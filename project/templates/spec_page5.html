@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='main.js') }}" defer></script>
+    <title>จ่ายรายงวด ขออนุมัติจ่ายเงินค่าจ้างทำความสะอาด</title>
+</head>
+<body>
+
+<div class="menu">
+    <a href="/spec-page-1"><button>1.หนังสือขอความเห็นชอบดำเนินการตัดหญ้า</button></a>
+    <a href="/spec-page-2"><button>2.มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ</button></a>
+    <a href="/spec-page-3"><button>3.รายงานขอจัดจ้างตัดหญ้าและฉีดยา ททร.1(1)แผนก</button></a>
+    <a href="/spec-page-4"><button>4.รายงาน ใบสั่งจ้างตัดหญ้า หน่วย พค 68 แบบแผน</button></a>
+</div>
+
+<div class="topbar">
+    <a href="/select" class="btn-back">← เลือกประเภทเอกสาร</a>
+    <div class="topbar-right">
+        <button onclick="window.print()">🖨 พิมพ์ PDF</button>
+    </div>
+</div>
+
+<div class="a4">
+
+    <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+
+    <div class="row mt10">
+        <div class="left">จาก&nbsp;&nbsp;&nbsp;{{ data.from }}</div>
+        <div class="right">ถึง&nbsp;&nbsp;&nbsp;{{ data.to }}</div>
+    </div>
+
+    <div class="row mt5">
+        <div class="left">เลขที่&nbsp;&nbsp;&nbsp;{{ data.number }}</div>
+        <div class="right">วันที่&nbsp;&nbsp;&nbsp;{{ data.date }}</div>
+    </div>
+
+   
+    <div class="receiver mt12">
+        <span class="topic-label">เรื่อง</span>
+        <span>{{ data.subject }}</span>
+    </div>
+    
+
+    <div class="receiver mt12">
+        เรียน&nbsp;&nbsp;&nbsp;{{ data.receiver }}
+    </div>
+
+    <div class="paragraph mt18">{{ data.section1 }}</div>
+    <div class="paragraph mt8">{{ data.section2 }}</div>
+    <div class="paragraph mt8">{{ data.closing }}</div>
+
+    <!-- ลายเซ็นคณะกรรมการตรวจรับ (ประธานฯ + กรรมการฯ x2) -->
+    <div class="sign-right">
+        {% for signer in data.committee %}
+        <div class="sign-block">
+            <div>ลงชื่อ&nbsp;.……………………......………….…&nbsp;{{ signer.position }}</div>
+            <div>({{ signer.name }})</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- อนุมัติจ่ายเงิน -->
+    <div class="approve">
+        อนุมัติ&nbsp;จ่ายเงิน&nbsp;{{ data.amount }}&nbsp;บาท<br>
+        ({{ data.amount_text }})<br>
+        {{ data.vat_note }}
+    </div>
+
+    <!-- ลายเซ็นผู้อนุมัติ -->
+    <div class="sign-left">
+        <div>{{ data.signature_approve }}</div>
+        <div class="position-under">{{ data.position_approve }}</div>
+    </div>
+
+    <div class="ref-table mt18">
+        <table class="ref-table-box">
+            <tr>
+                <td class="ref-label">ชผ.</td>
+                <td class="ref-sign"></td>
+                <td class="ref-sign"></td>
+            </tr>
+            <tr>
+                <td class="ref-label">พชง.</td>
+                <td class="ref-sign"></td>
+                <td class="ref-sign"></td>
+            </tr>
+        </table>
+        <div class="ref-text">
+            <div class="ref-dept mt5">{{ data.dept }}</div>
+            <div class="ref-tel">เบอร์โทร&nbsp;&nbsp;{{ data.tel }}</div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

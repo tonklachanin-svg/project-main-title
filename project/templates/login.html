@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>เข้าสู่ระบบ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, #9b0b0b 0%, #000000 100%);
+            background-image: url("{{ url_for('static', filename='logo.jpg') }}");
+            background-position: left top ;
+        }
+
+        .auth-card {
+            width: min(100%, 560px);
+            background: rgba(255,255,255,0.97);
+            border-radius: 24px;
+            padding: 48px 48px 40px;
+            box-shadow: 0 24px 60px rgba(61, 28, 97, 0.18);
+            border: 1px solid rgba(74, 56, 100, 0.08);
+            text-align: center;
+        }
+
+        .logo-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .logo-wrap img {
+            width: 320px;
+            height: 320px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.12));
+        }
+
+        .auth-eyebrow {
+            color: #6f24a6;
+            font-family: THSarabunBold;
+            font-size: 30pt;
+            margin-top: 30px;
+        }
+
+        .auth-title {
+            font-family: THSarabunBold;
+            font-size: 32pt;
+            color: #1f1b25;
+            margin: 4px 0;
+        }
+
+        .auth-subtitle {
+            font-size: 18pt;
+            color: #4d4459;
+            margin-bottom: 28px;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            text-align: left;
+        }
+
+        .auth-form label {
+            font-family: THSarabunBold;
+            font-size: 18pt;
+            color: #2a2532;
+        }
+
+        .auth-form .form-input {
+            width: 100%;
+            font-size: 18pt;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .btn-primary {
+            margin-top: 10px;
+            width: 100%;
+            padding: 14px;
+            font-size: 20pt;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #6f24a6 0%, #5b1b8b 100%);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-family: THSarabunBold;
+            box-shadow: 0 8px 20px rgba(61, 28, 97, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(180deg, #8e24aa 0%, #73219e 100%);
+        }
+
+        .auth-link {
+            margin-top: 20px;
+            font-size: 17pt;
+            text-align: center;
+            color: #4d4459;
+        }
+
+        .auth-link a {
+            color: #5b1b8b;
+            font-family: THSarabunBold;
+            text-decoration: none;
+        }
+
+        .auth-alert {
+            background: #fff2f2;
+            color: #8a1f1f;
+            border: 1px solid #f1baba;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-size: 17pt;
+            text-align: center;
+        }
+
+        .password-box{
+            position:relative;
+        }
+        .password-box .form-input{
+            padding-right:48px;
+        }
+        .toggle-password{
+            position:absolute;
+            right:15px;
+            top:50%;
+            transform:translateY(-50%);
+            cursor:pointer;
+            user-select:none;
+            font-size:18pt;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="auth-page">
+    <div class="auth-card">
+
+        <div class="logo-wrap">
+            <img src="{{ url_for('static', filename='logo.jpg') }}">
+            <div class="auth-eyebrow">การไฟฟ้าส่วนภูมิภาค</div>
+        </div>
+
+        <div class="auth-title">เข้าสู่ระบบ</div>
+
+        {% if error %}
+        <div class="auth-alert">{{ error }}</div>
+        {% endif %}
+
+        <form class="auth-form" method="POST" action="{{ url_for('auth.auth_login') }}">
+            <label>ชื่อผู้ใช้</label>
+            <input class="form-input" type="text"
+                   name="username" placeholder="ชื่อผู้ใช้" required>
+
+            <label>รหัสผ่าน</label>
+           <div class="password-box">
+            <input id="password" class="form-input" type="password" 
+                    name="password" placeholder="รหัสผ่าน" required>
+
+    <span class="toggle-password"
+          onclick="togglePassword()">👁</span>
+</div>
+
+            <button class="btn-primary" type="submit">เข้าสู่ระบบ</button>
+        </form>
+
+        <div class="auth-link">
+            ยังไม่มีบัญชี? <a href="/register">สมัครสมาชิก</a>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+function togglePassword(){
+    const input=document.getElementById("password");
+    input.type = input.type==="password" ? "text" : "password";
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>สมัครสมาชิก</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="auth-page">
+    <div class="auth-card">
+
+        <div style="text-align:left; margin-bottom:16px;">
+            <a href="/login" class="btn-back" style="font-size:14pt; padding:8px 18px;">← กลับเข้าสู่ระบบ</a>
+        </div>
+
+        <div style="text-align:center; margin-bottom:16px;">
+            <img src="{{ url_for('static', filename='logo.jpg') }}"
+                 style="width:80px; height:auto;">
+        </div>
+
+        <div class="auth-eyebrow">การไฟฟ้าส่วนภูมิภาค</div>
+        <div class="auth-title">สมัครสมาชิก</div>
+        <div class="auth-subtitle">ระบบหนังสือราชการ</div>
+
+        {% if error %}
+        <div class="auth-alert">{{ error }}</div>
+        {% endif %}
+
+        <form class="auth-form" method="POST" action="/auth/register">
+
+            <label>ชื่อ-นามสกุล <span style="color:#c0392b">*</span></label>
+            <input class="form-input auth-input" type="text"
+                   name="name" placeholder="ชื่อ-นามสกุล" required>
+
+            <label>ชื่อผู้ใช้ <span style="color:#c0392b">*</span></label>
+            <input class="form-input auth-input" type="text"
+                   name="username" placeholder="ชื่อผู้ใช้" required>
+
+            <label>รหัสผ่าน <span style="color:#c0392b">*</span></label>
+            <input class="form-input auth-input" type="password"
+                   name="password" placeholder="รหัสผ่าน" required>
+
+            <label>ยืนยันรหัสผ่าน <span style="color:#c0392b">*</span></label>
+            <input class="form-input auth-input" type="password"
+                   name="confirm_password" placeholder="ยืนยันรหัสผ่าน" required>
+
+            <label>เบอร์โทรศัพท์</label>
+            <input class="form-input auth-input" type="tel"
+                   name="phone" placeholder="0xx-xxx-xxxx">
+
+            <label>อีเมล</label>
+            <input class="form-input auth-input" type="email"
+                   name="email" placeholder="example@email.com">
+
+            <button class="btn-primary" type="submit">สมัครสมาชิก</button>
+        </form>
+
+        <div class="auth-link">
+            มีบัญชีแล้ว? <a href="/login">เข้าสู่ระบบ</a>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

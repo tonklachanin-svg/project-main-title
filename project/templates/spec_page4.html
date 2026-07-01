@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='main.js') }}" defer></script>
+    <title>รายงาน ใบสั่งจ้างตัดหญ้า หน่วย พค 68 แบบแผน</title>
+    <style>
+        .p4-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.3cm 0;
+            font-size: 14pt;
+        }
+        .p4-table th, .p4-table td {
+            border: 1px solid #555;
+            padding: 4px 8px;
+            text-align: center;
+        }
+        .p4-table th {
+            background: #f0e8f7;
+            font-family: THSarabunBold;
+        }
+        .p4-table .name-col { text-align: left; }
+        .p4-table tfoot td { font-family: THSarabunBold; background: #fafafa; }
+        .p4-section-num { font-family: THSarabunBold; color: #40275c; margin-top: 0.2cm; }
+        .p4-list { margin-left: 0.6cm; margin-top: 0.1cm; }
+        .p4-title { text-align: center; font-family: THSarabunBold; font-size: 18pt; margin-bottom: 0.3cm; }
+        .p4-signblock { text-align: center; margin-top: 0.6cm; }
+        .p4-photo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            margin: 0.3cm 0 0.6cm 0;
+        }
+        .p4-photo-grid img {
+            width: 100%;
+            height: auto;
+            border: 1px solid #aaa;
+            object-fit: cover;
+        }
+        .p4-photo-placeholder {
+            border: 1px dashed #999;
+            min-height: 4.5cm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 12pt;
+        }
+        @media print {
+            .p4-table { font-size: 12pt; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="menu">
+    <a href="/spec-page-1"><button>1.หนังสือขอความเห็นชอบดำเนินการตัดหญ้า</button></a>
+    <a href="/spec-page-2"><button>2.มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ</button></a>
+    <a href="/spec-page-3"><button>3.รายงานขอจัดจ้างตัดหญ้าและฉีดยา ททร.1(1)แผนก</button></a>
+    <a href="/spec-page-5"><button>5.จ่ายรายงวด ขออนุมัติจ่ายเงินค่าจ้างทำความสะอาด</button></a>
+</div>
+
+<div class="topbar">
+    <a href="/select" class="btn-back">← เลือกประเภทเอกสาร</a>
+    <div class="topbar-right">
+        <button onclick="window.print()">🖨 พิมพ์ PDF</button>
+    </div>
+</div>
+
+<!-- ===== ส่วนที่ 1: รายงานสรุปผลการพิจารณา, ตรวจรับ และอนุมัติจ่ายเงิน ===== -->
+<div class="a4">
+
+    <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+
+    <div class="row mt10">
+        <div class="left">จาก&nbsp;&nbsp;&nbsp;{{ data.report_from }}</div>
+        <div class="right">ถึง&nbsp;&nbsp;&nbsp;{{ data.report_to }}</div>
+    </div>
+
+    <div class="row mt5">
+        <div class="left">เลขที่&nbsp;&nbsp;&nbsp;{{ data.report_number }}</div>
+        <div class="right">วันที่&nbsp;&nbsp;&nbsp;{{ data.report_date }}</div>
+    </div>
+
+    
+    <div class="receiver mt12">
+        <span class="topic-label">เรื่อง</span>
+        <span>{{ data.report_subject }}</span>
+    </div>
+
+    <div class="receiver mt12">
+        เรียน&nbsp;&nbsp;&nbsp;{{ data.report_receiver }}
+    </div>
+
+    <div class="paragraph mt12">{{ data.report_intro }}</div>
+
+    <!-- ตารางสรุปผลการพิจารณา -->
+    <table class="p4-table">
+        <thead>
+            <tr>
+                <th>ที่</th>
+                <th>รายการ</th>
+                <th>ราคาที่เสนอ</th>
+                <th>ภาษีมูลค่าเพิ่ม</th>
+                <th>ราคาที่ตกลงซื้อ/จ้าง<br>(รวมภาษีมูลค่าเพิ่ม)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data.order_table %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td class="name-col">{{ row.item }}</td>
+                <td>{{ row.offer_price }}</td>
+                <td>{{ row.vat }}</td>
+                <td>{{ row.agreed_price }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4">รวม</td>
+                <td>{{ data.order_total.amount }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="paragraph mt5">{{ data.report_consideration }}</div>
+    <div class="paragraph">{{ data.report_budget_source }}</div>
+
+    <div class="paragraph mt10">{{ data.report_closing }}</div>
+
+    <div class="p4-signblock">
+        <div>ลงชื่อ........................................................</div>
+        <div>(.......................................................)</div>
+        <div>ตำแหน่ง...................................................</div>
+        <div>วันที่..........................................................</div>
+    </div>
+
+</div>
+
+<!-- ===== ส่วนที่ 2: ใบสั่งจ้าง ===== -->
+<div class="page-break"></div>
+
+<div class="a4">
+
+    <div class="p4-title">ใบสั่งจ้าง</div>
+
+    <div class="paragraph mt10">ผู้ขาย/ผู้รับจ้าง&nbsp;&nbsp;&nbsp;{{ data.vendor_name }}</div>
+    <div class="paragraph">ที่อยู่&nbsp;&nbsp;&nbsp;{{ data.vendor_address }}</div>
+    <div class="paragraph">โทรศัพท์&nbsp;&nbsp;&nbsp;{{ data.vendor_phone }}</div>
+    <div class="paragraph">เลขที่บัญชีเงินฝากธนาคาร&nbsp;&nbsp;&nbsp;{{ data.bank_account_no }}</div>
+    <div class="paragraph">ชื่อบัญชี&nbsp;&nbsp;&nbsp;{{ data.bank_account_name }}</div>
+    <div class="paragraph">ธนาคาร&nbsp;&nbsp;&nbsp;{{ data.bank_name }}</div>
+
+    <div class="paragraph mt10">{{ data.po_intro }}</div>
+
+    <table class="p4-table">
+        <thead>
+            <tr>
+                <th>ลำดับ</th>
+                <th>รายการ</th>
+                <th>จำนวน</th>
+                <th>หน่วย</th>
+                <th>ราคาต่อหน่วย<br>(บาท)</th>
+                <th>จำนวนเงิน<br>(บาท)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data.po_table %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td class="name-col">{{ row.item }}</td>
+                <td>{{ row.qty }}</td>
+                <td>{{ row.unit }}</td>
+                <td>{{ row.unit_price }}</td>
+                <td>{{ row.amount }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2">( {{ data.po_total.text }} )</td>
+                <td colspan="3">รวมเป็นเงิน</td>
+                <td>{{ data.po_total.subtotal }}</td>
+            </tr>
+            <tr>
+                <td colspan="5">ภาษีมูลค่าเพิ่ม</td>
+                <td>{{ data.po_total.vat }}</td>
+            </tr>
+            <tr>
+                <td colspan="5">รวมเป็นเงินทั้งสิ้น</td>
+                <td>{{ data.po_total.grand_total }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="paragraph mt5">หมายเหตุ&nbsp;&nbsp;{{ data.po_note }}</div>
+
+    <div class="p4-signblock">
+        <div>ลงชื่อ.............................................................ผู้สั่งซื้อ/สั่งจ้าง</div>
+        <div>( {{ data.approver_name }} )</div>
+        <div>ตำแหน่ง&nbsp;&nbsp;{{ data.approver_pos }}</div>
+        <div>วันที่.............................................................</div>
+    </div>
+
+    <div class="p4-signblock mt10">
+        <div>ลงชื่อ.........................................................ผู้รับสั่งซื้อ/สั่งจ้าง</div>
+        <div>( {{ data.vendor_name }} )</div>
+        <div>ตำแหน่ง&nbsp;&nbsp;ผู้รับจ้าง</div>
+        <div>วันที่..........................................................</div>
+    </div>
+
+</div>
+
+<!-- ===== ส่วนที่ 3: เงื่อนไขประกอบการสั่งจ้าง ===== -->
+<div class="page-break"></div>
+
+<div class="a4">
+
+    <div class="p4-title">เงื่อนไขประกอบการสั่งจ้าง</div>
+
+    <div class="p4-list">1. ผู้ขายต้องส่งมอบงานซึ่งปรากฏอยู่ในใบสั่งจ้างนี้ พร้อมด้วยหนังสือส่งมอบงาน หรือสำเนาใบส่งของ {{ data.delivery_doc_count }} ฉบับ</div>
+    <div class="p4-list">2. กำหนดส่งมอบงาน ภายใน {{ data.delivery_days }} วัน โดยนับถัดจากวันที่ได้รับใบสั่งจ้าง</div>
+    <div class="p4-list">3. ครบกำหนดส่งมอบงาน วันที่ {{ data.delivery_due_date }}</div>
+    <div class="p4-list">4. สถานที่ส่งมอบงาน {{ data.delivery_place }}</div>
+    <div class="p4-list">5. ระยะเวลารับประกันคุณภาพ {{ data.warranty_period }} ปี</div>
+    <div class="p4-list">6. การไฟฟ้าส่วนภูมิภาค สงวนสิทธิ์ค่าปรับกรณีส่งมอบงานเกินกำหนดเวลา ซึ่งผู้รับจ้างต้องถูกปรับตามข้อ 6.1</div>
+    <div class="p4-list" style="margin-left:1.2cm;">6.1 ถูกปรับเป็นรายวันในอัตราร้อยละ {{ data.penalty_rate_daily }} ของงานจ้างรวมภาษีมูลค่าเพิ่มที่ยังไม่ได้รับมอบ</div>
+    <div class="p4-list" style="margin-left:1.2cm;">6.2 กรณีต้องการผลสำเร็จของงานทั้งหมดพร้อมกัน ถูกปรับเป็นเงินรวมภาษีมูลค่าเพิ่มวันละ {{ data.penalty_lump_sum }} บาท (ในอัตราร้อยละ {{ data.penalty_rate_lump }} ของราคางานจ้างรวมภาษีมูลค่าเพิ่ม แต่ต้องไม่ต่ำกว่าวันละ {{ data.penalty_min_daily }} บาท)</div>
+    <div class="p4-list">7. การไฟฟ้าส่วนภูมิภาค สงวนสิทธิ์ที่จะไม่รับมอบงานนั้น ถ้าปรากฏว่างานนั้นมีลักษณะไม่ตรงตามรายการที่ระบุไว้ในใบสั่งจ้าง กรณีนี้ผู้รับจ้างต้องดำเนินการแก้ไขให้ถูกต้องตามใบสั่งจ้างทุกประการ ด้วยค่าใช้จ่ายของผู้รับจ้างเอง และระยะเวลาที่เสียไปเพราะเหตุดังกล่าว ผู้รับจ้างจะนำมาอ้างเป็นเหตุขอขยายเวลาทำการตามใบสั่งจ้าง หรือของดหรือลดค่าปรับไม่ได้</div>
+    <div class="p4-list">8. การประเมินผลการปฏิบัติงานของผู้ประกอบการ การไฟฟ้าส่วนภูมิภาคสามารถนำผลการปฏิบัติงานแล้วเสร็จตามสัญญา หรือข้อตกลงของคู่สัญญา เพื่อนำมาประเมินผลการปฏิบัติงานของผู้ปฏิบัติงาน</div>
+
+    <div class="paragraph mt12" style="font-size:13pt; color:#666;">
+        หมายเหตุ การติดอากรแสตมป์ ให้เป็นไปตามประมวลกฎหมายรัษฎากร หากต้องการให้ใบสั่งจ้างมีผลตามกฎหมาย
+    </div>
+
+</div>
+
+<!-- ===== ส่วนที่ 4: เอกสารแนบ 1 - รูปภาพพื้นที่แต่ละสถานี ===== -->
+<div class="page-break"></div>
+
+<div class="a4">
+    <div class="p4-title">เอกสารแนบ 1</div>
+</div>
+
+{% for station in data.station_areas %}
+<div class="page-break"></div>
+<div class="a4">
+    <div class="p4-section-num">{{ station.name }}</div>
+    <div class="p4-list">พื้นที่ตัดหญ้า</div>
+    <div class="p4-photo-grid">
+        {% for img in station.mow_images %}
+        <img src="{{ img }}" alt="พื้นที่ตัดหญ้า {{ station.name }}">
+        {% else %}
+        <div class="p4-photo-placeholder">แนบรูปภาพพื้นที่ตัดหญ้า</div>
+        <div class="p4-photo-placeholder">แนบรูปภาพพื้นที่ตัดหญ้า</div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="page-break"></div>
+<div class="a4">
+    <div class="p4-section-num">{{ station.name }}</div>
+    <div class="p4-list">พื้นที่ฉีดยากำจัดวัชพืช</div>
+    <div class="p4-photo-grid">
+        {% for img in station.spray_images %}
+        <img src="{{ img }}" alt="พื้นที่ฉีดยากำจัดวัชพืช {{ station.name }}">
+        {% else %}
+        <div class="p4-photo-placeholder">แนบรูปภาพพื้นที่ฉีดยากำจัดวัชพืช</div>
+        <div class="p4-photo-placeholder">แนบรูปภาพพื้นที่ฉีดยากำจัดวัชพืช</div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+
+</body>
+</html>
