@@ -283,10 +283,11 @@ body{
 .receiver{
     margin-top:0.18cm;
     color:#2a2532;
-
-display:flex;
+    display:flex;
     align-items:flex-start;
 }
+
+
 .section-title{
     text-align:left;
     margin-left:2.320cm;
