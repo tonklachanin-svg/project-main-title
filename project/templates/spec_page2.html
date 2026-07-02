@@ -70,13 +70,13 @@
     <table class="ref-table-box">
         <tr>
             <td class="ref-label">ชผ.</td>
-            <td class="ref-sign"></td>
-            <td class="ref-sign"></td>
+            <td class="ref-sign">{{ session.get('supervisor_name', '') }}</td>
+            <td class="ref-sign">{{ today_th }}</td>
         </tr>
         <tr>
             <td class="ref-label">พชง.</td>
-            <td class="ref-sign"></td>
-            <td class="ref-sign"></td>
+            <td class="ref-sign">{{ session.get('name', '') }}</td>
+            <td class="ref-sign">{{ today_th }}</td>
         </tr>
     </table>
     <div class="ref-text">

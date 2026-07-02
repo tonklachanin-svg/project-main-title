@@ -80,6 +80,31 @@
                 </div>
             </div>
 
+            <!-- ข้อมูลตำแหน่ง -->
+            <div class="reg-section-label">ข้อมูลตำแหน่ง</div>
+
+            <div class="reg-row">
+                <div class="reg-field">
+                    <label for="position">ตำแหน่ง <span class="req-star">*</span></label>
+                    <select id="position" name="position" required>
+                        <option value="" disabled selected>เลือกตำแหน่ง</option>
+                        <option value="พนักงาน">พนักงาน (พชง.)</option>
+                        <option value="รองหัวหน้า">รองหัวหน้า (ชผ.)</option>
+                        <option value="หัวหน้า">หัวหน้า (ชผ.)</option>
+                    </select>
+                </div>
+                <div class="reg-field">
+                    <label for="supervisor_id">หัวหน้า/รองหัวหน้า (ชผ.)</label>
+                    <select id="supervisor_id" name="supervisor_id">
+                        <option value="">-- ไม่ระบุ / เป็นหัวหน้าเอง --</option>
+                        {% for sup in supervisors %}
+                        <option value="{{ sup.id }}">{{ sup.name }} ({{ sup.position }})</option>
+                        {% endfor %}
+                    </select>
+                    <span class="reg-hint">เลือกหัวหน้าของคุณ (ถ้ามี) เพื่อให้ระบบดึงชื่อไปแสดงในเอกสารอัตโนมัติ</span>
+                </div>
+            </div>
+
             <!-- ข้อมูลติดต่อ -->
             <div class="reg-section-label">ข้อมูลติดต่อ <span style="font-weight:400;font-style:italic;color:#8A9BAD;">(ไม่บังคับ)</span></div>
 

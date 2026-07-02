@@ -42,6 +42,7 @@ body{
     min-height:100vh;
     padding:0;
     margin:0;
+    overflow-x:hidden;
 }
 
 /* =========================
@@ -155,7 +156,7 @@ body{
 
 .a4{
     width:min(21cm, calc(100% - 32px));
-    min-height:29.7cm;
+    min-height:auto;
     background:linear-gradient(135deg, #ffffff 0%, #fafbfd 50%, #f5f7fb 100%);
     margin:24px auto;
     position:relative;

@@ -10,6 +10,24 @@ app = Flask(__name__)
 app.secret_key = 'pea2569-xK9mQ'
 app.register_blueprint(auth)
 
+from datetime import datetime
+ 
+THAI_MONTHS = [
+    '', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+]
+ 
+@app.context_processor
+def inject_today_th():
+    """ทำให้ทุก template เรียกใช้ตัวแปร today_th ได้เลย
+    โดยไม่ต้อง pass มาจากทุก route -- จะได้วันที่ปัจจุบันแบบไทย
+    เช่น '2 กรกฎาคม 2569' อัตโนมัติทุกครั้งที่เปิดหน้า
+    """
+    now = datetime.now()
+    thai_year = now.year + 543
+    today_th = f"{now.day} {THAI_MONTHS[now.month]} {thai_year}"
+    return {'today_th': today_th}
+
 
 DEFAULT_DATA = {
     'from': 'ผจฟ.1',
