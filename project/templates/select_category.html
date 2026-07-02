@@ -136,12 +136,25 @@
             flex-shrink: 0;
         }
 
-        /* ===== GRID ===== */
+        /* ===== GRID (หมวดหมู่) ===== */
         .doc-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             margin-bottom: 40px;
+        }
+
+        .card-count-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(111,36,166,0.09);
+            color: var(--accent-text);
+            font-family: THSarabunBold, sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 999px;
         }
 
         /* ===== CARD ===== */
@@ -276,54 +289,25 @@
     <div class="hero-sub">เลือกประเภทเอกสารที่ต้องการดำเนินการ</div>
 </div>
 
-<!-- DOCUMENTS -->
+<!-- หมวดหมู่เอกสาร -->
 <div class="section-wrap">
     <div class="section-label">
         <span class="dot"></span>
-        เอกสารจัดซื้อจัดจ้าง — ตัดหญ้าและฉีดยากำจัดวัชพืช
+        หมวดหมู่เอกสาร
     </div>
 
     <div class="doc-grid">
 
-        <a href="/spec-page-1" class="doc-card c1">
-            <div class="card-badge">📋</div>
-            <div class="card-num">หน้า 1</div>
-            <div class="card-title">มอบหมายผู้จัดทำ</div>
-            <div class="card-desc">คุณลักษณะเฉพาะและราคากลาง</div>
+        <a href="/select/mowing" class="doc-card c1" style="min-height:220px;">
+            <span class="card-count-badge">5 เอกสาร</span>
+            <div class="card-badge">🌿</div>
+            <div class="card-num">หมวดหมู่</div>
+            <div class="card-title">จัดซื้อจัดจ้าง — ตัดหญ้าและฉีดยากำจัดวัชพืช</div>
+            <div class="card-desc">ตั้งแต่ขอความเห็นชอบ มอบหมายผู้จัดทำ รายงานขอจัดจ้าง ใบสั่งจ้าง จนถึงขออนุมัติจ่ายเงิน รวม 5 เอกสาร</div>
             <div class="card-arrow">→</div>
         </a>
 
-        <a href="/spec-page-2" class="doc-card c2">
-            <div class="card-badge">📊</div>
-            <div class="card-num">หน้า 2</div>
-            <div class="card-title">ขอความเห็นชอบ</div>
-            <div class="card-desc">รายงานขอดำเนินการจัดจ้าง</div>
-            <div class="card-arrow">→</div>
-        </a>
-
-        <a href="/spec-page-3" class="doc-card c3">
-            <div class="card-badge">📄</div>
-            <div class="card-num">หน้า 3</div>
-            <div class="card-title">รายงานขอจัดจ้าง</div>
-            <div class="card-desc">รายละเอียดพัสดุและเงื่อนไขการจ้าง</div>
-            <div class="card-arrow">→</div>
-        </a>
-
-        <a href="/spec-page-4" class="doc-card c4">
-            <div class="card-badge">📑</div>
-            <div class="card-num">หน้า 4</div>
-            <div class="card-title">ใบสั่งจ้าง</div>
-            <div class="card-desc">สรุปผลการพิจารณาและใบสั่งจ้าง</div>
-            <div class="card-arrow">→</div>
-        </a>
-
-        <a href="/spec-page-5" class="doc-card c5">
-            <div class="card-badge">🧾</div>
-            <div class="card-num">หน้า 5</div>
-            <div class="card-title">มอบหมาย</div>
-            <div class="card-desc">ใบเสร็จ</div>
-            <div class="card-arrow">→</div>
-        </a>
+        <!-- เตรียมไว้สำหรับหมวดหมู่เอกสารอื่นในอนาคต เพิ่มการ์ดแบบเดียวกันตรงนี้ได้เลย -->
 
     </div>
 </div>

@@ -2,66 +2,121 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>สมัครสมาชิก</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>สมัครสมาชิก | การไฟฟ้าส่วนภูมิภาค</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
 </head>
 <body>
 
-<div class="auth-page">
-    <div class="auth-card">
+<div class="reg-shell">
+<div class="reg-card">
 
-        <div style="text-align:left; margin-bottom:16px;">
-            <a href="/login" class="btn-back" style="font-size:14pt; padding:8px 18px;">← กลับเข้าสู่ระบบ</a>
+    <!-- Banner -->
+    <div class="reg-banner">
+        <img src="{{ url_for('static', filename='logo.jpg') }}" alt="โลโก้ กฟภ." class="reg-banner-logo">
+        <div class="reg-banner-text">
+            <div class="reg-banner-org">การไฟฟ้าส่วนภูมิภาค</div>
+            <div class="reg-banner-sub">Provincial Electricity Authority</div>
         </div>
+    </div>
 
-        <div style="text-align:center; margin-bottom:16px;">
-            <img src="{{ url_for('static', filename='logo.jpg') }}"
-                 style="width:80px; height:auto;">
-        </div>
+    <!-- Body -->
+    <div class="reg-body">
 
-        <div class="auth-eyebrow">การไฟฟ้าส่วนภูมิภาค</div>
-        <div class="auth-title">สมัครสมาชิก</div>
-        <div class="auth-subtitle">ระบบหนังสือราชการ</div>
+        <a href="/login" class="reg-back">← กลับไปหน้าเข้าสู่ระบบ</a>
+
+        <h2 class="reg-heading">สมัครสมาชิก</h2>
+        <p class="reg-subheading">กรอกข้อมูลเพื่อสร้างบัญชีผู้ใช้งานในระบบ</p>
 
         {% if error %}
-        <div class="auth-alert">{{ error }}</div>
+        <div class="reg-flash" role="alert">⚠️ {{ error }}</div>
         {% endif %}
 
-        <form class="auth-form" method="POST" action="/auth/register">
+        <form method="POST" action="/auth/register" novalidate>
 
-            <label>ชื่อ-นามสกุล <span style="color:#c0392b">*</span></label>
-            <input class="form-input auth-input" type="text"
-                   name="name" placeholder="ชื่อ-นามสกุล" required>
+            <!-- ข้อมูลบัญชี -->
+            <div class="reg-section-label">ข้อมูลบัญชี</div>
 
-            <label>ชื่อผู้ใช้ <span style="color:#c0392b">*</span></label>
-            <input class="form-input auth-input" type="text"
-                   name="username" placeholder="ชื่อผู้ใช้" required>
+            <div class="reg-field">
+                <label for="name">ชื่อ-นามสกุล <span class="req-star">*</span></label>
+                <input type="text" id="name" name="name"
+                       placeholder="เช่น นายสมชาย ใจดี" required autocomplete="name">
+            </div>
 
-            <label>รหัสผ่าน <span style="color:#c0392b">*</span></label>
-            <input class="form-input auth-input" type="password"
-                   name="password" placeholder="รหัสผ่าน" required>
+            <div class="reg-row">
+                <div class="reg-field">
+                    <label for="username">ชื่อผู้ใช้ <span class="req-star">*</span></label>
+                    <input type="text" id="username" name="username"
+                           placeholder="ภาษาอังกฤษหรือตัวเลข" required autocomplete="username">
+                    <span class="reg-hint">ใช้สำหรับเข้าสู่ระบบ</span>
+                </div>
+                <div class="reg-field" style="visibility:hidden;"></div>
+            </div>
 
-            <label>ยืนยันรหัสผ่าน <span style="color:#c0392b">*</span></label>
-            <input class="form-input auth-input" type="password"
-                   name="confirm_password" placeholder="ยืนยันรหัสผ่าน" required>
+            <!-- รหัสผ่าน -->
+            <div class="reg-section-label">รหัสผ่าน</div>
 
-            <label>เบอร์โทรศัพท์</label>
-            <input class="form-input auth-input" type="tel"
-                   name="phone" placeholder="0xx-xxx-xxxx">
+            <div class="reg-row">
+                <div class="reg-field">
+                    <label for="password">รหัสผ่าน <span class="req-star">*</span></label>
+                    <div class="reg-input-wrap">
+                        <input type="password" id="password" name="password"
+                               placeholder="อย่างน้อย 6 ตัวอักษร" required autocomplete="new-password">
+                        <button type="button" class="reg-toggle-pw" data-target="password">แสดง</button>
+                    </div>
+                </div>
+                <div class="reg-field">
+                    <label for="confirm_password">ยืนยันรหัสผ่าน <span class="req-star">*</span></label>
+                    <div class="reg-input-wrap">
+                        <input type="password" id="confirm_password" name="confirm_password"
+                               placeholder="กรอกซ้ำอีกครั้ง" required autocomplete="new-password">
+                        <button type="button" class="reg-toggle-pw" data-target="confirm_password">แสดง</button>
+                    </div>
+                </div>
+            </div>
 
-            <label>อีเมล</label>
-            <input class="form-input auth-input" type="email"
-                   name="email" placeholder="example@email.com">
+            <!-- ข้อมูลติดต่อ -->
+            <div class="reg-section-label">ข้อมูลติดต่อ <span style="font-weight:400;font-style:italic;color:#8A9BAD;">(ไม่บังคับ)</span></div>
 
-            <button class="btn-primary" type="submit">สมัครสมาชิก</button>
+            <div class="reg-row">
+                <div class="reg-field">
+                    <label for="phone">เบอร์โทรศัพท์</label>
+                    <input type="tel" id="phone" name="phone"
+                           placeholder="0xx-xxx-xxxx" autocomplete="tel">
+                </div>
+                <div class="reg-field">
+                    <label for="email">อีเมล</label>
+                    <input type="email" id="email" name="email"
+                           placeholder="example@pea.co.th" autocomplete="email">
+                </div>
+            </div>
+
+            <button type="submit" class="reg-submit">สร้างบัญชีผู้ใช้</button>
         </form>
 
-        <div class="auth-link">
+        <p class="reg-footer">
             มีบัญชีแล้ว? <a href="/login">เข้าสู่ระบบ</a>
-        </div>
+        </p>
 
-    </div>
-</div>
+    </div><!-- /reg-body -->
+</div><!-- /reg-card -->
+</div><!-- /reg-shell -->
+
+<script>
+document.querySelectorAll('.reg-toggle-pw').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var input = document.getElementById(btn.dataset.target);
+        var showing = input.type === 'text';
+        input.type = showing ? 'password' : 'text';
+        btn.textContent = showing ? 'แสดง' : 'ซ่อน';
+    });
+});
+</script>
 
 </body>
 </html>

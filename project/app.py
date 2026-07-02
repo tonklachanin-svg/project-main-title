@@ -112,7 +112,6 @@ DEFAULT_DATA_PAGE4 = {
     'report_receiver': 'อก.ปบ.(ก3) ผ่าน ชก.ปบ.(ก3)',
     'report_intro': 'ตามที่ หน่วยปฏิบัติงานสถานีไฟฟ้าที่ 1 (สถานีไฟฟ้าท่าทราย 1) ผจฟ.1 กปบ.(ก3) ดำเนินการจัดจ้างตัดหญ้า และฉีดยากำจัดวัชพืชภายในสถานีไฟฟ้าจำนวน 4 แห่ง โดยวิธีเฉพาะเจาะจง ขอรายงานผลการพิจารณาการจัดซื้อ/จ้าง ดังนี้',
 
-    # ตารางสรุปผลการพิจารณา (ใช้ร่วมกับตารางในใบสั่งจ้าง)
     'order_table': [
         {
             'item': 'จัดจ้างตัดหญ้า สฟฟ.ท่าทราย 1, สฟฟ.สค. 2, สฟฟ.บางปลา และ สฟฟ.ท่าทราย 2 ชั่วคราว พื้นที่ 4 ไร่ 265 ตร.วา',
@@ -216,7 +215,6 @@ DEFAULT_DATA_PAGE5 = {
     'section2': 'คณะกรรมการตรวจรับงานจ้างได้ทำการตรวจรับงานที่ผู้รับจ้างดำเนินการทำความสะอาดสถานีไฟฟ้าภายในหน่วยปฏิบัติงานสถานีไฟฟ้าที่ 1 (สถานีไฟฟ้าท่าทราย 1) ประจำเดือน ธันวาคม 2568 เป็นไปด้วยความเรียบร้อย คณะกรรมการฯ ได้พิจารณาแล้วเห็นควรอนุมัติจ่ายเงินจ้างทำความสะอาดสถานีไฟฟ้าภายในหน่วยปฏิบัติงานสถานีไฟฟ้าที่ 1 (สถานีไฟฟ้าท่าทราย 1) ประจำเดือน ธันวาคม 2568 เป็นจำนวนเงิน 3,600 บาท (สามพันหกร้อยบาทถ้วน) ไม่รวมภาษีมูลค่าเพิ่ม',
     'closing': 'จึงเรียนมาเพื่อโปรดพิจารณาและอนุมัติให้ต่อไป',
 
-    # คณะกรรมการตรวจรับ - ลงชื่อด้านขวา (ประธานกรรมการฯ + กรรมการฯ)
     'committee': [
         {'name': 'นายนามชัย  นุชประเสริฐ', 'position': 'ประธานกรรมการฯ'},
         {'name': 'นายกฤติณภัทร  เสียงใหญ่', 'position': 'กรรมการฯ'},
@@ -287,6 +285,33 @@ def get_form_data(page_key):
 @login_required
 def select_category():
     return render_template('select_category.html', username=session.get('name'))
+
+
+@app.route('/select/mowing')
+@login_required
+def select_mowing():
+    """หน้าการ์ดย่อย 5 ใบของหมวด 'จัดซื้อจัดจ้าง-ตัดหญ้า' + ปุ่มพิมพ์ทั้งชุด"""
+    return render_template('select_group_mowing.html', username=session.get('name'))
+
+
+@app.route('/spec-print-all')
+@login_required
+def spec_print_all():
+    """รวมข้อมูลเอกสารหน้า 1-5 มาไว้หน้าเดียว สำหรับพิมพ์เป็น PDF ไฟล์เดียว"""
+    data1 = get_form_data('spec_page1')
+    data2 = get_form_data('spec_page2')
+    data3 = get_form_data('spec_page3')
+    data4 = get_form_data('spec_page4')
+    data5 = get_form_data('spec_page5')
+    return render_template(
+        'spec_print_all.html',
+        data1=data1,
+        data2=data2,
+        data3=data3,
+        data4=data4,
+        data5=data5,
+        username=session.get('name'),
+    )
 
 
 @app.route('/main')

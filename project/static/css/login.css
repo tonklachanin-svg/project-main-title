@@ -1,0 +1,360 @@
+/* ==========================================================
+   login.css — หน้าเข้าสู่ระบบ
+   แนวทาง: ทางการ / หน่วยงานราชการ — กระดาษขาว + น้ำเงินเข้ม
+   Type: Chakra Petch (หัวเรื่อง, สื่อถึงงานวิศวกรรม/สาธารณูปโภค)
+         Sarabun (เนื้อหา, ฟอนต์ราชการไทยมาตรฐาน)
+   ========================================================== */
+
+:root{
+    --navy-deep:   #0A2647;
+    --navy-mid:    #123A66;
+    --navy-line:   rgba(255,255,255,0.08);
+    --gold:        #C9A54A;
+    --gold-soft:   #E4CE8F;
+
+    --bg-page:     #EEF2F6;
+    --bg-panel:    #FFFFFF;
+    --text-main:   #17212E;
+    --text-muted:  #5B6B7F;
+    --border:      #DCE3EA;
+    --border-focus:#123A66;
+    --error:       #B3261E;
+
+    --radius:      10px;
+    --shadow-card: 0 18px 40px -20px rgba(10,38,71,0.35);
+}
+
+*{ box-sizing:border-box; }
+
+body.login-body{
+    margin:0;
+    min-height:100vh;
+    background:var(--bg-page);
+    font-family:'Sarabun', sans-serif;
+    color:var(--text-main);
+    -webkit-font-smoothing:antialiased;
+}
+
+.login-shell{
+    display:flex;
+    min-height:100vh;
+}
+
+/* ---------- ฝั่งซ้าย: แผงองค์กร ---------- */
+.login-brand{
+    position:relative;
+    flex:0 0 42%;
+    background:linear-gradient(165deg, var(--navy-deep) 0%, var(--navy-mid) 100%);
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:4.5rem 3.5rem;
+    overflow:hidden;
+}
+
+/* ลายเส้นโครงข่ายไฟฟ้า — ลายเซ็นของดีไซน์นี้ */
+.login-brand::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+        repeating-linear-gradient(115deg, var(--navy-line) 0px, var(--navy-line) 1px, transparent 1px, transparent 88px),
+        repeating-linear-gradient(25deg, var(--navy-line) 0px, var(--navy-line) 1px, transparent 1px, transparent 88px);
+    opacity:0.6;
+    pointer-events:none;
+}
+
+.login-brand::after{
+    content:"";
+    position:absolute;
+    width:520px;
+    height:520px;
+    right:-220px;
+    bottom:-220px;
+    border-radius:50%;
+    background:radial-gradient(circle at center, rgba(201,165,74,0.16), transparent 70%);
+    pointer-events:none;
+}
+
+.login-brand-content{
+    position:relative;
+    z-index:1;
+    max-width:360px;
+}
+
+.login-logo{
+    width:76px;
+    height:76px;
+    object-fit:contain;
+    background:#fff;
+    border-radius:50%;
+    padding:8px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+}
+
+.login-org-th{
+    margin:1.4rem 0 0.15rem;
+    font-family:'Chakra Petch', 'Sarabun', sans-serif;
+    font-size:1.55rem;
+    font-weight:600;
+    letter-spacing:0.01em;
+}
+
+.login-org-en{
+    margin:0 0 1.6rem;
+    font-size:0.72rem;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,0.6);
+}
+
+/* เส้นวงจร — คั่นแบบ signature */
+.circuit-rule{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin:1.4rem 0 1.7rem;
+}
+.circuit-rule .node{
+    width:6px; height:6px;
+    border-radius:50%;
+    background:var(--gold);
+    flex:none;
+}
+.circuit-rule .trace{
+    flex:1;
+    height:1px;
+    background:repeating-linear-gradient(90deg, var(--gold-soft) 0 6px, transparent 6px 12px);
+    opacity:0.7;
+}
+
+.login-system-name{
+    font-family:'Chakra Petch', 'Sarabun', sans-serif;
+    font-size:1.05rem;
+    font-weight:500;
+    line-height:1.6;
+    color:#fff;
+}
+
+.login-system-desc{
+    margin-top:0.6rem;
+    font-size:0.92rem;
+    line-height:1.75;
+    color:rgba(255,255,255,0.68);
+}
+
+.login-brand-footer{
+    position:relative;
+    z-index:1;
+    margin-top:3rem;
+    font-size:0.78rem;
+    color:rgba(255,255,255,0.45);
+    border-top:1px solid var(--navy-line);
+    padding-top:1rem;
+}
+
+/* ---------- ฝั่งขวา: ฟอร์ม ---------- */
+.login-form-side{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:3rem 2rem;
+    background:var(--bg-panel);
+}
+
+.login-form-wrap{
+    width:100%;
+    max-width:380px;
+}
+
+.login-heading{
+    font-family:'Chakra Petch', 'Sarabun', sans-serif;
+    font-size:1.6rem;
+    font-weight:600;
+    margin:0 0 0.35rem;
+    color:var(--navy-deep);
+}
+
+.login-subheading{
+    margin:0 0 2rem;
+    font-size:0.95rem;
+    color:var(--text-muted);
+}
+
+.login-flash{
+    display:flex;
+    gap:0.6rem;
+    align-items:flex-start;
+    background:#FBEAE9;
+    border:1px solid #F2C6C3;
+    color:var(--error);
+    padding:0.75rem 0.9rem;
+    border-radius:8px;
+    font-size:0.88rem;
+    margin-bottom:1.3rem;
+    line-height:1.55;
+}
+
+.login-field{
+    margin-bottom:1.15rem;
+}
+
+.login-field label{
+    display:block;
+    font-size:0.88rem;
+    font-weight:600;
+    color:var(--text-main);
+    margin-bottom:0.4rem;
+}
+
+.login-input-wrap{
+    position:relative;
+}
+
+.login-field input[type="text"],
+.login-field input[type="password"]{
+    width:100%;
+    padding:0.72rem 0.9rem;
+    font-family:'Sarabun', sans-serif;
+    font-size:1rem;
+    color:var(--text-main);
+    background:#fff;
+    border:1.5px solid var(--border);
+    border-radius:8px;
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+}
+
+.login-field input#password{
+    padding-right:3.6rem;
+}
+
+.login-field input::placeholder{
+    color:#A9B4C2;
+}
+
+.login-field input:focus{
+    border-color:var(--border-focus);
+    box-shadow:0 0 0 3px rgba(18,58,102,0.12);
+}
+
+.login-toggle-pw{
+    position:absolute;
+    right:0.7rem;
+    top:50%;
+    transform:translateY(-50%);
+    border:none;
+    background:none;
+    font-size:0.82rem;
+    color:var(--text-muted);
+    cursor:pointer;
+    padding:0.2rem 0.3rem;
+}
+.login-toggle-pw:hover{ color:var(--navy-deep); }
+.login-toggle-pw:focus-visible{
+    outline:2px solid var(--border-focus);
+    outline-offset:2px;
+    border-radius:4px;
+}
+
+.login-row-between{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin:0.3rem 0 1.5rem;
+    font-size:0.86rem;
+}
+
+.login-remember{
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+    color:var(--text-muted);
+    cursor:pointer;
+}
+.login-remember input{
+    width:15px; height:15px;
+    accent-color:var(--navy-deep);
+}
+
+.login-forgot{
+    color:var(--navy-mid);
+    text-decoration:none;
+    font-weight:600;
+}
+.login-forgot:hover{ text-decoration:underline; }
+
+.login-submit{
+    width:100%;
+    padding:0.82rem 1rem;
+    background:var(--navy-deep);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-family:'Sarabun', sans-serif;
+    font-size:1.02rem;
+    font-weight:600;
+    letter-spacing:0.01em;
+    cursor:pointer;
+    transition:background .15s ease, transform .05s ease;
+}
+.login-submit:hover{ background:var(--navy-mid); }
+.login-submit:active{ transform:translateY(1px); }
+.login-submit:focus-visible{
+    outline:3px solid var(--gold);
+    outline-offset:2px;
+}
+
+.login-divider{
+    display:flex;
+    align-items:center;
+    gap:0.8rem;
+    margin:1.8rem 0 1.4rem;
+    color:var(--text-muted);
+    font-size:0.8rem;
+}
+.login-divider::before,
+.login-divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--border);
+}
+
+.login-register{
+    text-align:center;
+    font-size:0.9rem;
+    color:var(--text-muted);
+}
+.login-register a{
+    color:var(--navy-deep);
+    font-weight:600;
+    text-decoration:none;
+}
+.login-register a:hover{ text-decoration:underline; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 860px){
+    .login-shell{ flex-direction:column; }
+
+    .login-brand{
+        flex:none;
+        padding:2.4rem 2rem 2rem;
+        align-items:center;
+        text-align:center;
+    }
+    .login-brand-content{ max-width:none; }
+    .login-brand-footer{ display:none; }
+    .circuit-rule{ justify-content:center; }
+    .login-brand-content{ display:flex; flex-direction:column; align-items:center; }
+
+    .login-system-desc{ display:none; }
+
+    .login-form-side{ padding:2.4rem 1.4rem 3rem; }
+}
+
+@media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+}

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดซื้อจัดจ้าง — ตัดหญ้าและฉีดยากำจัดวัชพืช</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background: #f0ecf7;
+            font-family: THSarabun, 'Sarabun', sans-serif;
+            font-size: 18px;
+        }
+
+        /* ===== TOP NAV ===== */
+        .topnav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            height: 64px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(111,36,166,0.12);
+            box-shadow: 0 1px 12px rgba(0,0,0,0.06);
+        }
+
+        .topnav-left {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 17px;
+            color: #40275c;
+            text-decoration: none;
+            font-family: THSarabunBold, sans-serif;
+            font-weight: bold;
+        }
+
+        .topnav-title {
+            font-family: THSarabunBold, sans-serif;
+            font-size: 19px;
+            color: #40275c;
+            font-weight: bold;
+        }
+
+        .btn-print-all {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, #6f24a6 0%, #b360d6 100%);
+            color: #fff;
+            font-size: 17px;
+            font-family: THSarabunBold, sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(111,36,166,0.28);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .btn-print-all:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(111,36,166,0.36);
+        }
+
+        .btn-print-all:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            text-align: center;
+            padding: 48px 24px 36px;
+        }
+
+        .hero-title {
+            font-family: THSarabunBold, sans-serif;
+            font-size: 36px;
+            color: #2d1b3d;
+            line-height: 1.2;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .hero-sub {
+            font-size: 18px;
+            color: #999;
+        }
+
+        /* ===== SECTION ===== */
+        .section-wrap {
+            max-width: 1060px;
+            margin: 0 auto;
+            padding: 0 28px 72px;
+        }
+
+        /* ===== GRID ===== */
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        /* ===== CARD ===== */
+        .doc-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border-radius: 20px;
+            padding: 32px 24px 24px;
+            text-decoration: none;
+            color: inherit;
+            border: 1.5px solid rgba(0,0,0,0.06);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+            overflow: hidden;
+            min-height: 200px;
+        }
+
+        .doc-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 0 0 20px 20px;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.25s ease;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 44px rgba(0,0,0,0.13);
+            border-color: rgba(111,36,166,0.2);
+        }
+
+        .doc-card:hover::after {
+            transform: scaleX(1);
+        }
+
+        .card-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: var(--badge-bg);
+            font-size: 26px;
+            margin-bottom: 18px;
+            flex-shrink: 0;
+        }
+
+        .card-num {
+            font-family: THSarabunBold, sans-serif;
+            font-size: 13px;
+            color: var(--accent-text);
+            letter-spacing: 0.07em;
+            margin-bottom: 6px;
+            opacity: 0.75;
+            font-weight: bold;
+        }
+
+        .card-title {
+            font-family: THSarabunBold, sans-serif;
+            font-size: 24px;
+            color: #1e1230;
+            line-height: 1.3;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .card-desc {
+            font-size: 17px;
+            color: #8a8a9a;
+            line-height: 1.55;
+            flex: 1;
+        }
+
+        .card-arrow {
+            margin-top: 18px;
+            font-size: 22px;
+            color: var(--accent-text);
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            transform: translateX(-6px);
+        }
+
+        .doc-card:hover .card-arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .c1 { --accent: #6f24a6; --badge-bg: rgba(111,36,166,0.09); --accent-text: #6f24a6; }
+        .c2 { --accent: #1565c0; --badge-bg: rgba(21,101,192,0.09); --accent-text: #1565c0; }
+        .c3 { --accent: #2e7d32; --badge-bg: rgba(46,125,50,0.09);  --accent-text: #2e7d32; }
+        .c4 { --accent: #b04500; --badge-bg: rgba(176,69,0,0.09);   --accent-text: #b04500; }
+        .c5 { --accent: #00838f; --badge-bg: rgba(0,131,143,0.09);  --accent-text: #00838f; }
+
+        @media (max-width: 860px) {
+            .doc-grid { grid-template-columns: repeat(2, 1fr); }
+            .hero-title { font-size: 30px; }
+        }
+
+        @media (max-width: 500px) {
+            .doc-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .doc-card { padding: 20px 16px 16px; min-height: unset; }
+            .card-desc { display: none; }
+            .topnav { padding: 0 18px; flex-wrap: wrap; height: auto; min-height: 64px; gap: 8px; }
+            .topnav-title { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+    <div class="topnav-left">
+        <a href="/select" class="btn-back">← กลับหมวดหมู่</a>
+        <span class="topnav-title">จัดซื้อจัดจ้าง — ตัดหญ้าและฉีดยากำจัดวัชพืช</span>
+    </div>
+    <button class="btn-print-all" id="btnPrintAll" onclick="printAll()">
+        🖨 พิมพ์all
+    </button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-title">เอกสารในหมวดนี้</div>
+    <div class="hero-sub">เป็นเอกสารที่เกี่ยวกับการจัดซื้อจัดจ้างการตัดหญ้าและฉีดยากำจัดวัชพืช</div>
+</div>
+
+<!-- DOCUMENTS -->
+<div class="section-wrap">
+    <div class="doc-grid">
+
+        <a href="/spec-page-1" class="doc-card c1">
+            <div class="card-badge">📋</div>
+            <div class="card-num">หน้า 1</div>
+            <div class="card-title">มอบหมายผู้จัดทำ</div>
+            <div class="card-desc">คุณลักษณะเฉพาะและราคากลาง</div>
+            <div class="card-arrow">→</div>
+        </a>
+
+        <a href="/spec-page-2" class="doc-card c2">
+            <div class="card-badge">📊</div>
+            <div class="card-num">หน้า 2</div>
+            <div class="card-title">ขอความเห็นชอบ</div>
+            <div class="card-desc">รายงานขอดำเนินการจัดจ้าง</div>
+            <div class="card-arrow">→</div>
+        </a>
+
+        <a href="/spec-page-3" class="doc-card c3">
+            <div class="card-badge">📄</div>
+            <div class="card-num">หน้า 3</div>
+            <div class="card-title">รายงานขอจัดจ้าง</div>
+            <div class="card-desc">รายละเอียดพัสดุและเงื่อนไขการจ้าง</div>
+            <div class="card-arrow">→</div>
+        </a>
+
+        <a href="/spec-page-4" class="doc-card c4">
+            <div class="card-badge">📑</div>
+            <div class="card-num">หน้า 4</div>
+            <div class="card-title">ใบสั่งจ้าง</div>
+            <div class="card-desc">สรุปผลการพิจารณาและใบสั่งจ้าง</div>
+            <div class="card-arrow">→</div>
+        </a>
+
+        <a href="/spec-page-5" class="doc-card c5">
+            <div class="card-badge">🧾</div>
+            <div class="card-num">หน้า 5</div>
+            <div class="card-title">ขออนุมัติจ่ายเงิน</div>
+            <div class="card-desc">จ่ายรายงวด ตรวจรับและอนุมัติจ่ายค่าจ้าง</div>
+            <div class="card-arrow">→</div>
+        </a>
+
+    </div>
+</div>
+
+<script>
+// เปิดหน้าพิมพ์รวม (ฝั่งเซิร์ฟเวอร์รวมข้อมูล 5 หน้าไว้แล้ว) ใน iframe ที่ซ่อนไว้
+// แล้วสั่งพิมพ์ทันทีที่โหลดเสร็จ โดยไม่ต้องออกจากหน้านี้
+function printAll() {
+    const btn = document.getElementById('btnPrintAll');
+    const oldLabel = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⏳ กำลังเตรียมเอกสาร...';
+
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.src = '/spec-print-all';
+
+    iframe.onload = function () {
+        btn.disabled = false;
+        btn.innerHTML = oldLabel;
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+    };
+
+    document.body.appendChild(iframe);
+
+    // เคลียร์ iframe ทิ้งหลังพิมพ์เสร็จ/ปิดหน้าต่างพิมพ์
+    const cleanup = () => setTimeout(() => iframe.remove(), 1000);
+    iframe.contentWindow && (iframe.contentWindow.onafterprint = cleanup);
+    setTimeout(cleanup, 60000); // เผื่อกรณีเบราว์เซอร์ไม่ยิง onafterprint
+}
+</script>
+
+</body>
+</html>
