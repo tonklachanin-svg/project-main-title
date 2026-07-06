@@ -1,0 +1,72 @@
+/* =========================================================
+   PAGE5.CSS — เฉพาะจ่ายรายงวด ขออนุมัติจ่ายเงินค่าจ้างทำความสะอาด
+========================================================= */
+
+.approve{
+    margin-top:0.6cm !important;
+    text-align:left;
+    color:#40275c;
+    font-family:THSarabunBold;
+    font-size:14pt !important;
+}
+
+.sign-right{
+    width:9cm !important;
+    margin-left:auto;
+    margin-top:0.6cm !important;
+    text-align:center;
+    color:#1f1b25;
+}
+
+.sign-block{
+    margin-top:0.35cm !important;
+    white-space:nowrap;
+    font-size:14pt !important;
+}
+.sign-block div:last-child{ white-space:normal; }
+
+.sign-left{
+    width:7cm;
+    margin-top:0.3cm !important;
+    margin-left:0;
+    margin-right:auto;
+    text-align:left;
+    color:#1f1b25;
+    font-size:14pt !important;
+}
+
+.position-under{
+    margin-top:0.2cm;
+    text-align:left;
+    margin-left:1.0cm;
+}
+
+/* ===== REF TABLE (ชผ./พชง.) ===== */
+.ref-table{
+    margin-top:0.5cm !important;
+    overflow:hidden;
+}
+.ref-table-box{
+    float:right;
+    border-collapse:collapse;
+    width:9cm !important;
+    margin:0;
+}
+.ref-text{ float:left; }
+.ref-table table td{
+    border:1px solid #555;
+    padding:3px 16px;
+    min-width:55px;
+    font-size:13pt;
+    color:#1f1b25;
+    background:none;
+}
+.ref-table table tbody tr:hover{ background:none; }
+.ref-label{ font-family:THSarabunBold; }
+.ref-dept{ font-size:14pt; margin-top:6px; color:#1f1b25; }
+.ref-tel{ font-size:14pt; color:#1f1b25; }
+
+@media print {
+    .sign-right, .sign-left, .approve{ page-break-inside: avoid; }
+    .ref-table{ margin-top:0.8cm !important; page-break-inside: avoid; }
+}

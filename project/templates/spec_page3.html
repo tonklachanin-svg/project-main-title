@@ -1,86 +1,46 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='main.js') }}" defer></script>
-    <title>รายงานขอจัดจ้างตัดหญ้าและฉีดยา ททร.1(1)แผนก</title>
-    <style>
-        .p3-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 0.3cm 0;
-            font-size: 14pt;
-        }
-        .p3-table th, .p3-table td {
-            border: 1px solid #555;
-            padding: 4px 8px;
-            text-align: center;
-        }
-        .p3-table th {
-            background: #f0e8f7;
-            font-family: THSarabunBold;
-        }
-        .p3-table .name-col { text-align: left; }
-        .p3-table tfoot td { font-family: THSarabunBold; background: #fafafa; }
-        .p3-section-num { font-family: THSarabunBold; color: #40275c; margin-top: 0.2cm; }
-        .p3-list { margin-left: 0.6cm; margin-top: 0.1cm; }
-        @media print {
-            .p3-table { font-size: 12pt; }
-        }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
 
-<div class="menu">
-    <a href="/spec-page-1"><button>1.หนังสือขอความเห็นชอบดำเนินการตัดหญ้า</button></a>
-    <a href="/spec-page-2"><button>2.มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ</button></a>
-    <a href="/spec-page-4"><button>4.รายงาน ใบสั่งจ้างตัดหญ้า หน่วย พค 68 แบบแผน</button></a>
-    <a href="/spec-page-5"><button>5.จ่ายรายงวด ขออนุมัติจ่ายเงินค่าจ้างทำความสะอาด</button></a>
-</div>
+{% block title %}รายงานขอจัดจ้างตัดหญ้าและฉีดยา ททร.1(1)แผนก{% endblock %}
 
-<div class="topbar">
-    <a href="/select" class="btn-back">← เลือกประเภทเอกสาร</a>
-    <div class="topbar-right">
-        <button onclick="window.print()">🖨 พิมพ์ PDF</button>
-    </div>
-</div>
+{% block page_style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/page3.css') }}">
+{% endblock %}
 
+{% block content %}
 <div class="a4">
 
     <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
     <div class="row mt10">
-        <div class="left">จาก&nbsp;&nbsp;&nbsp;{{ data.from }}</div>
-        <div class="right">ถึง&nbsp;&nbsp;&nbsp;{{ data.to }}</div>
+        <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data.from }}</div>
+        <div class="right"><span class="p3-label">ถึง</span>&nbsp;&nbsp;&nbsp;{{ data.to }}</div>
     </div>
 
     <div class="row mt5">
-        <div class="left">เลขที่&nbsp;&nbsp;&nbsp;{{ data.number }}</div>
-        <div class="right">วันที่&nbsp;&nbsp;&nbsp;{{ data.date }}</div>
+        <div class="left"><span class="p3-label">เลขที่</span>&nbsp;&nbsp;&nbsp;{{ data.number }}</div>
+        <div class="right"><span class="p3-label">วันที่</span>&nbsp;&nbsp;&nbsp;{{ data.date }}</div>
     </div>
 
- 
     <div class="receiver mt12">
         <span class="topic-label">เรื่อง</span>
         <span>{{ data.subject }}</span>
     </div>
-    
+
     <div class="receiver mt12">
-        เรียน&nbsp;&nbsp;&nbsp;{{ data.receiver }}
+        <span class="p3-label">เรียน</span>&nbsp;&nbsp;&nbsp;{{ data.receiver }}
     </div>
 
     <div class="paragraph mt12">{{ data.intro }}</div>
 
     <!-- 1. เหตุผล -->
-    <div class="p3-section-num">1. เหตุผลและความจำเป็นที่ต้องซื้อ/จ้าง</div>
-    <div class="paragraph">{{ data.reason }}</div>
+    <div class="p3-heading">1. เหตุผลและความจำเป็นที่ต้องซื้อ/จ้าง</div>
+    <div class="p3-body30">{{ data.reason }}</div>
 
     <!-- 2. รายละเอียดพัสดุ -->
-    <div class="p3-section-num">2. รายละเอียดของพัสดุที่จะซื้อหรืองานที่จะจ้าง</div>
-    <div class="paragraph">{{ data.detail_intro }}</div>
+    <div class="p3-heading">2. รายละเอียดของพัสดุที่จะซื้อหรืองานที่จะจ้าง</div>
+    <div class="p3-body30">{{ data.detail_intro }}</div>
 
-    <div class="p3-list">2.1 ตารางจัดจ้างตัดหญ้าสถานีไฟฟ้า (ใช้เครื่องมือผู้รับจ้าง)</div>
+    <div class="p3-body30">2.1 ตารางจัดจ้างตัดหญ้าสถานีไฟฟ้า (ใช้เครื่องมือผู้รับจ้าง)</div>
     <table class="p3-table">
         <thead>
             <tr>
@@ -108,7 +68,7 @@
         </tfoot>
     </table>
 
-    <div class="p3-list">2.2 ตารางจัดจ้างฉีดยากำจัดวัชพืชสถานีไฟฟ้า (ใช้เครื่องมือผู้รับจ้าง)</div>
+    <div class="p3-body30">2.2 ตารางจัดจ้างฉีดยากำจัดวัชพืชสถานีไฟฟ้า (ใช้เครื่องมือผู้รับจ้าง)</div>
     <table class="p3-table">
         <thead>
             <tr>
@@ -139,104 +99,116 @@
     <div class="paragraph mt5">หมายเหตุ {{ data.last_hired }}</div>
 
     <!-- 3. ราคากลาง -->
-    <div class="p3-section-num">3. ราคากลางของพัสดุที่จะซื้อหรืองานที่จะจ้าง</div>
-    <div class="paragraph">{{ data.price_basis }}</div>
+    <div class="p3-heading">3. ราคากลางของพัสดุที่จะซื้อหรืองานที่จะจ้าง</div>
+    <div class="p3-body30">{{ data.price_basis }}</div>
 
     <!-- 4. วงเงิน -->
-    <div class="p3-section-num">4. วงเงินที่จะซื้อหรือจ้างโดยให้ระบุวงเงินงบประมาณ</div>
-    <div class="paragraph">{{ data.budget_detail }}</div>
+    <div class="p3-heading">4. วงเงินที่จะซื้อหรือจ้างโดยให้ระบุวงเงินงบประมาณ</div>
+    <div class="p3-body30">{{ data.budget_detail }}</div>
 
     <!-- 5. กำหนดเวลา -->
-    <div class="p3-section-num">5. กำหนดเวลาที่ต้องการใช้พัสดุนั้น หรือให้งานนั้นแล้วเสร็จ</div>
-    <div class="paragraph">{{ data.deadline }}</div>
+    <div class="p3-heading">5. กำหนดเวลาที่ต้องการใช้พัสดุนั้น หรือให้งานนั้นแล้วเสร็จ</div>
+    <div class="p3-body30">{{ data.deadline }}</div>
 
     <!-- 6. วิธีจัดซื้อจัดจ้าง -->
-    <div class="p3-section-num">6. วิธีจะซื้อหรือจ้าง และเหตุผลที่จะต้องซื้อหรือจ้างโดยวิธีนั้น</div>
-    <div class="paragraph">{{ data.method }}</div>
+    <div class="p3-heading">6. วิธีจะซื้อหรือจ้าง และเหตุผลที่จะต้องซื้อหรือจ้างโดยวิธีนั้น</div>
+    <div class="p3-body30">{{ data.method }}</div>
 
     <!-- 7. ข้อเสนออื่นๆ -->
-    <div class="p3-section-num">7. ข้อเสนออื่นๆ</div>
-    <div class="p3-list">
+    <div class="p3-heading">7. ข้อเสนออื่นๆ</div>
+    <div class="p3-body30">
         (1) เห็นควรให้เจ้าหน้าที่พัสดุ โดย {{ data.officer_name }} ตำแหน่ง {{ data.officer_pos }}
         เป็นผู้ติดต่อตกลงราคากับผู้ขาย/ผู้รับจ้างโดยตรง
     </div>
-    <div class="p3-list mt5">(2) แต่งตั้งคณะกรรมการตรวจรับพัสดุ/ผู้ตรวจรับพัสดุ</div>
-    <div class="p3-list" style="margin-left:1.2cm;">
-        {% for m in data.committee %}
-        <div>{{ loop.index }}. {{ m.name }} &nbsp;&nbsp;{{ m.pos }} &nbsp;&nbsp;{{ m.role }}</div>
-        {% endfor %}
-    </div>
-    <div class="paragraph mt5">{{ data.committee_order }}</div>
-
-    <div class="paragraph mt12">{{ data.closing }}</div>
-
-    <!-- อนุมัติ -->
-    <div class="approve" style="text-align:center; margin-top:1.2cm;">
-        {{ data.approve_text }}
-    </div>
-    <div style="text-align:center; margin-top:0.3cm;">
-        <div>{{ data.signature_approve }}</div>
-        <div>{{ data.position_approve }}</div>
-    </div>
-
-    <div style="text-align:left; margin-top:0.6cm;">
-        <div>{{ data.signature_from }}</div>
-        <div>{{ data.position_from }}</div>
-    </div>
-
-    <!-- ตารางผู้เกี่ยวข้อง -->
-    <div class="ref-table mt18">
-        <table class="ref-table-box">
+    <div class="p3-body30">(2) แต่งตั้งคณะกรรมการตรวจรับพัสดุ/ผู้ตรวจรับพัสดุ</div>
+    {% if data.committee %}
+    <div class="p3-committee-wrap">
+        <table class="p3-committee">
+            {% for m in data.committee %}
             <tr>
-                <td class="ref-label">ชผ.</td>
-                <td class="ref-sign"></td>
-                <td class="ref-sign"></td>
+                <td class="c-name">{{ loop.index }}. {{ m.name }}</td>
+                <td class="c-pos">{{ m.pos }}</td>
+                <td class="c-role">{{ m.role }}</td>
             </tr>
-            <tr>
-                <td class="ref-label">พชง.</td>
-                <td class="ref-sign"></td>
-                <td class="ref-sign"></td>
-            </tr>
+            {% endfor %}
         </table>
-        <div class="ref-text">
-            <div class="ref-dept mt5">แผนกจัดการงานสถานีไฟฟ้า 1</div>
-            <div class="ref-tel">เบอร์โทร&nbsp;&nbsp;{{ data.dept_phone }}</div>
+    </div>
+    {% endif %}
+    <div class="p3-body25">{{ data.committee_order }}</div>
+
+    <div class="p3-body25">{{ data.closing }}</div>
+
+    <!-- แถวลายเซ็น: อนุมัติ (ซ้าย) + ผู้เสนอ (ขวา) -->
+    <div class="p3-sign-row">
+        <div class="approve-box">
+            <div class="approve-text">{{ data.approve_text }}</div>
+            <div class="approve-name">{{ data.signature_approve }}</div>
+            <div class="approve-pos">{{ data.position_approve }}</div>
+        </div>
+
+        <div class="from-box">
+            <div class="from-name">{{ data.signature_from }}</div>
+            <div class="from-pos">{{ data.position_from }}</div>
         </div>
     </div>
 
-</div>
-
-<!-- ===== หน้าภาคผนวก: คุณสมบัติผู้เสนอราคา ===== -->
-<div class="page-break"></div>
-
-<div class="a4">
-
-    <h2 style="text-align:center; margin-bottom:0.3cm;">
-        คุณสมบัติของผู้เสนอราคา เงื่อนไขการเสนอราคาและการส่งมอบพัสดุ/งานจ้าง
-    </h2>
-
-    <div class="p3-section-num">1. คุณสมบัติของผู้เสนอราคา</div>
-    <div class="paragraph" style="white-space:pre-line;">{{ data.qualification_intro }}</div>
-
-    <div class="p3-section-num">2. เงื่อนไขการเสนอราคา</div>
-    <div class="paragraph">ผู้เสนอราคาจะต้องปฏิบัติ ดังนี้</div>
-    <div class="paragraph" style="white-space:pre-line;">{{ data.condition_offer }}</div>
-
-    <div class="p3-section-num">3. เกณฑ์การพิจารณาราคา</div>
-    <div class="paragraph">จะตัดสินโดยใช้เกณฑ์ราคา</div>
-
-    <div class="p3-section-num">4. เงื่อนไขการส่งมอบพัสดุ/งานจ้าง</div>
-    <div class="paragraph">4.1 กำหนดส่งมอบพัสดุ ภายใน {{ data.delivery_days }} วัน โดยนับถัดจากวันที่ได้รับใบสั่งซื้อ/สั่งจ้าง</div>
-    <div class="paragraph">4.2 สถานที่ส่งมอบพัสดุ {{ data.delivery_place }}</div>
-    <div class="paragraph">4.3 ระยะเวลารับประกันคุณภาพ {{ data.warranty_period }}</div>
-    <div class="paragraph">4.4 {{ data.penalty_clause }}</div>
-    <div class="paragraph">4.5 {{ data.rejection_clause }}</div>
-
-    <div class="paragraph mt12" style="font-size:13pt; color:#666;">
-        หมายเหตุ สำหรับเงื่อนไขคุณสมบัติของผู้เสนอราคา ตามข้อ 1.5-1.7 เป็นไปตามแนวทางที่คณะกรรมการ ป.ป.ช. กำหนด
+    <!-- ตารางผู้เกี่ยวข้อง (ชผ./พชง.) — ฟีเจอร์ติดตามงานของระบบ ไม่ใช่ส่วนของหนังสือราชการต้นฉบับ -->
+    <div class="ref-table">
+        <div class="ref-text">
+            <div class="ref-dept mt5">{{ data.dept_name }}</div>
+            <div class="ref-tel">เบอร์โทร&nbsp;&nbsp;{{ data.dept_phone }}</div>
+        </div>
+        <table class="ref-table-box">
+            <tr>
+                <td class="ref-label">ชผ.</td>
+                <td class="ref-sign">{{ session.get('supervisor_name', '') }}</td>
+                <td class="ref-sign">{{ today_th }}</td>
+            </tr>
+            <tr>
+                <td class="ref-label">พชง.</td>
+                <td class="ref-sign">{{ session.get('name', '') }}</td>
+                <td class="ref-sign">{{ today_th }}</td>
+            </tr>
+        </table>
     </div>
 
 </div>
 
-</body>
-</html>
+<!-- ===== ภาคผนวก: คุณสมบัติผู้เสนอราคา — ยังคงเป็นการ์ดหน้าแยกเหมือนเดิมตอนดูในเว็บ
+     แต่ตัดตัวบังคับขึ้นหน้าใหม่ตอนพิมพ์ออก (เดิมใช้ page-break ทำให้พิมพ์แล้วเหลือหน้าว่างเปล่ายาว) ===== -->
+<div class="a4 p3-appendix-page">
+
+    <h2 class="p3-appendix-title" style="text-align:center; margin-bottom:0.3cm; text-decoration:underline;">
+        คุณสมบัติของผู้เสนอราคา เงื่อนไขการเสนอราคาและการส่งมอบพัสดุ/งานจ้าง
+    </h2>
+
+    <div class="p3-appendix-num">1. <span class="u">คุณสมบัติของผู้เสนอราคา</span></div>
+    <div class="p3-flush">1.1 ผู้เสนอราคา ต้องเป็นผู้มีอาชีพขาย/รับจ้าง ดังกล่าว</div>
+    <div class="p3-hang">1.2 ผู้เสนอราคา ต้องไม่เป็นผู้ที่ถูกระบุชื่อไว้ในบัญชีรายชื่อผู้ทิ้งงานของทางราชการและได้แจ้งเวียนชื่อแล้ว หรือไม่เป็นผู้ที่ได้รับผลของการสั่งให้นิติบุคคล หรือบุคคลอื่นเป็นผู้ทิ้งงานตามระเบียบของทางราชการ</div>
+    <div class="p3-hang">1.3 ผู้เสนอราคาต้องไม่เป็นผู้ได้รับเอกสิทธิ์หรือความคุ้มกัน ซึ่งอาจปฏิเสธไม่ยอมขึ้นศาลไทย เว้นแต่รัฐบาลของผู้เสนอราคาได้มีคำสั่งให้สละสิทธิ์และความคุ้มกันเช่นว่านั้น</div>
+    <div class="p3-hang">1.4 ผู้เสนอราคาต้องไม่เป็นผู้ที่ถูกประเมินสิทธิผู้เสนอราคาในสถานะที่ห้ามเข้าเสนอราคาและห้ามทำสัญญาตามที่ กวพ. กำหนด</div>
+    <div class="p3-hang">1.5 บุคคลหรือนิติบุคคลที่จะเข้าเป็นคู่สัญญาต้องไม่อยู่ในฐานะเป็นผู้ไม่แสดงบัญชีรายรับรายจ่าย หรือแสดงบัญชีรายรับรายจ่ายไม่ถูกต้องครบถ้วนในสาระสำคัญ</div>
+    <div class="p3-hang">1.6 บุคคลหรือนิติบุคคลที่จะเข้าเป็นคู่สัญญากับหน่วยงานภาครัฐซึ่งได้ดำเนินการจัดซื้อจัดจ้างด้วยระบบอิเล็กทรอนิกส์ (e-Government Procurement : e-GP) ต้องลงทะเบียนในระบบอิเล็กทรอนิกส์ ของกรมบัญชีกลาง ที่เว็บไซต์ศูนย์ข้อมูลจัดซื้อจัดจ้างภาครัฐ</div>
+    <div class="p3-hang">1.7 คู่สัญญาต้องรับและจ่ายเงินผ่านบัญชีธนาคาร เว้นแต่การจ่ายเงินแต่ละครั้งซึ่งมีมูลค่าเกินสามหมื่นบาทคู่สัญญาอาจจ่ายเป็นเงินสดก็ได้</div>
+    <div class="p3-flush">1.8 ให้กำหนดคุณสมบัติอื่น ๆ</div>
+
+    <div class="p3-appendix-num">2. <span class="u">เงื่อนไขการเสนอราคา</span></div>
+    <div class="p3-lead">ผู้เสนอราคาจะต้องปฏิบัติ ดังนี้</div>
+    <div class="p3-numlist">(1) ปฏิบัติตามเงื่อนไขที่ระบุไว้ในเอกสารซื้อ/จ้าง</div>
+    <div class="p3-numlist">(2) ราคาที่เสนอจะต้องเป็นราคาที่รวมภาษีมูลค่าเพิ่ม และภาษีอื่น ๆ (ถ้ามี)รวมค่าใช้จ่ายทั้งปวงไว้ด้วยแล้ว</div>
+    <div class="p3-numlist">(3) ห้ามผู้เสนอราคาถอนการเสนอราคา</div>
+
+    <div class="p3-appendix-num">3. <span class="u">เกณฑ์การพิจารณาราคา</span> <span style="font-family:inherit; font-weight:normal;">จะตัดสินโดยใช้เกณฑ์ราคา</span></div>
+
+    <div class="p3-appendix-num">4. <span class="u">เงื่อนไขการส่งมอบพัสดุ/งานจ้าง</span></div>
+    <div class="p3-flush">4.1 กำหนดส่งมอบพัสดุ ภายใน {{ data.delivery_days }} วัน โดยนับถัดจากวันที่ได้รับใบสั่งซื้อ/สั่งจ้าง</div>
+    <div class="p3-hang">4.2 สถานที่ส่งมอบพัสดุ {{ data.delivery_place }}</div>
+    <div class="p3-flush">4.3 ระยะเวลารับประกันคุณภาพ {{ data.warranty_period }}</div>
+    <div class="p3-hang">4.4 {{ data.penalty_clause }}</div>
+    <div class="p3-hang">4.5 {{ data.rejection_clause }}</div>
+
+    <div class="p3-note-label mt12"><span class="u">หมายเหตุ</span></div>
+    <div class="p3-note-text">สำหรับเงื่อนไขคุณสมบัติของผู้เสนอราคา ตามข้อ 1.5-1.7 เป็นไปตามแนวทางที่คณะกรรมการ ป.ป.ช. กำหนด</div>
+
+</div>
+{% endblock %}

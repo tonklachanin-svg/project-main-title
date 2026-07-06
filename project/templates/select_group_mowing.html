@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>จัดซื้อจัดจ้าง — ตัดหญ้าและฉีดยากำจัดวัชพืช</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -213,6 +213,7 @@
         .c3 { --accent: #2e7d32; --badge-bg: rgba(46,125,50,0.09);  --accent-text: #2e7d32; }
         .c4 { --accent: #b04500; --badge-bg: rgba(176,69,0,0.09);   --accent-text: #b04500; }
         .c5 { --accent: #00838f; --badge-bg: rgba(0,131,143,0.09);  --accent-text: #00838f; }
+        .c6 { --accent: #d81b60; --badge-bg: rgba(216,27,96,0.09);  --accent-text: #d81b60; }
 
         @media (max-width: 860px) {
             .doc-grid { grid-template-columns: repeat(2, 1fr); }
@@ -237,7 +238,7 @@
         <span class="topnav-title">จัดซื้อจัดจ้าง — ตัดหญ้าและฉีดยากำจัดวัชพืช</span>
     </div>
     <button class="btn-print-all" id="btnPrintAll" onclick="printAll()">
-        🖨 พิมพ์all
+        🖨 พิมพ์ทั้งหมด
     </button>
 </nav>
 
@@ -254,16 +255,16 @@
         <a href="/spec-page-1" class="doc-card c1">
             <div class="card-badge">📋</div>
             <div class="card-num">หน้า 1</div>
-            <div class="card-title">มอบหมายผู้จัดทำ</div>
-            <div class="card-desc">คุณลักษณะเฉพาะและราคากลาง</div>
+            <div class="card-title">ขอความเห็นชอบ</div>
+            <div class="card-desc">หนังสือขอความเห็นชอบดำเนินการจัดจ้าง</div>
             <div class="card-arrow">→</div>
         </a>
 
         <a href="/spec-page-2" class="doc-card c2">
             <div class="card-badge">📊</div>
             <div class="card-num">หน้า 2</div>
-            <div class="card-title">ขอความเห็นชอบ</div>
-            <div class="card-desc">รายงานขอดำเนินการจัดจ้าง</div>
+            <div class="card-title">มอบหมายผู้จัดทำ</div>
+            <div class="card-desc">คุณลักษณะเฉพาะและราคากลาง</div>
             <div class="card-arrow">→</div>
         </a>
 
@@ -291,6 +292,14 @@
             <div class="card-arrow">→</div>
         </a>
 
+        <a href="/spec-page-6" class="doc-card c6">
+            <div class="card-badge">✍</div>
+            <div class="card-num">หน้า 6</div>
+            <div class="card-title">ใบสำคัญจ่ายเงิน</div>
+            <div class="card-desc">แบบฟอร์มใบสำคัญจ่ายเงิน (ตบ. 7-ป. 33)</div>
+            <div class="card-arrow">→</div>
+        </a>
+
     </div>
 </div>
 
@@ -312,18 +321,22 @@ function printAll() {
     iframe.style.border = '0';
     iframe.src = '/spec-print-all';
 
+    // เคลียร์ iframe ทิ้งหลังพิมพ์เสร็จ/ปิดหน้าต่างพิมพ์
+    const cleanup = () => setTimeout(() => iframe.remove(), 1000);
+
     iframe.onload = function () {
         btn.disabled = false;
         btn.innerHTML = oldLabel;
+        // ต้องผูก onafterprint หลังจากโหลดเสร็จ ไม่ใช่ก่อนหน้านั้น
+        // เพราะการ navigate ของ iframe ไปยัง src ใหม่จะรีเซ็ต window ด้านใน
+        // ทำให้ handler ที่ผูกไว้ตอน window ยังเป็น about:blank หายไป
+        iframe.contentWindow.onafterprint = cleanup;
         iframe.contentWindow.focus();
         iframe.contentWindow.print();
     };
 
     document.body.appendChild(iframe);
 
-    // เคลียร์ iframe ทิ้งหลังพิมพ์เสร็จ/ปิดหน้าต่างพิมพ์
-    const cleanup = () => setTimeout(() => iframe.remove(), 1000);
-    iframe.contentWindow && (iframe.contentWindow.onafterprint = cleanup);
     setTimeout(cleanup, 60000); // เผื่อกรณีเบราว์เซอร์ไม่ยิง onafterprint
 }
 </script>

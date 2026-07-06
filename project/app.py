@@ -1,16 +1,32 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from functools import wraps
+import os
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_session import Session
 from database import get_db
 from auth import auth
+from common_data import get_common_data, save_common_data, apply_common_data
+
 
 
 app = Flask(__name__)
-app.secret_key = 'pea2569-xK9mQ'
+app.secret_key = os.environ.get('SECRET_KEY', 'pea2569-xK9mQ')
+
+# เก็บ session ฝั่งเซิร์ฟเวอร์แทน cookie ฝั่งไคลเอนต์ (เดิมติดตั้ง Flask-Session ไว้แล้ว
+# แต่ไม่เคยเปิดใช้งานจริง) เพราะ form_store เก็บฉบับร่างของทั้งเอกสาร ขนาดใหญ่เกินกว่า
+# ที่ cookie ปกติ (จำกัดราว 4KB ต่อโดเมนในเบราว์เซอร์) จะรับไหว พอเนื้อหายาว (เช่นหน้า 3/4)
+# เบราว์เซอร์จะปฏิเสธ Set-Cookie แบบเงียบ ๆ ทำให้ข้อมูลที่บันทึกหายไปโดยไม่มี error ใด ๆ
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_FILE_DIR'] = os.path.join(os.path.dirname(__file__), 'flask_session')
+app.config['SESSION_PERMANENT'] = False
+Session(app)
+
 app.register_blueprint(auth)
 
 from datetime import datetime
+import hashlib
+import json
  
 THAI_MONTHS = [
     '', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -37,8 +53,28 @@ DEFAULT_DATA = {
     'subject': 'ขอความเห็นชอบดำเนินการจัดจ้างตัดหญ้าและฉีดยากำจัดวัชพืชสถานีไฟฟ้าในหน่วยปฏิบัติงานสถานีไฟฟ้าที่ 1',
     'receiver': 'อก.ปบ.(ก3) ผ่าน ชก.ปบ.(ก3)',
     'section1': 'หน่วยปฏิบัติงานสถานีไฟฟ้าที่ 1 (สถานีไฟฟ้าท่าทราย 1) สังกัด ผจฟ.1 กปบ.(ก3) ตรวจสอบพบว่าบริเวณพื้นที่ภายในบริเวณสถานีไฟฟ้า มีต้นหญ้าและวัชพืชขึ้นเป็นจำนวนมาก',
-    'section2': 'ผจฟ.1 กปบ.(ก3) ได้พิจารณาแล้วเพื่อป้องกันการเกิดกระแสไฟฟ้าขัดข้อง จากสัตว์เลื้อยคลาน ต่างๆ จึงเห็นควรดำเนินการจัดจ้างตัดหญ้าและฉีดยากำจัดวัชพืช โดยใช้ราคากลางอ้างอิงตามพระราชบัญญัติการจัดซื้อจัดจ้าง และบริหารพัสดุภาครัฐ พ.ศ. 2560 จึงขออนุมัติความเห็นชอบดำเนินการจัดซื้อ/จ้างดังกล่าว โดยให้เบิกจ่ายจากงบทำการ ประจำปี 2569',
+    'section2': 'ผจฟ.1 กปบ.(ก3) ได้พิจารณาแล้วเพื่อป้องกันการเกิดกระแสไฟฟ้าขัดข้อง จากสัตว์เลื้อยคลาน ต่างๆ จึงเห็นควรดำเนินการจัดจ้างตัดหญ้าและฉีดยากำจัดวัชพืช โดยใช้ราคากลางอ้างอิงตามพระราชบัญญัติการจัดซื้อจัดจ้าง และบริหารพัสดุภาครัฐ พ.ศ. 2560 จึงขออนุมัติความเห็นชอบดำเนินการจัดซื้อ/จ้างดังกล่าว โดยให้เบิกจ่ายจากงบทำการ ประจำปี 2569 ค่าจ้างบำรุงรักษาสวน รหัสบัญชี 53034030 ศูนย์ต้นทุน I301031040',
     'closing': 'จึงเรียนมาเพื่อโปรดพิจารณาหากเห็นชอบโปรดลงนามให้ต่อไป',
+    'signature_from': '(นายภานุพงค์  เจนสุริยะกุล)',
+    'position_from': 'หผ.จฟ.1 กปบ.(ก3)',
+    'approve': 'เห็นชอบดำเนินการต่อไป',
+    'signature_approve': '(นายเลอพงศ์ แก่นจันทร์)',
+    'position_approve': 'อก.ปบ.(ก3)'
+}
+
+# ===== ข้อมูลเริ่มต้นสำหรับหน้า 2: มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ =====
+# (เดิมหน้านี้ไม่มีชุดข้อมูลของตัวเอง เลยไปใช้ DEFAULT_DATA ของหน้า 1 แทนโดยไม่ได้ตั้งใจ
+#  ข้อความด้านล่างนำมาจากเอกสารจริง 2_มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ.docx)
+DEFAULT_DATA_PAGE2 = {
+    'from': 'ผจฟ.1',
+    'to': 'กปบ.(ก3)',
+    'number': 'ก.3 กปบ.(จฟ.1)',
+    'date': '',
+    'subject': 'มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะของพัสดุ และกำหนดราคากลาง สำหรับงานขอจัดจ้างตัดหญ้าและฉีดยากำจัดวัชพืชสถานีไฟฟ้าในหน่วยปฏิบัติงานสถานีไฟฟ้าที่ 1 ด้วยวิธีเฉพาะเจาะจง',
+    'receiver': 'อก.ปบ.(ก3) ผ่าน ชก.ปบ.(ก3)',
+    'section1': 'ด้วย ผจฟ.1 กปบ.(ก3) มีความประสงค์จะจัดจ้างตัดหญ้าและฉีดยากำจัดวัชพืชสถานีไฟฟ้าในหน่วยปฏิบัติงานสถานีไฟฟ้าที่ 1 เพื่อให้เป็นไปตามพระราชบัญญัติการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ.2560 และระเบียบกระทรวงการคลังว่าด้วยการจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560',
+    'section2': 'ผจฟ.1 กปบ.(ก3) ขอมอบหมายให้ นายพีรวิชญ์  ศรีนันทวงศ์ ตำแหน่ง ชผ.จฟ.1 กปบ.(ก3) เป็นผู้จัดทำรายละเอียดคุณลักษณะเฉพาะของพัสดุและกำหนดราคากลาง โดยมีอำนาจและหน้าที่จัดทำรายละเอียดคุณลักษณะเฉพาะของพัสดุที่จะซื้อ/จ้าง กำหนดหลักเกณฑ์การพิจารณาคัดเลือกข้อเสนอ และ กำหนดราคากลางของพัสดุที่จะซื้อ/จ้าง โดยให้ผู้ได้รับมอบหมายดำเนินการให้แล้วเสร็จภายใน 10 วันทำการ นับถัดจากวันที่ได้รับมอบหมาย',
+    'closing': 'จึงเรียนมาเพื่อโปรดพิจารณา',
     'signature_from': '(นายภานุพงค์  เจนสุริยะกุล)',
     'position_from': 'หผ.จฟ.1 กปบ.(ก3)',
     'approve': 'เห็นชอบดำเนินการต่อไป',
@@ -250,9 +286,45 @@ DEFAULT_DATA_PAGE5 = {
     'tel': '10520 - 21',
 }
 
+# ===== ข้อมูลเริ่มต้นสำหรับหน้า 6: ใบสำคัญจ่ายเงิน =====
+DEFAULT_DATA_PAGE6 = {
+    'receipt_ref': '',
+    'number': '',
+    'date_day': '',
+    'date_month': 'เมษายน',
+    'date_year': '2569',
+    'payee': 'นายอาทิตย์  จันทร์น้ำเงิน  (495969)',
+    'payee_address': '',
+    'branch': 'กฟก.3',
+    'budget_type': 'งบทำการ',
+    'job_number': 'I301031040',
+    'account_code': '53051040',
+    'cashbook_page': '',
+    'debit_account': '',
+    'posted_date': '',
+
+    'voucher_items': [
+        {'description': 'ค่าจ้างเปลี่ยนกระจกแตกร้าวห้องคอนโทรล สถานีไฟฟ้าดอนเจดีย์', 'amount': '3500', 'satang': '-'},
+    ],
+    'subtotal': '3500',
+    'subtotal_satang': '-',
+    'vat': '',
+    'vat_satang': '-',
+    'total_text': 'สามพันห้าร้อยบาทถ้วน',
+    'total_amount': '3500',
+
+    'receipt_no': '',
+    'receipt_date': '',
+    'check_no': '',
+    'check_date': '',
+
+    'dept': 'แผนกจัดการงานสถานีไฟฟ้า 1',
+    'tel': '10520-21',
+}
+
 
 # รายชื่อหน้าเอกสารที่แก้ไขแยกชุดกันได้
-VALID_PAGES = ['main', 'spec_page1', 'spec_page2', 'report', 'spec_page3', 'spec_page4', 'spec_page5']
+VALID_PAGES = ['main', 'spec_page1', 'spec_page2', 'report', 'spec_page3', 'spec_page4', 'spec_page5', 'spec_page6']
 
 
 def login_required(f):
@@ -266,19 +338,34 @@ def login_required(f):
 
 # กำหนดชุดข้อมูล default ของแต่ละหน้าไว้ในที่เดียว เพื่อให้ดูแลง่ายเมื่อมีหน้าเพิ่มในอนาคต
 PAGE_DEFAULTS = {
+    'spec_page2': DEFAULT_DATA_PAGE2,
     'spec_page3': DEFAULT_DATA_PAGE3,
     'spec_page4': DEFAULT_DATA_PAGE4,
     'spec_page5': DEFAULT_DATA_PAGE5,
+    'spec_page6': DEFAULT_DATA_PAGE6,
 }
 
+def get_defaults_hash():
+    """สร้าง Hash ของ DEFAULT_DATA ทุกหน้า"""
+    data = {
+        "main": DEFAULT_DATA,
+        "spec_page1": DEFAULT_DATA,
+        **PAGE_DEFAULTS
+    }
+
+    return hashlib.md5(
+        json.dumps(data, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    ).hexdigest()
 
 def get_form_data(page_key):
-    """ดึงข้อมูลของหน้านั้นๆ จาก session แยกเป็นคนละชุด
 
-    หากเคยบันทึกข้อมูลของหน้านี้ไว้ใน session ก่อนหน้านี้ แต่โครงสร้างข้อมูล
-    เริ่มต้น (DEFAULT_DATA_PAGE*) มีการเพิ่ม field ใหม่เข้ามาภายหลัง จะทำการ
-    เติม field ที่ขาดหายไปให้อัตโนมัติ เพื่อป้องกัน UndefinedError ใน template
-    """
+    current_hash = get_defaults_hash()
+
+    if session.get("defaults_hash") != current_hash:
+        session["defaults_hash"] = current_hash
+        session.pop("form_store", None)
+        session.modified = True
+
     store = session.get('form_store', {})
     default = PAGE_DEFAULTS.get(page_key, DEFAULT_DATA)
 
@@ -287,7 +374,7 @@ def get_form_data(page_key):
         session['form_store'] = store
         session.modified = True
     else:
-        # เติม key ที่ขาดหายไป (ระดับบนสุดของ dict) โดยไม่ทับค่าที่ผู้ใช้เคยแก้ไขไว้
+        # เติม key ใหม่ที่เพิ่งเพิ่มเข้า DEFAULT_DATA
         missing_keys = set(default.keys()) - set(store[page_key].keys())
         if missing_keys:
             for key in missing_keys:
@@ -295,7 +382,9 @@ def get_form_data(page_key):
             session['form_store'] = store
             session.modified = True
 
-    return store[page_key]
+    page_data = dict(store[page_key])
+    apply_common_data(page_key, page_data)
+    return page_data
 
 
 
@@ -351,35 +440,42 @@ def report():
 @login_required
 def spec_page_1():
     data = get_form_data('spec_page1')
-    return render_template('spec_page1.html', data=data, username=session.get('name'))
+    return render_template('spec_page1.html', data=data, username=session.get('name'), current_page=1, page_key='spec_page1')
 
 
 @app.route('/spec-page-2')
 @login_required
 def spec_page_2():
     data = get_form_data('spec_page2')
-    return render_template('spec_page2.html', data=data, username=session.get('name'))
+    return render_template('spec_page2.html', data=data, username=session.get('name'), current_page=2, page_key='spec_page2')
 
 
 @app.route('/spec-page-3')
 @login_required
 def spec_page_3():
     data = get_form_data('spec_page3')
-    return render_template('spec_page3.html', data=data, username=session.get('name'))
+    return render_template('spec_page3.html', data=data, username=session.get('name'), current_page=3, page_key='spec_page3')
 
 
 @app.route('/spec-page-4')
 @login_required
 def spec_page_4():
     data = get_form_data('spec_page4')
-    return render_template('spec_page4.html', data=data, username=session.get('name'))
+    return render_template('spec_page4.html', data=data, username=session.get('name'), current_page=4, page_key='spec_page4')
 
 
 @app.route('/spec-page-5')
 @login_required
 def spec_page_5():
     data = get_form_data('spec_page5')
-    return render_template('spec_page5.html', data=data, username=session.get('name'))
+    return render_template('spec_page5.html', data=data, username=session.get('name'), current_page=5, page_key='spec_page5')
+
+
+@app.route('/spec-page-6')
+@login_required
+def spec_page_6():
+    data = get_form_data('spec_page6')
+    return render_template('spec_page6.html', data=data, username=session.get('name'), current_page=6, page_key='spec_page6')
 
 
 @app.route('/edit-form')
@@ -407,6 +503,43 @@ def save_form():
     session.modified = True
 
     return jsonify({'status': 'success', 'message': 'บันทึกแล้ว', 'page_key': page_key})
+
+
+@app.route('/edit-common-data', methods=['GET', 'POST'])
+@login_required
+def edit_common_data():
+    """หน้าแก้ไข 'ข้อมูลกลาง' ที่เดียว — บันทึกแล้วหน้า 1,2,3,5,6 ที่ใช้
+    ข้อมูลชุดนี้ (ลายเซ็นผู้เสนอ/จาก-ถึง, ชื่อแผนก+เบอร์โทร, คณะกรรมการ)
+    จะเปลี่ยนตามทันทีในครั้งถัดไปที่เปิดหน้านั้น เพราะดึงจาก MySQL สดทุกครั้ง
+    """
+    if request.method == 'POST':
+        committee = []
+        for i in range(3):
+            committee.append({
+                'name': request.form.get(f'committee_name_{i}', '').strip(),
+                'job_pos': request.form.get(f'committee_job_pos_{i}', '').strip(),
+                'role': request.form.get(f'committee_role_{i}', '').strip(),
+            })
+
+        new_data = {
+            'signature_from': request.form.get('signature_from', '').strip(),
+            'position_from': request.form.get('position_from', '').strip(),
+            'org_from': request.form.get('org_from', '').strip(),
+            'org_to': request.form.get('org_to', '').strip(),
+            'dept_name': request.form.get('dept_name', '').strip(),
+            'dept_tel': request.form.get('dept_tel', '').strip(),
+            'committee': committee,
+        }
+        save_common_data(new_data)
+        return redirect(url_for('spec_page_1', saved=1))
+
+    common = get_common_data()
+    return render_template(
+        'edit_common_data.html',
+        common=common,
+        username=session.get('name'),
+        saved=request.args.get('saved'),
+    )
 
 
 if __name__ == '__main__':

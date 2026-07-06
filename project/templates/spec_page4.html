@@ -1,97 +1,34 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='main.js') }}" defer></script>
-    <title>รายงาน ใบสั่งจ้างตัดหญ้า หน่วย พค 68 แบบแผน</title>
-    <style>
-        .p4-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 0.3cm 0;
-            font-size: 14pt;
-        }
-        .p4-table th, .p4-table td {
-            border: 1px solid #555;
-            padding: 4px 8px;
-            text-align: center;
-        }
-        .p4-table th {
-            background: #f0e8f7;
-            font-family: THSarabunBold;
-        }
-        .p4-table .name-col { text-align: left; }
-        .p4-table tfoot td { font-family: THSarabunBold; background: #fafafa; }
-        .p4-section-num { font-family: THSarabunBold; color: #40275c; margin-top: 0.2cm; }
-        .p4-list { margin-left: 0.6cm; margin-top: 0.1cm; }
-        .p4-title { text-align: center; font-family: THSarabunBold; font-size: 18pt; margin-bottom: 0.3cm; }
-        .p4-signblock { text-align: center; margin-top: 0.6cm; }
-        .p4-photo-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 6px;
-            margin: 0.3cm 0 0.6cm 0;
-        }
-        .p4-photo-grid img {
-            width: 100%;
-            height: auto;
-            border: 1px solid #aaa;
-            object-fit: cover;
-        }
-        .p4-photo-placeholder {
-            border: 1px dashed #999;
-            min-height: 4.5cm;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #999;
-            font-size: 12pt;
-        }
-        @media print {
-            .p4-table { font-size: 12pt; }
-        }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
 
-<div class="menu">
-    <a href="/spec-page-1"><button>1.หนังสือขอความเห็นชอบดำเนินการตัดหญ้า</button></a>
-    <a href="/spec-page-2"><button>2.มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ</button></a>
-    <a href="/spec-page-3"><button>3.รายงานขอจัดจ้างตัดหญ้าและฉีดยา ททร.1(1)แผนก</button></a>
-    <a href="/spec-page-5"><button>5.จ่ายรายงวด ขออนุมัติจ่ายเงินค่าจ้างทำความสะอาด</button></a>
-</div>
+{% block title %}รายงาน ใบสั่งจ้างตัดหญ้า หน่วย พค 68 แบบแผน{% endblock %}
 
-<div class="topbar">
-    <a href="/select" class="btn-back">← เลือกประเภทเอกสาร</a>
-    <div class="topbar-right">
-        <button onclick="window.print()">🖨 พิมพ์ PDF</button>
-    </div>
-</div>
+{% block page_style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/page4.css') }}">
+{% endblock %}
 
+{% block content %}
 <!-- ===== ส่วนที่ 1: รายงานสรุปผลการพิจารณา, ตรวจรับ และอนุมัติจ่ายเงิน ===== -->
 <div class="a4">
 
     <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
     <div class="row mt10">
-        <div class="left">จาก&nbsp;&nbsp;&nbsp;{{ data.report_from }}</div>
-        <div class="right">ถึง&nbsp;&nbsp;&nbsp;{{ data.report_to }}</div>
+        <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data.report_from }}</div>
+        <div class="right"><span class="p3-label">ถึง</span>&nbsp;&nbsp;&nbsp;{{ data.report_to }}</div>
     </div>
 
     <div class="row mt5">
-        <div class="left">เลขที่&nbsp;&nbsp;&nbsp;{{ data.report_number }}</div>
-        <div class="right">วันที่&nbsp;&nbsp;&nbsp;{{ data.report_date }}</div>
+        <div class="left"><span class="p3-label">เลขที่</span>&nbsp;&nbsp;&nbsp;{{ data.report_number }}</div>
+        <div class="right"><span class="p3-label">วันที่</span>&nbsp;&nbsp;&nbsp;{{ data.report_date }}</div>
     </div>
 
-    
     <div class="receiver mt12">
         <span class="topic-label">เรื่อง</span>
         <span>{{ data.report_subject }}</span>
     </div>
 
     <div class="receiver mt12">
-        เรียน&nbsp;&nbsp;&nbsp;{{ data.report_receiver }}
+        <span class="p3-label">เรียน</span>&nbsp;&nbsp;&nbsp;{{ data.report_receiver }}
     </div>
 
     <div class="paragraph mt12">{{ data.report_intro }}</div>
@@ -274,6 +211,4 @@
     </div>
 </div>
 {% endfor %}
-
-</body>
-</html>
+{% endblock %}

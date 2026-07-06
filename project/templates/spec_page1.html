@@ -1,39 +1,29 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='main.js') }}" defer></script>
-    <title>หนังสือขอความเห็นชอบดำเนินการตัดหญ้า</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-<div class="menu">
-    <a href="/spec-page-2"><button>2.มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ</button></a>
-    <a href="/spec-page-3"><button>3.รายงานขอจัดจ้างตัดหญ้าและฉีดยา ททร.1(1)แผนก</button></a>
-    <a href="/spec-page-4"><button>4.รายงาน ใบสั่งจ้างตัดหญ้า หน่วย พค 68 แบบแผน</button></a>
-    <a href="/spec-page-5"><button>5.จ่ายรายงวด ขออนุมัติจ่ายเงินค่าจ้างทำความสะอาด</button></a>
+{% block title %}หนังสือขอความเห็นชอบดำเนินการตัดหญ้า{% endblock %}
+
+{% block page_style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/page1.css') }}">
+{% endblock %}
+
+{% block content %}
+{% if request.args.get('saved') %}
+<div style="max-width:900px;margin:10px auto 0;padding:10px 16px;background:#e7f7ec;color:#157347;border-radius:8px;font-size:16px;text-align:center;">
+    บันทึกข้อมูลกลางเรียบร้อยแล้ว ✓
 </div>
-
-<div class="topbar">
-    <a href="/select" class="btn-back">← เลือกประเภทเอกสาร</a>
-    <div class="topbar-right">
-        <button onclick="window.print()">🖨 พิมพ์ PDF</button>
-    </div>
-</div>
-
+{% endif %}
 <div class="a4">
 
     <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
     <div class="row mt10">
-        <div class="left">จาก&nbsp;&nbsp;&nbsp;{{ data.from }}</div>
-        <div class="right">ถึง&nbsp;&nbsp;&nbsp;{{ data.to }}</div>
+        <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data.from }}</div>
+        <div class="right"><span class="p3-label">ถึง</span>&nbsp;&nbsp;&nbsp;{{ data.to }}</div>
     </div>
 
     <div class="row mt5">
-        <div class="left">เลขที่&nbsp;&nbsp;&nbsp;{{ data.number }}</div>
-        <div class="right">วันที่&nbsp;&nbsp;&nbsp;{{ data.date }}</div>
+        <div class="left"><span class="p3-label">เลขที่</span>&nbsp;&nbsp;&nbsp;{{ data.number }}</div>
+        <div class="right"><span class="p3-label">วันที่</span>&nbsp;&nbsp;&nbsp;{{ data.date }}</div>
     </div>
 
     <div class="receiver mt12">
@@ -41,19 +31,17 @@
         <span>{{ data.subject }}</span>
     </div>
 
-    
-
     <div class="receiver mt12">
-        เรียน&nbsp;&nbsp;&nbsp;{{ data.receiver }}
+        <span class="p3-label">เรียน</span>&nbsp;&nbsp;&nbsp;{{ data.receiver }}
     </div>
 
     <div class="section-title mt18">1. ข้อมูล</div>
-    <div class="paragraph">{{ data.section1 }}</div>
+    <div class="paragraph p1-body-indent">{{ data.section1 }}</div>
 
     <div class="section-title mt12">2. ข้อพิจารณา</div>
-    <div class="paragraph">{{ data.section2 }}</div>
+    <div class="paragraph p1-body-indent">{{ data.section2 }}</div>
 
-    <div class="paragraph mt8">{{ data.closing }}</div>
+    <div class="paragraph p1-closing-indent mt8">{{ data.closing }}</div>
 
     <div class="sign-right">
         <div>{{ data.signature_from }}</div>
@@ -66,8 +54,26 @@
         <div>{{ data.signature_approve }}</div>
         <div class="position-under">{{ data.position_approve }}</div>
     </div>
+    
+    <div class="ref-table mt18">
+    <table class="ref-table-box">
+        <tr>
+            <td class="ref-label">ชผ.</td>
+            <td class="ref-sign">{{ session.get('supervisor_name', '') }}</td>
+            <td class="ref-sign">{{ today_th }}</td>
+        </tr>
+        <tr>
+            <td class="ref-label">พชง.</td>
+            <td class="ref-sign">{{ session.get('name', '') }}</td>
+            <td class="ref-sign">{{ today_th }}</td>
+        </tr>
+    </table>
 
+    <div class="ref-text">
+        <div class="ref-dept mt5">{{ data.dept_name }}</div>
+        <div class="ref-tel">เบอร์โทร&nbsp;&nbsp;{{ data.dept_tel }}</div>
+    </div>
 </div>
 
-</body>
-</html>
+</div>
+{% endblock %}

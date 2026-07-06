@@ -1,4 +1,4 @@
-from flask import Blueprint, app, render_template, request, session, redirect, url_for
+from flask import Blueprint, render_template, request, session, redirect, url_for
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_db

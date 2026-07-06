@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}ใบสำคัญจ่ายเงิน{% endblock %}
+
+{% block page_style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/page6.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="a4 p6-voucher">
+
+    <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+
+    <!-- ===== หัวแบบฟอร์ม ===== -->
+    <div class="row mt10">
+        <div class="left">เลขที่ กฟฟ.&nbsp;&nbsp;&nbsp;{{ data.receipt_ref }}</div>
+        <div class="right">เลขที่&nbsp;&nbsp;&nbsp;{{ data.number }}</div>
+    </div>
+
+    <div class="row mt5">
+        <div class="left">วันที่&nbsp;&nbsp;&nbsp;{{ data.date_day }}&nbsp;&nbsp;&nbsp;เดือน&nbsp;&nbsp;&nbsp;{{ data.date_month }}&nbsp;&nbsp;&nbsp;พ.ศ.&nbsp;&nbsp;&nbsp;{{ data.date_year }}</div>
+    </div>
+
+    <div class="paragraph mt5">ผู้เบิก&nbsp;&nbsp;&nbsp;{{ data.payee }}</div>
+    <div class="paragraph">ที่อยู่&nbsp;&nbsp;&nbsp;{{ data.payee_address }}</div>
+
+    <div class="p6-title mt12">ใบสำคัญจ่ายเงิน</div>
+
+    <!-- ===== แถบข้อมูลบัญชี 3 คอลัมน์ ===== -->
+    <table class="p6-info-box mt8">
+        <tr>
+            <td class="p6-info-col">
+                <div>กฟฟ&nbsp;&nbsp;&nbsp;{{ data.branch }}</div>
+                <div>งบ&nbsp;&nbsp;&nbsp;{{ data.budget_type }}</div>
+                <div>หมายเลขงาน&nbsp;&nbsp;&nbsp;{{ data.job_number }}</div>
+                <div>รหัสบัญชี&nbsp;&nbsp;&nbsp;{{ data.account_code }}</div>
+            </td>
+            <td class="p6-info-col">
+                <div class="p6-info-header">การลงบัญชี</div>
+                <div>สมุดเงินสดหน้า&nbsp;&nbsp;&nbsp;{{ data.cashbook_page }}</div>
+                <div>เดบิทบัญชี&nbsp;&nbsp;&nbsp;{{ data.debit_account }}</div>
+                <div>ลงบัญชีเมื่อ&nbsp;&nbsp;&nbsp;{{ data.posted_date }}</div>
+            </td>
+            <td class="p6-info-col">
+                <div class="p6-info-header">ลงชื่อผู้ลงและให้เลขบัญชี</div>
+                <div class="p6-blank-line">&nbsp;</div>
+                <div class="p6-blank-line">&nbsp;</div>
+                <div class="p6-blank-line">&nbsp;</div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- ===== ตารางรายการ ===== -->
+    <table class="p6-table mt8">
+        <thead>
+            <tr>
+                <th class="p6-col-no">ลำดับ</th>
+                <th>รายการ</th>
+                <th class="p6-col-amt">จำนวนเงิน (บาท)</th>
+                <th class="p6-col-st">สต.</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data.voucher_items %}
+            <tr>
+                <td class="p6-col-no">{{ loop.index }}</td>
+                <td class="name-col">{{ row.description }}</td>
+                <td class="p6-col-amt">{{ row.amount }}</td>
+                <td class="p6-col-st">{{ row.satang | default('-') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2">รวมเป็นเงิน</td>
+                <td class="p6-col-amt">{{ data.subtotal }}</td>
+                <td class="p6-col-st">{{ data.subtotal_satang | default('-') }}</td>
+            </tr>
+            <tr>
+                <td colspan="2">ภาษีมูลค่าเพิ่ม</td>
+                <td class="p6-col-amt">{{ data.vat | default('') }}</td>
+                <td class="p6-col-st">{{ data.vat_satang | default('-') }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="paragraph mt5">
+        รวมเงินที่เบิก&nbsp;&nbsp;&nbsp;( {{ data.total_text }} )&nbsp;&nbsp;บาท
+        <span class="p6-total-amount">{{ data.total_amount }}</span>
+    </div>
+
+    <!-- ===== แถวลายเซ็นตรวจสอบ / อนุมัติจ่าย ===== -->
+    <div class="row mt12">
+        <div class="left">ตรวจสอบถูกต้องแล้ว</div>
+        <div class="right">จ่ายเงินได้</div>
+    </div>
+
+    <div class="row mt18">
+        <div class="left">........................................................................................</div>
+        <div class="right">........................................................................................</div>
+    </div>
+
+    <div class="row">
+        <div class="left p6-role-note">หผ.กง., หผ.คก., หผ., หม.บง./หผ., หม.,ธก.</div>
+        <div class="right p6-role-note">อฝ.ฟข./อก.บข./อก.ทข./ผจก.</div>
+    </div>
+
+    <div class="row mt5">
+        <div class="left">............./............./...........................</div>
+        <div class="right">............./............./...........................</div>
+    </div>
+
+    <!-- ===== ส่วนใบเสร็จรับเงิน ===== -->
+    <div class="row mt18">
+        <div class="left">ใบเสร็จรับเงินเลขที่&nbsp;&nbsp;&nbsp;{{ data.receipt_no }}&nbsp;&nbsp;&nbsp;ลว.&nbsp;&nbsp;&nbsp;{{ data.receipt_date }}</div>
+        <div class="right">เช็คเลขที่&nbsp;&nbsp;&nbsp;{{ data.check_no }}&nbsp;&nbsp;&nbsp;ลว.&nbsp;&nbsp;&nbsp;{{ data.check_date }}</div>
+    </div>
+
+    <div class="paragraph mt8">
+        ได้รับเงินไว้ถูกต้องแล้ว&nbsp;&nbsp;เมื่อวันที่&nbsp;...................&nbsp;เดือน&nbsp;.....................................&nbsp;พ.ศ.&nbsp;........................
+        <span class="p6-total-amount">จำนวนเงิน&nbsp;&nbsp;{{ data.total_amount }}</span>
+    </div>
+
+    <div class="paragraph mt5">เป็นเงิน&nbsp;&nbsp;&nbsp;( {{ data.total_text }} )</div>
+
+    <div class="row mt18">
+        <div class="left">........................................................................................</div>
+        <div class="right">........................................................................................</div>
+    </div>
+
+    <div class="row">
+        <div class="left p6-role-note">ผู้จ่ายเงิน</div>
+        <div class="right p6-role-note">ผู้รับเงิน</div>
+    </div>
+
+    <div class="p6-form-code mt8">ตบ. 7-ป. 33</div>
+
+    <!-- ตารางผู้เกี่ยวข้อง (ชผ./พชง.) — ฟีเจอร์ติดตามงานของระบบ ไม่ใช่ส่วนของหนังสือราชการต้นฉบับ -->
+    <div class="ref-table mt12">
+        <table class="ref-table-box">
+            <tr>
+                <td class="ref-label">ชผ.</td>
+                <td class="ref-sign">{{ session.get('supervisor_name', '') }}</td>
+                <td class="ref-sign">{{ today_th }}</td>
+            </tr>
+            <tr>
+                <td class="ref-label">พชง.</td>
+                <td class="ref-sign">{{ session.get('name', '') }}</td>
+                <td class="ref-sign">{{ today_th }}</td>
+            </tr>
+        </table>
+        <div class="ref-text">
+            <div class="ref-dept mt5">{{ data.dept }}</div>
+            <div class="ref-tel">เบอร์โทร&nbsp;&nbsp;{{ data.tel }}</div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

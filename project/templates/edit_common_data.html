@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แก้ไขข้อมูลกลาง</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: THSarabun, 'Sarabun', sans-serif;
+        font-size: 18px;
+        background: #f0ecf7;
+        margin: 0;
+        padding: 32px 16px 80px;
+        color: #222;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    .back { display: inline-block; margin-bottom: 16px; color: #40275c; text-decoration: none; font-weight: bold; }
+    h1 { font-size: 26px; color: #40275c; margin-bottom: 4px; }
+    p.hint { color: #777; margin-top: 0; margin-bottom: 28px; font-size: 16px; }
+
+    .card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 24px 28px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    .card h2 {
+        font-size: 20px;
+        color: #40275c;
+        margin: 0 0 16px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid rgba(111,36,166,0.13);
+    }
+    label { display: block; margin-top: 14px; font-weight: bold; font-size: 15px; color: #444; }
+    label:first-of-type { margin-top: 0; }
+    input[type=text] {
+        width: 100%;
+        padding: 10px 12px;
+        margin-top: 6px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 17px;
+        font-family: inherit;
+    }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .committee-member {
+        border: 1px dashed rgba(111,36,166,0.3);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-top: 14px;
+    }
+    .committee-member .row2 { margin-top: 6px; }
+
+    .save-bar {
+        position: sticky;
+        bottom: 0;
+        background: rgba(240,236,247,0.95);
+        backdrop-filter: blur(6px);
+        padding: 14px 0;
+        margin-top: 4px;
+    }
+    button.save {
+        padding: 13px 30px;
+        border: none;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #6f24a6 0%, #b360d6 100%);
+        color: #fff;
+        font-size: 18px;
+        font-family: THSarabunBold, sans-serif;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(111,36,166,0.28);
+    }
+    button.save:hover { transform: translateY(-1px); }
+
+    .saved-msg {
+        display: inline-block;
+        margin-left: 16px;
+        padding: 8px 18px;
+        background: #e7f7ec;
+        color: #157347;
+        border-radius: 999px;
+        font-size: 15px;
+    }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+    <a class="back" href="/spec-page-1">← ย้อนกลับ</a>
+    <h1>แก้ไขข้อมูลกลาง</h1>
+    <p class="hint">แก้ตรงนี้ที่เดียว หน้า 1, 2, 3, 5, 6 ที่ใช้ข้อมูลชุดนี้จะเปลี่ยนตามทันที</p>
+
+    <form method="POST">
+
+        <div class="card">
+            <h2>ลายเซ็นผู้เสนอ + จาก / ถึง</h2>
+            <div class="row2">
+                <div>
+                    <label>จาก (เช่น ผจฟ.1)</label>
+                    <input type="text" name="org_from" value="{{ common.org_from }}">
+                </div>
+                <div>
+                    <label>ถึง (เช่น กปบ.(ก3))</label>
+                    <input type="text" name="org_to" value="{{ common.org_to }}">
+                </div>
+            </div>
+            <label>ชื่อผู้เสนอ (พร้อมวงเล็บ เช่น (นายภานุพงค์ เจนสุริยะกุล))</label>
+            <input type="text" name="signature_from" value="{{ common.signature_from }}">
+            <label>ตำแหน่งผู้เสนอ</label>
+            <input type="text" name="position_from" value="{{ common.position_from }}">
+        </div>
+
+        <div class="card">
+            <h2>ชื่อแผนก + เบอร์โทร</h2>
+            <label>ชื่อแผนก</label>
+            <input type="text" name="dept_name" value="{{ common.dept_name }}">
+            <label>เบอร์โทร</label>
+            <input type="text" name="dept_tel" value="{{ common.dept_tel }}">
+        </div>
+
+        <div class="card">
+            <h2>คณะกรรมการตรวจรับพัสดุ (3 คน)</h2>
+            {% for m in common.committee %}
+            <div class="committee-member">
+                <label>ชื่อ - นามสกุล คนที่ {{ loop.index }}</label>
+                <input type="text" name="committee_name_{{ loop.index0 }}" value="{{ m.name }}">
+                <div class="row2">
+                    <div>
+                        <label>ตำแหน่งงาน (เช่น พชง.7 ผจฟ.1 กปบ.(ก3))</label>
+                        <input type="text" name="committee_job_pos_{{ loop.index0 }}" value="{{ m.job_pos }}">
+                    </div>
+                    <div>
+                        <label>บทบาทในคณะกรรมการ (เช่น ประธานกรรมการ / กรรมการ)</label>
+                        <input type="text" name="committee_role_{{ loop.index0 }}" value="{{ m.role }}">
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="save-bar">
+            <button type="submit" class="save">บันทึกข้อมูลกลาง</button>
+            {% if saved %}<span class="saved-msg">บันทึกเรียบร้อยแล้ว ✓</span>{% endif %}
+        </div>
+
+    </form>
+</div>
+</body>
+</html>

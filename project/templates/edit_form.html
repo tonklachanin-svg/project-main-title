@@ -1,200 +1,152 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <title>แบบฟอร์มแก้ไขข้อมูล</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='main.js') }}" defer></script>
-</head>
-<body>
+{% extends "base.html" %}
 
-<div class="menu">
-    <a href="/select"><button>หน้าแรก</button></a>
-</div>
+{% block title %}แก้ไขข้อมูลเอกสาร{% endblock %}
 
-<div class="topbar">
-    <a href="/select" class="btn-back">← เลือกประเภทเอกสาร</a>
-    <div class="topbar-right">
-        <span style="font-family:THSarabunBold; color:#6f24a6; font-size:15pt;">
-            📄 กำลังแก้ไข:
-            {% if page_key == 'main' %}หน้าหลัก
-            {% elif page_key == 'spec_page1' %}จัดซื้อจัดจ้าง หน้า 1
-            {% elif page_key == 'spec_page2' %}จัดซื้อจัดจ้าง หน้า 2
-            {% elif page_key == 'report' %}รายงานจัดซื้อจัดจ้าง
+{% block page_style %}
+<style>
+    .edit-wrap{ max-width:900px; margin:24px auto; padding:0 16px 80px; }
+    .edit-card{
+        background:#fff; border-radius:16px; padding:24px 28px; margin-bottom:20px;
+        box-shadow:0 2px 12px rgba(0,0,0,0.06); border:1px solid rgba(0,0,0,0.05);
+    }
+    .edit-card h2{
+        font-size:20px; color:#40275c; margin:0 0 16px; padding-bottom:10px;
+        border-bottom:2px solid rgba(111,36,166,0.13); font-family:THSarabunBold;
+    }
+    .edit-field{ margin-top:14px; }
+    .edit-field:first-child{ margin-top:0; }
+    .edit-field label{ display:block; margin-bottom:6px; font-family:THSarabunBold; color:#444; }
+    .edit-group{
+        border:1px dashed rgba(111,36,166,0.3); border-radius:10px; padding:14px 16px; margin-top:14px;
+    }
+    .edit-group-title{ font-family:THSarabunBold; color:#7b3fa8; margin-bottom:8px; }
+    .edit-row2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .edit-note{ color:#8a8a9a; font-size:14pt; }
+    @media (max-width:640px){ .edit-row2{ grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-wrap">
+    <h1 style="font-family:THSarabunBold; color:#40275c;">แก้ไขข้อมูลเอกสาร</h1>
+    <p style="color:#777; margin-bottom:20px;">แก้ไขแล้วกด "บันทึก" ด้านล่าง ระบบจะพาไปหน้าเอกสารที่แก้ไขให้ทันที</p>
+
+    <form id="editForm">
+        {% macro render_value(key, value, path) %}
+            {% if value is mapping %}
+                <div class="edit-group">
+                    <div class="edit-group-title">{{ key }}</div>
+                    {% for subkey, subval in value.items() %}
+                        {{ render_value(subkey, subval, path ~ '.' ~ subkey) }}
+                    {% endfor %}
+                </div>
+            {% elif value is sequence and value is not string %}
+                {% if value|length > 0 and value[0] is mapping %}
+                    <div class="edit-group">
+                        <div class="edit-group-title">{{ key }}</div>
+                        {% for item in value %}
+                            {% set row_index = loop.index0 %}
+                            <div class="edit-group">
+                                <div class="edit-group-title">{{ key }} #{{ loop.index }}</div>
+                                <div class="edit-row2">
+                                {% for subkey, subval in item.items() %}
+                                    <div class="edit-field">
+                                        <label>{{ subkey }}</label>
+                                        <input type="text" class="form-input" style="width:100%;"
+                                               data-path="{{ path }}.{{ row_index }}.{{ subkey }}"
+                                               value="{{ subval }}">
+                                    </div>
+                                {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="edit-field">
+                        <label>{{ key }}</label>
+                        <p class="edit-note">รายการรูปภาพ/ข้อมูลชนิดนี้ยังไม่รองรับการแก้ไขผ่านฟอร์มนี้ (ค่าเดิมจะยังถูกเก็บไว้ไม่หายไป)</p>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="edit-field">
+                    <label>{{ key }}</label>
+                    {% if value|string|length > 60 %}
+                        <textarea class="form-textarea" data-path="{{ path }}">{{ value }}</textarea>
+                    {% else %}
+                        <input type="text" class="form-input" style="width:100%;" data-path="{{ path }}" value="{{ value }}">
+                    {% endif %}
+                </div>
             {% endif %}
-        </span>
-        <button onclick="window.print()">🖨 พิมพ์ PDF</button>
-    </div>
-</div>
+        {% endmacro %}
 
-<div class="a4">
-    <form id="editForm" onsubmit="handleSubmit(event)">
-
-        <input type="hidden" id="page_key_input" value="{{ page_key }}">
-
-        <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
-
-        <!-- header -->
-        <div class="row mt10">
-            <div class="left">
-                <label>จาก&nbsp;&nbsp;&nbsp;</label>
-                <input type="text" class="form-input" name="from"
-                       value="{{ data.from }}" placeholder="จาก">
-            </div>
-            <div class="right">
-                <label>ถึง&nbsp;&nbsp;&nbsp;</label>
-                <input type="text" class="form-input" name="to"
-                       value="{{ data.to }}" placeholder="ถึง">
-            </div>
+        <div class="edit-card">
+            {% for key, value in data.items() %}
+                {{ render_value(key, value, key) }}
+            {% endfor %}
         </div>
 
-        <div class="row mt5">
-            <div class="left">
-                <label>เลขที่&nbsp;&nbsp;&nbsp;</label>
-                <input type="text" class="form-input" name="number"
-                       value="{{ data.number }}" placeholder="เลขที่">
-            </div>
-            <div class="right">
-                <label>วันที่&nbsp;&nbsp;&nbsp;</label>
-                <input type="date" class="form-input" name="date"
-                       value="{{ data.date }}">
-            </div>
+        <div class="form-actions">
+            <button type="submit" class="btn-save">บันทึก</button>
+            <a href="/spec-page-1" class="btn-reset" style="text-decoration:none; display:inline-flex; align-items:center;">ยกเลิก</a>
         </div>
-
-        <!-- เรื่อง -->
-        <div class="topic mt12">
-            <span class="topic-label">เรื่อง</span>
-            <textarea class="form-textarea" name="subject"
-                      placeholder="เรื่อง">{{ data.subject }}</textarea>
-        </div>
-
-        <!-- เรียน -->
-        <div class="receiver mt12">
-            <label>เรียน&nbsp;&nbsp;&nbsp;</label>
-            <input type="text" class="form-input" name="receiver"
-                   value="{{ data.receiver }}" placeholder="เรียน">
-        </div>
-
-        <!-- section 1 -->
-        <div class="section-title mt18">1. ข้อมูล</div>
-        <div class="paragraph">
-            <textarea class="form-textarea" name="section1">{{ data.section1 }}</textarea>
-        </div>
-
-        <!-- section 2 -->
-        <div class="section-title mt12">2. ข้อพิจารณา</div>
-        <div class="paragraph">
-            <textarea class="form-textarea" name="section2">{{ data.section2 }}</textarea>
-        </div>
-
-        <div class="paragraph mt8">
-            <textarea class="form-textarea" name="closing">{{ data.closing }}</textarea>
-        </div>
-
-        <!-- sign -->
-        <div class="sign-right">
-            <div>
-                <label>ลงชื่อ</label>
-                <input type="text" class="form-input sign-input"
-                       name="signature_from" value="{{ data.signature_from }}">
-            </div>
-            <div>
-                <input type="text" class="form-input sign-input"
-                       name="position_from" value="{{ data.position_from }}">
-            </div>
-        </div>
-
-        <!-- approve -->
-        <div class="approve">
-            <input type="text" class="form-input" name="approve"
-                   value="{{ data.approve }}">
-        </div>
-
-        <div class="sign-left">
-            <div>
-                <label>ลงชื่อ</label>
-                <input type="text" class="form-input sign-input"
-                       name="signature_approve" value="{{ data.signature_approve }}">
-            </div>
-            <div>
-                <input type="text" class="form-input sign-input"
-                       name="position_approve" value="{{ data.position_approve }}">
-            </div>
-        </div>
-
-        <!-- ปุ่ม -->
-        <div class="form-actions mt18">
-            <button type="submit" class="btn-save">💾 บันทึกข้อมูล</button>
-            <button type="reset" class="btn-reset">🔄 ล้างข้อมูล</button>
-        </div>
-
+        <p id="saveMsg" style="text-align:center; margin-top:12px;"></p>
     </form>
 </div>
 
+<script id="original-data" type="application/json">{{ data | tojson }}</script>
 <script>
-// แผนที่ page_key -> URL กลับไปหน้านั้น
-const PAGE_REDIRECT = {
-    'main':       '/main',
-    'spec_page1': '/spec-page-1',
-    'spec_page2': '/spec-page-2',
-    'report':     '/report'
-};
+(function(){
+    const pageKey = {{ page_key | tojson }};
+    const baseData = JSON.parse(document.getElementById('original-data').textContent);
 
-function handleSubmit(event) {
-    event.preventDefault();
-    const data = Object.fromEntries(new FormData(document.getElementById('editForm')));
-    const pageKey = document.getElementById('page_key_input').value;
-
-    const checks = [
-        { key: 'from',               label: 'จาก' },
-        { key: 'to',                 label: 'ถึง' },
-        { key: 'number',             label: 'เลขที่' },
-        { key: 'date',               label: 'วันที่' },
-        { key: 'subject',            label: 'เรื่อง' },
-        { key: 'receiver',           label: 'เรียน' },
-        { key: 'section1',           label: '1. ข้อมูล' },
-        { key: 'section2',           label: '2. ข้อพิจารณา' },
-        { key: 'signature_from',     label: 'ลงชื่อผู้เสนอ' },
-        { key: 'position_from',      label: 'ตำแหน่งผู้เสนอ' },
-        { key: 'signature_approve',  label: 'ลงชื่อผู้อนุมัติ' },
-        { key: 'position_approve',   label: 'ตำแหน่งผู้อนุมัติ' },
-    ];
-
-    for (const c of checks) {
-        if (!data[c.key] || !data[c.key].trim()) {
-            showToast(`กรุณากรอก "${c.label}" ก่อนบันทึก`, 'error');
-            const el = document.querySelector(`[name="${c.key}"]`);
-            if (el) {
-                el.focus();
-                el.style.borderColor = '#e53935';
-                el.style.boxShadow = '0 0 0 2px rgba(229,57,53,0.25)';
-                setTimeout(() => {
-                    el.style.borderColor = '';
-                    el.style.boxShadow = '';
-                }, 2500);
-            }
-            return;
+    function setPath(obj, path, value){
+        const parts = path.split('.');
+        let cur = obj;
+        for (let i = 0; i < parts.length - 1; i++){
+            const p = isFinite(parts[i]) ? Number(parts[i]) : parts[i];
+            if (cur[p] === undefined || cur[p] === null) cur[p] = isFinite(parts[i+1]) ? [] : {};
+            cur = cur[p];
         }
+        const last = parts[parts.length - 1];
+        cur[last] = value;
     }
 
-    data._page_key = pageKey;
+    document.getElementById('editForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        const merged = JSON.parse(JSON.stringify(baseData));
+        document.querySelectorAll('[data-path]').forEach(function(el){
+            setPath(merged, el.getAttribute('data-path'), el.value);
+        });
+        merged._page_key = pageKey;
 
-    fetch('/api/save-form', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    })
-    .then(async r => {
-        if (r.status === 401) { window.location.href = '/login'; return; }
-        const d = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(d.message || 'ไม่สามารถบันทึกได้');
-        showToast(d.message || 'บันทึกแล้ว ✅');
-        const redirectUrl = PAGE_REDIRECT[pageKey] || '/main';
-        setTimeout(() => window.location.href = redirectUrl, 900);
-    })
-    .catch(e => showToast('เกิดข้อผิดพลาด: ' + e.message, 'error'));
-}
+        fetch('/api/save-form', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(merged)
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(res){
+            const msg = document.getElementById('saveMsg');
+            if (res.status === 'success'){
+                msg.textContent = 'บันทึกแล้ว กำลังพาไปหน้าเอกสาร...';
+                msg.style.color = '#157347';
+                const routeMap = {
+                    'main': '/main', 'spec_page1': '/spec-page-1', 'spec_page2': '/spec-page-2',
+                    'spec_page3': '/spec-page-3', 'report': '/report', 'spec_page4': '/spec-page-4',
+                    'spec_page5': '/spec-page-5', 'spec_page6': '/spec-page-6'
+                };
+                setTimeout(function(){ window.location.href = routeMap[res.page_key] || '/select'; }, 600);
+            } else {
+                msg.textContent = 'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง';
+                msg.style.color = '#c53030';
+            }
+        })
+        .catch(function(){
+            const msg = document.getElementById('saveMsg');
+            msg.textContent = 'เกิดข้อผิดพลาดในการบันทึก';
+            msg.style.color = '#c53030';
+        });
+    });
+})();
 </script>
-
-</body>
-</html>
+{% endblock %}

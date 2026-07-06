@@ -32,6 +32,15 @@
         @media print {
             .no-print { display: none; }
             .p3-table, .p4-table { font-size: 12pt; }
+
+            /* ภาคผนวกคุณสมบัติผู้เสนอราคาในหน้าพิมพ์รวม เดิมใช้ .paragraph ปกติ (เยื้อง 2.75cm,
+               line-height ปกติ) ทำให้เนื้อหายาวเกิน 1 หน้าไปนิดเดียว (บรรทัด "หมายเหตุ" ท้ายสุด
+               ล้นไปเป็นหน้าเกือบว่างเปล่าต่างหาก) บีบเฉพาะส่วนนี้ให้จบในหน้าเดียวเหมือนที่แก้ไว้
+               ในหน้า 3 เดี่ยว (page3.css) */
+            .printall-appendix{ padding-top:0.5cm !important; padding-bottom:0.3cm !important; font-size:13.5pt; }
+            .printall-appendix h2{ font-size:15pt; margin-bottom:0.1cm; }
+            .printall-appendix .p3-section-num{ margin-top:0.06cm; }
+            .printall-appendix .paragraph{ text-indent:1.25cm; margin-top:0.02cm; line-height:1.0 !important; }
         }
     </style>
 </head>
@@ -48,18 +57,18 @@
     <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
     <div class="row mt10">
-        <div class="left">จาก&nbsp;&nbsp;&nbsp;{{ data1.from }}</div>
-        <div class="right">ถึง&nbsp;&nbsp;&nbsp;{{ data1.to }}</div>
+        <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data1.from }}</div>
+        <div class="right"><span class="p3-label">ถึง</span>&nbsp;&nbsp;&nbsp;{{ data1.to }}</div>
     </div>
     <div class="row mt5">
-        <div class="left">เลขที่&nbsp;&nbsp;&nbsp;{{ data1.number }}</div>
-        <div class="right">วันที่&nbsp;&nbsp;&nbsp;{{ data1.date }}</div>
+        <div class="left"><span class="p3-label">เลขที่</span>&nbsp;&nbsp;&nbsp;{{ data1.number }}</div>
+        <div class="right"><span class="p3-label">วันที่</span>&nbsp;&nbsp;&nbsp;{{ data1.date }}</div>
     </div>
     <div class="receiver mt12">
         <span class="topic-label">เรื่อง</span>
         <span>{{ data1.subject }}</span>
     </div>
-    <div class="receiver mt12">เรียน&nbsp;&nbsp;&nbsp;{{ data1.receiver }}</div>
+    <div class="receiver mt12"><span class="p3-label">เรียน</span>&nbsp;&nbsp;&nbsp;{{ data1.receiver }}</div>
 
     <div class="section-title mt18">1. ข้อมูล</div>
     <div class="paragraph">{{ data1.section1 }}</div>
@@ -78,6 +87,17 @@
         <div>{{ data1.signature_approve }}</div>
         <div class="position-under">{{ data1.position_approve }}</div>
     </div>
+
+    <div class="ref-table mt18">
+        <table class="ref-table-box">
+            <tr><td class="ref-label">ชผ.</td><td class="ref-sign">{{ session.get('supervisor_name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
+            <tr><td class="ref-label">พชง.</td><td class="ref-sign">{{ session.get('name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
+        </table>
+        <div class="ref-text">
+            <div class="ref-dept mt5">{{ data1.dept_name }}</div>
+            <div class="ref-tel">เบอร์โทร&nbsp;&nbsp;{{ data1.dept_tel }}</div>
+        </div>
+    </div>
 </div>
 
 <!-- ===================== หน้า 2: มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ ===================== -->
@@ -86,18 +106,18 @@
     <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
     <div class="row mt10">
-        <div class="left">จาก&nbsp;&nbsp;&nbsp;{{ data2.from }}</div>
-        <div class="right">ถึง&nbsp;&nbsp;&nbsp;{{ data2.to }}</div>
+        <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data2.from }}</div>
+        <div class="right"><span class="p3-label">ถึง</span>&nbsp;&nbsp;&nbsp;{{ data2.to }}</div>
     </div>
     <div class="row mt5">
-        <div class="left">ที่&nbsp;&nbsp;&nbsp;{{ data2.number }}</div>
-        <div class="right">วันที่&nbsp;&nbsp;&nbsp;{{ data2.date }}</div>
+        <div class="left"><span class="p3-label">ที่</span>&nbsp;&nbsp;&nbsp;{{ data2.number }}</div>
+        <div class="right"><span class="p3-label">วันที่</span>&nbsp;&nbsp;&nbsp;{{ data2.date }}</div>
     </div>
     <div class="receiver mt12">
         <span class="topic-label">เรื่อง</span>
         <span>{{ data2.subject }}</span>
     </div>
-    <div class="receiver mt12">เรียน&nbsp;&nbsp;&nbsp;{{ data2.receiver }}</div>
+    <div class="receiver mt12"><span class="p3-label">เรียน</span>&nbsp;&nbsp;&nbsp;{{ data2.receiver }}</div>
 
     <div class="paragraph mt18">{{ data2.section1 }}</div>
     <div class="paragraph mt8">{{ data2.section2 }}</div>
@@ -115,12 +135,12 @@
 
     <div class="ref-table mt18">
         <table class="ref-table-box">
-            <tr><td class="ref-label">ชผ.</td><td class="ref-sign"></td><td class="ref-sign"></td></tr>
-            <tr><td class="ref-label">พชง.</td><td class="ref-sign"></td><td class="ref-sign"></td></tr>
+            <tr><td class="ref-label">ชผ.</td><td class="ref-sign">{{ session.get('supervisor_name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
+            <tr><td class="ref-label">พชง.</td><td class="ref-sign">{{ session.get('name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
         </table>
         <div class="ref-text">
-            <div class="ref-dept mt5">แผนกจัดการงานสถานีไฟฟ้า 1</div>
-            <div class="ref-tel">เบอร์โทร&nbsp;&nbsp;10520-21</div>
+            <div class="ref-dept mt5">{{ data2.dept_name }}</div>
+            <div class="ref-tel">เบอร์โทร&nbsp;&nbsp;{{ data2.dept_tel }}</div>
         </div>
     </div>
 </div>
@@ -131,18 +151,18 @@
     <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
     <div class="row mt10">
-        <div class="left">จาก&nbsp;&nbsp;&nbsp;{{ data3.from }}</div>
-        <div class="right">ถึง&nbsp;&nbsp;&nbsp;{{ data3.to }}</div>
+        <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data3.from }}</div>
+        <div class="right"><span class="p3-label">ถึง</span>&nbsp;&nbsp;&nbsp;{{ data3.to }}</div>
     </div>
     <div class="row mt5">
-        <div class="left">เลขที่&nbsp;&nbsp;&nbsp;{{ data3.number }}</div>
-        <div class="right">วันที่&nbsp;&nbsp;&nbsp;{{ data3.date }}</div>
+        <div class="left"><span class="p3-label">เลขที่</span>&nbsp;&nbsp;&nbsp;{{ data3.number }}</div>
+        <div class="right"><span class="p3-label">วันที่</span>&nbsp;&nbsp;&nbsp;{{ data3.date }}</div>
     </div>
     <div class="receiver mt12">
         <span class="topic-label">เรื่อง</span>
         <span>{{ data3.subject }}</span>
     </div>
-    <div class="receiver mt12">เรียน&nbsp;&nbsp;&nbsp;{{ data3.receiver }}</div>
+    <div class="receiver mt12"><span class="p3-label">เรียน</span>&nbsp;&nbsp;&nbsp;{{ data3.receiver }}</div>
 
     <div class="paragraph mt12">{{ data3.intro }}</div>
 
@@ -245,11 +265,11 @@
 
     <div class="ref-table mt18">
         <table class="ref-table-box">
-            <tr><td class="ref-label">ชผ.</td><td class="ref-sign"></td><td class="ref-sign"></td></tr>
-            <tr><td class="ref-label">พชง.</td><td class="ref-sign"></td><td class="ref-sign"></td></tr>
+            <tr><td class="ref-label">ชผ.</td><td class="ref-sign">{{ session.get('supervisor_name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
+            <tr><td class="ref-label">พชง.</td><td class="ref-sign">{{ session.get('name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
         </table>
         <div class="ref-text">
-            <div class="ref-dept mt5">แผนกจัดการงานสถานีไฟฟ้า 1</div>
+            <div class="ref-dept mt5">{{ data3.dept_name }}</div>
             <div class="ref-tel">เบอร์โทร&nbsp;&nbsp;{{ data3.dept_phone }}</div>
         </div>
     </div>
@@ -257,7 +277,7 @@
 
 <!-- ภาคผนวกของหน้า 3: คุณสมบัติผู้เสนอราคา -->
 <div class="page-break"></div>
-<div class="a4">
+<div class="a4 printall-appendix">
     <h2 style="text-align:center; margin-bottom:0.3cm;">
         คุณสมบัติของผู้เสนอราคา เงื่อนไขการเสนอราคาและการส่งมอบพัสดุ/งานจ้าง
     </h2>
@@ -290,18 +310,18 @@
     <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
     <div class="row mt10">
-        <div class="left">จาก&nbsp;&nbsp;&nbsp;{{ data4.report_from }}</div>
-        <div class="right">ถึง&nbsp;&nbsp;&nbsp;{{ data4.report_to }}</div>
+        <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data4.report_from }}</div>
+        <div class="right"><span class="p3-label">ถึง</span>&nbsp;&nbsp;&nbsp;{{ data4.report_to }}</div>
     </div>
     <div class="row mt5">
-        <div class="left">เลขที่&nbsp;&nbsp;&nbsp;{{ data4.report_number }}</div>
-        <div class="right">วันที่&nbsp;&nbsp;&nbsp;{{ data4.report_date }}</div>
+        <div class="left"><span class="p3-label">เลขที่</span>&nbsp;&nbsp;&nbsp;{{ data4.report_number }}</div>
+        <div class="right"><span class="p3-label">วันที่</span>&nbsp;&nbsp;&nbsp;{{ data4.report_date }}</div>
     </div>
     <div class="receiver mt12">
         <span class="topic-label">เรื่อง</span>
         <span>{{ data4.report_subject }}</span>
     </div>
-    <div class="receiver mt12">เรียน&nbsp;&nbsp;&nbsp;{{ data4.report_receiver }}</div>
+    <div class="receiver mt12"><span class="p3-label">เรียน</span>&nbsp;&nbsp;&nbsp;{{ data4.report_receiver }}</div>
 
     <div class="paragraph mt12">{{ data4.report_intro }}</div>
 
@@ -460,18 +480,18 @@
     <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
     <div class="row mt10">
-        <div class="left">จาก&nbsp;&nbsp;&nbsp;{{ data5.from }}</div>
-        <div class="right">ถึง&nbsp;&nbsp;&nbsp;{{ data5.to }}</div>
+        <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data5.from }}</div>
+        <div class="right"><span class="p3-label">ถึง</span>&nbsp;&nbsp;&nbsp;{{ data5.to }}</div>
     </div>
     <div class="row mt5">
-        <div class="left">เลขที่&nbsp;&nbsp;&nbsp;{{ data5.number }}</div>
-        <div class="right">วันที่&nbsp;&nbsp;&nbsp;{{ data5.date }}</div>
+        <div class="left"><span class="p3-label">เลขที่</span>&nbsp;&nbsp;&nbsp;{{ data5.number }}</div>
+        <div class="right"><span class="p3-label">วันที่</span>&nbsp;&nbsp;&nbsp;{{ data5.date }}</div>
     </div>
     <div class="receiver mt12">
         <span class="topic-label">เรื่อง</span>
         <span>{{ data5.subject }}&nbsp;ประจำเดือน&nbsp;{{ data5.month }}&nbsp;{{ data5.year }}&nbsp;งวดที่&nbsp;{{ data5.period }}</span>
     </div>
-    <div class="receiver mt12">เรียน&nbsp;&nbsp;&nbsp;{{ data5.receiver }}</div>
+    <div class="receiver mt12"><span class="p3-label">เรียน</span>&nbsp;&nbsp;&nbsp;{{ data5.receiver }}</div>
 
     <div class="paragraph mt18">{{ data5.section1 }}</div>
     <div class="paragraph mt8">{{ data5.section2 }}</div>
@@ -499,8 +519,8 @@
 
     <div class="ref-table mt18">
         <table class="ref-table-box">
-            <tr><td class="ref-label">ชผ.</td><td class="ref-sign"></td><td class="ref-sign"></td></tr>
-            <tr><td class="ref-label">พชง.</td><td class="ref-sign"></td><td class="ref-sign"></td></tr>
+            <tr><td class="ref-label">ชผ.</td><td class="ref-sign">{{ session.get('supervisor_name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
+            <tr><td class="ref-label">พชง.</td><td class="ref-sign">{{ session.get('name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
         </table>
         <div class="ref-text">
             <div class="ref-dept mt5">{{ data5.dept }}</div>

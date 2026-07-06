@@ -1,0 +1,116 @@
+/* page6.css — ใบสำคัญจ่ายเงิน (payment voucher) */
+
+.p6-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 15pt;
+    text-decoration: underline;
+}
+
+.p6-info-box {
+    width: 100%;
+    border: 1px solid #000;
+    border-collapse: collapse;
+    font-size: 13pt;
+}
+
+.p6-info-box td.p6-info-col {
+    border-right: 1px solid #000;
+    vertical-align: top;
+    padding: 4px 8px;
+    width: 33.33%;
+}
+
+.p6-info-box td.p6-info-col:last-child {
+    border-right: none;
+}
+
+.p6-info-header {
+    font-weight: bold;
+    text-decoration: underline;
+    margin-bottom: 4px;
+}
+
+.p6-blank-line {
+    border-bottom: 1px dotted #000;
+    height: 16px;
+}
+
+.p6-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13pt;
+}
+
+.p6-table th,
+.p6-table td {
+    border: 1px solid #000;
+    padding: 3px 6px;
+}
+
+.p6-table thead th {
+    text-align: center;
+    font-weight: bold;
+}
+
+.p6-table td.name-col {
+    text-align: left;
+}
+
+.p6-col-no {
+    width: 6%;
+    text-align: center;
+}
+
+.p6-col-amt {
+    width: 16%;
+    text-align: right;
+}
+
+.p6-col-st {
+    width: 8%;
+    text-align: center;
+}
+
+.p6-table tfoot td {
+    font-weight: bold;
+}
+
+.p6-total-amount {
+    font-weight: bold;
+    margin-left: 12px;
+}
+
+.p6-role-note {
+    font-size: 11pt;
+    text-align: center;
+}
+
+.p6-form-code {
+    font-size: 10pt;
+    color: #666;
+    text-align: right;
+}
+
+.p6-voucher .row .left,
+.p6-voucher .row .right {
+    width: 50%;
+}
+.ref-table-box{
+    float:right;
+    width:9cm;
+    border-collapse:collapse;
+    margin:0;
+}
+
+.ref-table-box td{
+    border:1px solid #555;
+    padding:3px 10px;
+    font-size:13pt;
+    background:none;
+    color:#000;
+}
+
+.ref-table-box tr:hover{
+    background:none;
+}

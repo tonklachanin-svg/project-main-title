@@ -1,39 +1,24 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='main.js') }}" defer></script>
-    <title>มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-<div class="menu">
-    <a href="/spec-page-1"><button>1.หนังสือขอความเห็นชอบดำเนินการตัดหญ้า</button></a>
-    <a href="/spec-page-3"><button>3.รายงานขอจัดจ้างตัดหญ้าและฉีดยา ททร.1(1)แผนก</button></a>
-    <a href="/spec-page-4"><button>4.รายงาน ใบสั่งจ้างตัดหญ้า หน่วย พค 68 แบบแผน</button></a>
-    <a href="/spec-page-5"><button>5.จ่ายรายงวด ขออนุมัติจ่ายเงินค่าจ้างทำความสะอาด</button></a>
-</div>
+{% block title %}มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ{% endblock %}
 
-<div class="topbar">
-    <a href="/select" class="btn-back">← เลือกประเภทเอกสาร</a>
-    <div class="topbar-right">
-        <button onclick="window.print()">🖨 พิมพ์ PDF</button>
-    </div>
-</div>
+{% block page_style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/page2.css') }}">
+{% endblock %}
 
+{% block content %}
 <div class="a4">
 
     <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
 
     <div class="row mt10">
-        <div class="left">จาก&nbsp;&nbsp;&nbsp;{{ data.from }}</div>
-        <div class="right">ถึง&nbsp;&nbsp;&nbsp;{{ data.to }}</div>
+        <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data.from }}</div>
+        <div class="right"><span class="p3-label">ถึง</span>&nbsp;&nbsp;&nbsp;{{ data.to }}</div>
     </div>
 
     <div class="row mt5">
-        <div class="left">ที่&nbsp;&nbsp;&nbsp;{{ data.number }}</div>
-        <div class="right">วันที่&nbsp;&nbsp;&nbsp;{{ data.date }}</div>
+        <div class="left"><span class="p3-label">ที่</span>&nbsp;&nbsp;&nbsp;{{ data.number }}</div>
+        <div class="right"><span class="p3-label">วันที่</span>&nbsp;&nbsp;&nbsp;{{ data.date }}</div>
     </div>
 
     <div class="receiver mt12">
@@ -42,7 +27,7 @@
     </div>
 
     <div class="receiver mt12">
-        เรียน&nbsp;&nbsp;&nbsp;{{ data.receiver }}
+        <span class="p3-label">เรียน</span>&nbsp;&nbsp;&nbsp;{{ data.receiver }}
     </div>
 
     <div class="paragraph mt18">{{ data.section1 }}</div>
@@ -66,24 +51,24 @@
         <div class="position-under">{{ data.position_approve }}</div>
     </div>
 
-   <div class="ref-table mt18">
-    <table class="ref-table-box">
-        <tr>
-            <td class="ref-label">ชผ.</td>
-            <td class="ref-sign">{{ session.get('supervisor_name', '') }}</td>
-            <td class="ref-sign">{{ today_th }}</td>
-        </tr>
-        <tr>
-            <td class="ref-label">พชง.</td>
-            <td class="ref-sign">{{ session.get('name', '') }}</td>
-            <td class="ref-sign">{{ today_th }}</td>
-        </tr>
-    </table>
-    <div class="ref-text">
-        <div class="ref-dept mt5">แผนกจัดการงานสถานีไฟฟ้า 1</div>
-        <div class="ref-tel">เบอร์โทร&nbsp;&nbsp;10520-21</div>
+    <div class="ref-table mt18">
+        <table class="ref-table-box">
+            <tr>
+                <td class="ref-label">ชผ.</td>
+                <td class="ref-sign">{{ session.get('supervisor_name', '') }}</td>
+                <td class="ref-sign">{{ today_th }}</td>
+            </tr>
+            <tr>
+                <td class="ref-label">พชง.</td>
+                <td class="ref-sign">{{ session.get('name', '') }}</td>
+                <td class="ref-sign">{{ today_th }}</td>
+            </tr>
+        </table>
+        <div class="ref-text">
+            <div class="ref-dept mt5">{{ data.dept_name }}</div>
+            <div class="ref-tel">เบอร์โทร&nbsp;&nbsp;{{ data.dept_tel }}</div>
+        </div>
     </div>
-</div>
 
-</body>
-</html>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+/* =========================================================
+   PAGE4.CSS — เฉพาะรายงาน/ใบสั่งจ้างตัดหญ้า หน่วย พค 68 แบบแผน
+========================================================= */
+
+.p4-table{
+    width:100%;
+    border-collapse:collapse;
+    margin:0.3cm 0;
+    font-size:14pt;
+}
+.p4-table th, .p4-table td{
+    border:1px solid #555;
+    padding:4px 8px;
+    text-align:center;
+}
+.p4-table th{ background:#f0e8f7; font-family:THSarabunBold; }
+.p4-table .name-col{ text-align:left; }
+.p4-table tfoot td{ font-family:THSarabunBold; background:#fafafa; }
+
+.p4-section-num{ font-family:THSarabunBold; color:#40275c; margin-top:0.2cm; }
+.p4-list{ margin-left:0.6cm; margin-top:0.1cm; }
+.p4-title{ text-align:center; font-family:THSarabunBold; font-size:18pt; margin-bottom:0.3cm; }
+.p4-signblock{ text-align:center; margin-top:0.6cm; }
+
+/* เดิม placeholder สูงแค่ 4.5cm ทำให้หน้าแนบรูปภาพ (ตอนยังไม่ได้แนบรูปจริง)
+   ดูโล่งว่างเปล่าเกือบทั้งหน้า (เหลือพื้นที่พิมพ์ได้อีกเกือบ 20cm) ขยายให้เต็มหน้ามากขึ้น */
+.p4-photo-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:10px;
+    margin:0.5cm 0 0.6cm 0;
+}
+.p4-photo-grid img{
+    width:100%;
+    height:15cm;
+    border:1px solid #aaa;
+    object-fit:cover;
+}
+.p4-photo-placeholder{
+    border:1px dashed #999;
+    min-height:15cm;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#999;
+    font-size:12pt;
+    text-align:center;
+    padding:0.5cm;
+}
+
+@media print {
+    .p4-table{ font-size:12pt; }
+}
