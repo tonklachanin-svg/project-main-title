@@ -7,6 +7,7 @@ from flask_session import Session
 from database import get_db
 from auth import auth
 from common_data import get_common_data, save_common_data, apply_common_data
+from document_drafts import get_draft, save_draft
 
 
 
@@ -25,9 +26,7 @@ Session(app)
 app.register_blueprint(auth)
 
 from datetime import datetime
-import hashlib
-import json
- 
+
 THAI_MONTHS = [
     '', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
     'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
@@ -345,47 +344,54 @@ PAGE_DEFAULTS = {
     'spec_page6': DEFAULT_DATA_PAGE6,
 }
 
-def get_defaults_hash():
-    """สร้าง Hash ของ DEFAULT_DATA ทุกหน้า"""
-    data = {
-        "main": DEFAULT_DATA,
-        "spec_page1": DEFAULT_DATA,
-        **PAGE_DEFAULTS
-    }
+def get_form_data(page_key, owner_id=None):
+    """อ่านข้อมูลเอกสารของหน้าที่ระบุ สำหรับเจ้าของ (owner_id) ที่ระบุ
+    ถ้าไม่ระบุ owner_id จะใช้ผู้ใช้ที่ login อยู่ปัจจุบัน (ดู/แก้ของตัวเอง)
+    ถ้า owner_id เป็นคนอื่น จะอ่านฉบับร่างของคนนั้นแบบ read-only
 
-    return hashlib.md5(
-        json.dumps(data, sort_keys=True, ensure_ascii=False).encode("utf-8")
-    ).hexdigest()
+    ฉบับร่างเก็บถาวรใน MySQL (document_drafts) แยกตามผู้ใช้แต่ละคน
+    ถ้าเจ้าของยังไม่เคยบันทึกฉบับร่างของหน้านี้เลย จะคืนค่าเริ่มต้น (DEFAULT_DATA)
+    ไปก่อน โดยยังไม่บันทึกลงฐานข้อมูลจนกว่าจะมีการแก้ไขจริงผ่าน /api/save-form
+    """
+    if owner_id is None:
+        owner_id = session.get('user_id')
 
-def get_form_data(page_key):
-
-    current_hash = get_defaults_hash()
-
-    if session.get("defaults_hash") != current_hash:
-        session["defaults_hash"] = current_hash
-        session.pop("form_store", None)
-        session.modified = True
-
-    store = session.get('form_store', {})
     default = PAGE_DEFAULTS.get(page_key, DEFAULT_DATA)
+    draft = get_draft(owner_id, page_key)
 
-    if page_key not in store:
-        store[page_key] = dict(default)
-        session['form_store'] = store
-        session.modified = True
+    if draft is None:
+        page_data = dict(default)
     else:
-        # เติม key ใหม่ที่เพิ่งเพิ่มเข้า DEFAULT_DATA
-        missing_keys = set(default.keys()) - set(store[page_key].keys())
-        if missing_keys:
-            for key in missing_keys:
-                store[page_key][key] = default[key]
-            session['form_store'] = store
-            session.modified = True
+        # เติม key ใหม่ที่เพิ่งเพิ่มเข้า DEFAULT_DATA แต่ฉบับร่างเดิมยังไม่มี
+        page_data = dict(default)
+        page_data.update(draft)
 
-    page_data = dict(store[page_key])
     apply_common_data(page_key, page_data)
     return page_data
 
+
+def resolve_viewer():
+    """อ่าน ?user=<id> จาก query string เพื่อรองรับการดูงานของเพื่อนร่วมงานแบบ read-only
+    คืนค่า (owner_id, readonly, owner_name) — ถ้าไม่ระบุ หรือระบุเป็นตัวเอง จะถือว่า
+    กำลังดู/แก้ไขข้อมูลของตัวเอง (readonly=False)"""
+    my_id = session.get('user_id')
+    requested = request.args.get('user', type=int)
+    if not requested or requested == my_id:
+        return my_id, False, None
+
+    conn = get_db()
+    try:
+        cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT name FROM users WHERE id = %s", (requested,))
+        row = cur.fetchone()
+        cur.close()
+    finally:
+        conn.close()
+
+    if not row:
+        return my_id, False, None
+
+    return requested, True, row['name']
 
 
 @app.route('/select')
@@ -401,15 +407,34 @@ def select_mowing():
     return render_template('select_group_mowing.html', username=session.get('name'))
 
 
+@app.route('/colleagues')
+@login_required
+def colleagues():
+    """รายชื่อเพื่อนร่วมงานทั้งหมด กดเข้าไปดูงาน (เอกสาร) ของคนนั้นแบบ read-only ได้"""
+    conn = get_db()
+    try:
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            "SELECT id, name, position FROM users WHERE id != %s ORDER BY name",
+            (session['user_id'],),
+        )
+        people = cur.fetchall()
+        cur.close()
+    finally:
+        conn.close()
+    return render_template('colleagues.html', people=people, username=session.get('name'))
+
+
 @app.route('/spec-print-all')
 @login_required
 def spec_print_all():
     """รวมข้อมูลเอกสารหน้า 1-5 มาไว้หน้าเดียว สำหรับพิมพ์เป็น PDF ไฟล์เดียว"""
-    data1 = get_form_data('spec_page1')
-    data2 = get_form_data('spec_page2')
-    data3 = get_form_data('spec_page3')
-    data4 = get_form_data('spec_page4')
-    data5 = get_form_data('spec_page5')
+    owner_id, readonly, owner_name = resolve_viewer()
+    data1 = get_form_data('spec_page1', owner_id)
+    data2 = get_form_data('spec_page2', owner_id)
+    data3 = get_form_data('spec_page3', owner_id)
+    data4 = get_form_data('spec_page4', owner_id)
+    data5 = get_form_data('spec_page5', owner_id)
     return render_template(
         'spec_print_all.html',
         data1=data1,
@@ -439,43 +464,55 @@ def report():
 @app.route('/spec_page1')
 @login_required
 def spec_page_1():
-    data = get_form_data('spec_page1')
-    return render_template('spec_page1.html', data=data, username=session.get('name'), current_page=1, page_key='spec_page1')
+    owner_id, readonly, owner_name = resolve_viewer()
+    data = get_form_data('spec_page1', owner_id)
+    return render_template('spec_page1.html', data=data, username=session.get('name'), current_page=1,
+                            page_key='spec_page1', readonly=readonly, owner_name=owner_name, owner_id=owner_id)
 
 
 @app.route('/spec-page-2')
 @login_required
 def spec_page_2():
-    data = get_form_data('spec_page2')
-    return render_template('spec_page2.html', data=data, username=session.get('name'), current_page=2, page_key='spec_page2')
+    owner_id, readonly, owner_name = resolve_viewer()
+    data = get_form_data('spec_page2', owner_id)
+    return render_template('spec_page2.html', data=data, username=session.get('name'), current_page=2,
+                            page_key='spec_page2', readonly=readonly, owner_name=owner_name, owner_id=owner_id)
 
 
 @app.route('/spec-page-3')
 @login_required
 def spec_page_3():
-    data = get_form_data('spec_page3')
-    return render_template('spec_page3.html', data=data, username=session.get('name'), current_page=3, page_key='spec_page3')
+    owner_id, readonly, owner_name = resolve_viewer()
+    data = get_form_data('spec_page3', owner_id)
+    return render_template('spec_page3.html', data=data, username=session.get('name'), current_page=3,
+                            page_key='spec_page3', readonly=readonly, owner_name=owner_name, owner_id=owner_id)
 
 
 @app.route('/spec-page-4')
 @login_required
 def spec_page_4():
-    data = get_form_data('spec_page4')
-    return render_template('spec_page4.html', data=data, username=session.get('name'), current_page=4, page_key='spec_page4')
+    owner_id, readonly, owner_name = resolve_viewer()
+    data = get_form_data('spec_page4', owner_id)
+    return render_template('spec_page4.html', data=data, username=session.get('name'), current_page=4,
+                            page_key='spec_page4', readonly=readonly, owner_name=owner_name, owner_id=owner_id)
 
 
 @app.route('/spec-page-5')
 @login_required
 def spec_page_5():
-    data = get_form_data('spec_page5')
-    return render_template('spec_page5.html', data=data, username=session.get('name'), current_page=5, page_key='spec_page5')
+    owner_id, readonly, owner_name = resolve_viewer()
+    data = get_form_data('spec_page5', owner_id)
+    return render_template('spec_page5.html', data=data, username=session.get('name'), current_page=5,
+                            page_key='spec_page5', readonly=readonly, owner_name=owner_name, owner_id=owner_id)
 
 
 @app.route('/spec-page-6')
 @login_required
 def spec_page_6():
-    data = get_form_data('spec_page6')
-    return render_template('spec_page6.html', data=data, username=session.get('name'), current_page=6, page_key='spec_page6')
+    owner_id, readonly, owner_name = resolve_viewer()
+    data = get_form_data('spec_page6', owner_id)
+    return render_template('spec_page6.html', data=data, username=session.get('name'), current_page=6,
+                            page_key='spec_page6', readonly=readonly, owner_name=owner_name, owner_id=owner_id)
 
 
 @app.route('/edit-form')
@@ -497,10 +534,9 @@ def save_form():
     if page_key not in VALID_PAGES:
         page_key = 'main'
 
-    store = session.get('form_store', {})
-    store[page_key] = payload
-    session['form_store'] = store
-    session.modified = True
+    # บันทึกลงฉบับร่างของ "ผู้ใช้ที่ login อยู่" เท่านั้นเสมอ (ไม่อ่านจาก payload/query
+    # string เด็ดขาด) เพื่อไม่ให้ใครแก้ไขทับฉบับร่างของคนอื่นได้
+    save_draft(session['user_id'], page_key, payload)
 
     return jsonify({'status': 'success', 'message': 'บันทึกแล้ว', 'page_key': page_key})
 

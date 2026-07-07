@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เพื่อนร่วมงาน</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+    <style>
+        .colleagues-wrap{ max-width:720px; margin:32px auto; padding:0 16px 60px; }
+        .colleagues-wrap h1{ font-family:THSarabunBold; color:#40275c; margin-bottom:4px; }
+        .colleagues-hint{ color:#777; margin-bottom:24px; }
+        .colleague-card{
+            display:flex; align-items:center; justify-content:space-between;
+            background:#fff; border-radius:14px; padding:16px 20px; margin-bottom:12px;
+            border:1px solid rgba(0,0,0,0.06); box-shadow:0 2px 10px rgba(0,0,0,0.05);
+        }
+        .colleague-name{ font-family:THSarabunBold; font-size:17pt; color:#2d1b3d; }
+        .colleague-pos{ color:#8a8a9a; font-size:14pt; }
+        .colleague-view{
+            text-decoration:none; padding:8px 18px; border-radius:999px;
+            background:linear-gradient(135deg, #6f24a6 0%, #b360d6 100%); color:#fff;
+            font-family:THSarabunBold; font-size:14pt;
+        }
+        .empty-note{ color:#8a8a9a; text-align:center; padding:40px 0; }
+        .colleagues-search{
+            width:100%; box-sizing:border-box; padding:10px 16px; margin-bottom:20px;
+            border:1px solid rgba(0,0,0,0.12); border-radius:999px; font-size:14pt;
+            font-family:THSarabunBold; color:#2d1b3d; outline:none;
+        }
+        .colleagues-search:focus{ border-color:#6f24a6; }
+    </style>
+</head>
+<body>
+<div class="colleagues-wrap">
+    <a class="back" href="/select" style="color:#40275c; font-family:THSarabunBold; text-decoration:none;">← เลือกประเภทเอกสาร</a>
+    <h1>เพื่อนร่วมงาน</h1>
+    <p class="colleagues-hint">ดูเอกสารที่เพื่อนร่วมงานกำลังจัดทำอยู่ได้ (ดูได้อย่างเดียว แก้ไขไม่ได้)</p>
+
+    {% if people %}
+        <input type="text" id="colleagueSearch" class="colleagues-search" placeholder="ค้นหาชื่อเพื่อนร่วมงาน..." oninput="filterColleagues(this.value)">
+        <div id="colleagueList">
+        {% for p in people %}
+        <div class="colleague-card" data-name="{{ p.name|lower }}">
+            <div>
+                <div class="colleague-name">{{ p.name }}</div>
+                <div class="colleague-pos">{{ p.position or '' }}</div>
+            </div>
+            <a class="colleague-view" href="/spec-page-1?user={{ p.id }}">ดูงาน →</a>
+        </div>
+        {% endfor %}
+        </div>
+        <p class="empty-note" id="noMatch" style="display:none;">ไม่พบเพื่อนร่วมงานที่ค้นหา</p>
+    {% else %}
+        <p class="empty-note">ยังไม่มีเพื่อนร่วมงานคนอื่นในระบบ</p>
+    {% endif %}
+</div>
+<script>
+function filterColleagues(query) {
+    var q = query.trim().toLowerCase();
+    var cards = document.querySelectorAll('#colleagueList .colleague-card');
+    var visibleCount = 0;
+    cards.forEach(function(card) {
+        var match = card.getAttribute('data-name').indexOf(q) !== -1;
+        card.style.display = match ? '' : 'none';
+        if (match) visibleCount++;
+    });
+    var noMatch = document.getElementById('noMatch');
+    if (noMatch) noMatch.style.display = visibleCount === 0 ? '' : 'none';
+}
+</script>
+</body>
+</html>

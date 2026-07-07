@@ -99,6 +99,18 @@ body{
     border-color:rgba(255,255,255,0.35);
 }
 
+/* ===== READONLY BANNER (ดูงานเพื่อนร่วมงาน) ===== */
+.readonly-banner{
+    width:100%;
+    text-align:center;
+    padding:10px 16px;
+    background:linear-gradient(90deg, #fff3cd 0%, #ffe9a8 100%);
+    color:#7a5c00;
+    font-family:THSarabunBold;
+    font-size:15pt;
+    border-bottom:1px solid rgba(122, 92, 0, 0.15);
+}
+
 /* ===== TOPBAR ===== */
 .topbar{
     width:100%;
@@ -297,7 +309,7 @@ a:hover{ color:#6f24a6; }
 /* ===== PRINT (กติกาการพิมพ์ที่ใช้ร่วมกันทุกหน้า) ===== */
 @media print {
     body{ background:white; padding:0; }
-    .no-print, .menu, .topbar{ display:none !important; }
+    .no-print, .menu, .topbar, .readonly-banner{ display:none !important; }
     .a4, .paper{
         margin:0; box-shadow:none; border:none; border-radius:0;
         width:21cm; min-height:auto;
