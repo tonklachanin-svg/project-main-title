@@ -33,6 +33,19 @@
             .no-print { display: none; }
             .p3-table, .p4-table { font-size: 12pt; }
 
+            /* หน้า 3 (รายงานขอจัดจ้าง) ในชุดพิมพ์รวม เดิมยาวเกิน 2 หน้าไปนิดเดียว ทำให้บล็อก
+               ลายเซ็นผู้เสนอ (signature_from) + ตาราง ชผ./พชง. ท้ายเอกสาร ซึ่งห้ามตัดกลาง
+               (page-break-inside:avoid) ถูกเขี่ยไปทั้งก้อนเป็นหน้าที่ 3 เกือบว่างเปล่าต่างหาก
+               (ตรวจด้วย Playwright PDF จริงพบหน้าที่เหลือแค่ตาราง ชผ./พชง. ตัวเดียว)
+               บีบระยะ/ระยะขอบของตาราง 2.1-2.2 และหัวข้อ 1-7 ลงเล็กน้อยตลอดทั้งหน้า
+               ให้เนื้อหาที่เหลือพอดีจบใน 2 หน้าเดิม ไม่ต้องเปิดหน้าที่ 3 อีกหน้า */
+            .p3-table td, .p3-table th { padding: 2px 6px !important; }
+            .p3-section-num { margin-top: 0.1cm !important; }
+            .p3-list { margin-top: 0.05cm !important; }
+            .printall-p3-signoff{ margin-top:0.15cm !important; page-break-inside:avoid; }
+            .ref-table.printall-p3-reftable{ margin-top:0.2cm !important; }
+            .p3-signoff-approve{ margin-top:0.4cm !important; }
+
             /* ภาคผนวกคุณสมบัติผู้เสนอราคาในหน้าพิมพ์รวม เดิมใช้ .paragraph ปกติ (เยื้อง 2.75cm,
                line-height ปกติ) ทำให้เนื้อหายาวเกิน 1 หน้าไปนิดเดียว (บรรทัด "หมายเหตุ" ท้ายสุด
                ล้นไปเป็นหน้าเกือบว่างเปล่าต่างหาก) บีบเฉพาะส่วนนี้ให้จบในหน้าเดียวเหมือนที่แก้ไว้
@@ -253,17 +266,17 @@
 
     <div class="paragraph mt12">{{ data3.closing }}</div>
 
-    <div class="approve" style="text-align:center; margin-top:1.2cm;">{{ data3.approve_text }}</div>
-    <div style="text-align:center; margin-top:0.3cm;">
+    <div class="approve p3-signoff-approve" style="text-align:center; margin-top:1.2cm;">{{ data3.approve_text }}</div>
+    <div class="printall-p3-signoff" style="text-align:center; margin-top:0.3cm;">
         <div>{{ data3.signature_approve }}</div>
         <div>{{ data3.position_approve }}</div>
     </div>
-    <div style="text-align:left; margin-top:0.6cm;">
+    <div class="printall-p3-signoff" style="text-align:left; margin-top:0.6cm;">
         <div>{{ data3.signature_from }}</div>
         <div>{{ data3.position_from }}</div>
     </div>
 
-    <div class="ref-table mt18">
+    <div class="ref-table printall-p3-reftable mt18">
         <table class="ref-table-box">
             <tr><td class="ref-label">ชผ.</td><td class="ref-sign">{{ session.get('supervisor_name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
             <tr><td class="ref-label">พชง.</td><td class="ref-sign">{{ session.get('name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
@@ -440,13 +453,10 @@
 </div>
 
 <div class="page-break"></div>
-<div class="a4">
-    <div class="p4-title">เอกสารแนบ 1</div>
-</div>
 
 {% for station in data4.station_areas %}
-<div class="page-break"></div>
 <div class="a4">
+    {% if loop.first %}<div class="p4-title">เอกสารแนบ 1</div>{% endif %}
     <div class="p4-section-num">{{ station.name }}</div>
     <div class="p4-list">พื้นที่ตัดหญ้า</div>
     <div class="p4-photo-grid">
@@ -454,24 +464,36 @@
         <img src="{{ img }}" alt="พื้นที่ตัดหญ้า {{ station.name }}">
         {% else %}
         <div class="p4-photo-placeholder">แนบรูปภาพพื้นที่ตัดหญ้า</div>
-        <div class="p4-photo-placeholder">แนบรูปภาพพื้นที่ตัดหญ้า</div>
         {% endfor %}
     </div>
-</div>
 
-<div class="page-break"></div>
-<div class="a4">
-    <div class="p4-section-num">{{ station.name }}</div>
     <div class="p4-list">พื้นที่ฉีดยากำจัดวัชพืช</div>
     <div class="p4-photo-grid">
         {% for img in station.spray_images %}
-        <img src="{{ img }}" alt="พื้นที่ฉีดยากำจัดวัชพืช {{ station.name }}">
+            {% if img.lower().endswith('.pdf') %}
+            <a class="p4-pdf-box" href="{{ img }}" target="_blank">
+                <span class="p4-pdf-icon">PDF</span>
+                <span>{{ img|display_filename }}</span>
+            </a>
+            {% elif img.lower().endswith(('.xls', '.xlsx')) %}
+            <a class="p4-pdf-box" href="{{ img }}" target="_blank">
+                <span class="p4-pdf-icon xls-icon">XLS</span>
+                <span>{{ img|display_filename }}</span>
+            </a>
+            {% elif img.lower().endswith(('.doc', '.docx')) %}
+            <a class="p4-pdf-box" href="{{ img }}" target="_blank">
+                <span class="p4-pdf-icon doc-icon">DOC</span>
+                <span>{{ img|display_filename }}</span>
+            </a>
+            {% else %}
+            <img src="{{ img }}" alt="พื้นที่ฉีดยากำจัดวัชพืช {{ station.name }}">
+            {% endif %}
         {% else %}
-        <div class="p4-photo-placeholder">แนบรูปภาพพื้นที่ฉีดยากำจัดวัชพืช</div>
         <div class="p4-photo-placeholder">แนบรูปภาพพื้นที่ฉีดยากำจัดวัชพืช</div>
         {% endfor %}
     </div>
 </div>
+{% if not loop.last %}<div class="page-break"></div>{% endif %}
 {% endfor %}
 
 <!-- ===================== หน้า 5: ขออนุมัติจ่ายเงิน (จ่ายรายงวด) ===================== -->

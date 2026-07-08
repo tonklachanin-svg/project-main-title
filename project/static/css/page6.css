@@ -114,3 +114,20 @@
 .ref-table-box tr:hover{
     background:none;
 }
+.p6-table thead,
+.p6-table thead tr,
+.p6-table thead th{
+    background: #fff !important;
+    color: #000 !important;
+}
+
+.p6-table th{
+    background: #fff !important;
+    color: #000 !important;
+    border: 1px solid #000 !important;
+}
+
+.p6-table td{
+    background: #fff !important;
+    color: #000 !important;
+}

@@ -4,93 +4,428 @@
 
 {% block page_style %}
 <style>
-    .edit-wrap{ max-width:900px; margin:24px auto; padding:0 16px 80px; }
-    .edit-card{
-        background:#fff; border-radius:16px; padding:24px 28px; margin-bottom:20px;
-        box-shadow:0 2px 12px rgba(0,0,0,0.06); border:1px solid rgba(0,0,0,0.05);
+    :root{
+        --pea-purple-dark: #3d1a52;
+        --pea-purple: #6f24a6;
+        --pea-violet: #8a2be2;
+        --pea-gold: #c9a24b;
+        --pea-gold-light: #e6cd8a;
+        --ink: #2d2438;
+        --ink-soft: #6b6178;
     }
-    .edit-card h2{
-        font-size:20px; color:#40275c; margin:0 0 16px; padding-bottom:10px;
-        border-bottom:2px solid rgba(111,36,166,0.13); font-family:THSarabunBold;
+
+    body{ padding-bottom: 0; }
+
+    .edit-page{ max-width: 1180px; margin: 0 auto; padding: 22px 20px 40px; }
+
+    /* ===== หัวเรื่อง เรียบ กระชับ ไม่แย่งซีนฟอร์ม ===== */
+    .edit-title-row{
+        display:flex; align-items:center; justify-content:space-between;
+        flex-wrap: wrap; gap: 10px;
+        margin-bottom: 18px;
     }
-    .edit-field{ margin-top:14px; }
-    .edit-field:first-child{ margin-top:0; }
-    .edit-field label{ display:block; margin-bottom:6px; font-family:THSarabunBold; color:#444; }
-    .edit-group{
-        border:1px dashed rgba(111,36,166,0.3); border-radius:10px; padding:14px 16px; margin-top:14px;
+    .edit-title-row h1{
+        font-family: THSarabunBold; font-size: 25pt; color: var(--pea-purple-dark);
+        margin: 0; display:flex; align-items:center; gap:10px;
     }
-    .edit-group-title{ font-family:THSarabunBold; color:#7b3fa8; margin-bottom:8px; }
-    .edit-row2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    .edit-note{ color:#8a8a9a; font-size:14pt; }
-    @media (max-width:640px){ .edit-row2{ grid-template-columns:1fr; } }
+    .edit-title-row h1 .badge-icon{
+        width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+        background: linear-gradient(135deg, var(--pea-purple) 0%, var(--pea-violet) 100%);
+        font-size:18pt; box-shadow:0 4px 12px rgba(111,36,166,0.3); flex-shrink:0;
+    }
+    .edit-title-row p{ margin: 2px 0 0 48px; color: var(--ink-soft); font-size: 14.5pt; }
+
+    /* ===== เลย์เอาต์หลัก: เนื้อหาฟอร์ม + เมนูลัดข้ามหัวข้อ (จอกว้าง) ===== */
+    .edit-layout{ display:grid; grid-template-columns: 1fr 220px; gap: 24px; align-items:start; }
+    .edit-toc{
+        position: sticky; top: 16px;
+        background: #fff; border-radius: 14px; padding: 14px 8px;
+        box-shadow: 0 8px 22px rgba(61,26,82,0.08); border: 1px solid rgba(111,36,166,0.08);
+        max-height: calc(100vh - 32px); overflow-y: auto;
+    }
+    .edit-toc-title{ font-family:THSarabunBold; color:var(--ink-soft); font-size:11.5pt; text-transform:uppercase; letter-spacing:1px; padding:4px 12px 8px; }
+    .edit-toc a{
+        display:block; padding:8px 12px; border-radius:9px; color:var(--ink); text-decoration:none;
+        font-size:14pt; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        border-left: 3px solid transparent; transition: all .15s ease;
+    }
+    .edit-toc a:hover{ background: rgba(111,36,166,0.08); border-left-color: var(--pea-purple-light, var(--pea-violet)); color:var(--pea-purple); }
+
+    /* ===== การ์ดฟอร์มหลัก: แผ่นเรียบสบายตา ไม่ทึบไม่หนัก ===== */
+    .edit-sheet{
+        background:#fff; border-radius:20px; padding:8px 30px 26px;
+        box-shadow: 0 16px 40px rgba(61,26,82,0.09), 0 2px 8px rgba(0,0,0,0.03);
+        border: 1px solid rgba(111,36,166,0.07);
+    }
+
+    /* กริดฟิลด์ระดับบนสุด: ช่องสั้นเรียงข้างกัน 2 คอลัมน์ ช่องยาว/กลุ่ม เต็มแถว */
+    .edit-grid{
+        display:grid; grid-template-columns: 1fr 1fr; gap: 4px 22px;
+        padding-top: 18px;
+    }
+    .edit-grid > .edit-field:has(textarea){ grid-column: 1 / -1; }
+    .edit-grid > details.edit-section{ grid-column: 1 / -1; }
+
+    .edit-field{ margin: 10px 0; }
+    .edit-field label{
+        display:block; margin-bottom:5px; font-family:THSarabunBold; color: var(--ink-soft); font-size:13pt;
+    }
+    .edit-field input[type=text], .edit-field textarea{
+        width:100%; box-sizing:border-box;
+        padding: 11px 14px; border-radius:11px; font-size:15.5pt; font-family:inherit;
+        border: 1.5px solid #e6e0ee; background: #fbfaff; color: var(--ink);
+        transition: all .18s ease;
+    }
+    .edit-field input[type=text]:hover, .edit-field textarea:hover{ border-color:#d7c9ea; }
+    .edit-field input[type=text]:focus, .edit-field textarea:focus{
+        outline:none; border-color: var(--pea-purple); background:#fff;
+        box-shadow: 0 0 0 4px rgba(111,36,166,0.10);
+    }
+    .edit-field textarea{ resize: vertical; min-height: 52px; overflow:hidden; line-height:1.5; }
+
+    /* ===== หัวข้อกลุ่ม (details/summary แบบพับได้) ===== */
+    details.edit-section{
+        margin: 18px 0 6px;
+        border: 1px solid rgba(111,36,166,0.12);
+        border-radius: 14px;
+        background: linear-gradient(180deg, rgba(111,36,166,0.025) 0%, rgba(111,36,166,0.01) 100%);
+        overflow: hidden;
+    }
+    details.edit-section > summary{
+        list-style:none; cursor:pointer; user-select:none;
+        display:flex; align-items:center; gap:10px;
+        padding: 13px 18px;
+        font-family: THSarabunBold; color: var(--pea-purple-dark); font-size:15.5pt;
+        border-bottom: 1px solid rgba(111,36,166,0.10);
+    }
+    details.edit-section > summary::-webkit-details-marker{ display:none; }
+    details.edit-section > summary::before{
+        content:'▸'; display:inline-block; color: var(--pea-purple); transition: transform .18s ease;
+        font-size: 12pt;
+    }
+    details.edit-section[open] > summary::before{ transform: rotate(90deg); }
+    details.edit-section > summary .count-badge{
+        margin-left:auto; background: rgba(111,36,166,0.12); color: var(--pea-purple);
+        font-family: THSarabunBold; font-size:11.5pt; padding:2px 10px; border-radius:999px;
+    }
+    details.edit-section > summary:hover{ background: rgba(111,36,166,0.05); }
+    details.edit-section .section-body{ padding: 14px 18px 6px; }
+    details.edit-section[open]{ }
+    /* กลุ่มย่อยที่ซ้อนอยู่ในกลุ่ม ให้พื้นเข้มขึ้นทีละนิด เพื่อบอกระดับชั้น */
+    details.edit-section details.edit-section{ background: rgba(111,36,166,0.045); }
+
+    /* รายการที่เป็น list ของอ็อบเจกต์ (เช่น ตารางสถานี) แสดงเป็นการ์ดย่อยเรียงกริด แทนสตริงยาวลงมา */
+    .tile-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+    .tile-card{
+        background:#fff; border:1px solid rgba(111,36,166,0.14); border-radius:12px;
+        padding: 10px 14px 6px; box-shadow: 0 3px 10px rgba(61,26,82,0.05);
+    }
+    .tile-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+    .tile-num{
+        display:inline-block; font-family:THSarabunBold; font-size:11.5pt; color:#fff;
+        background: linear-gradient(135deg, var(--pea-gold) 0%, var(--pea-gold-light) 100%);
+        padding:2px 11px; border-radius:999px;
+    }
+    .tile-remove{
+        border:none; background: rgba(200,40,40,0.10); color:#b0362f;
+        width:24px; height:24px; border-radius:50%; cursor:pointer; font-size:12pt; line-height:1;
+        display:flex; align-items:center; justify-content:center; transition: all .15s ease;
+    }
+    .tile-remove:hover{ background:#c0392b; color:#fff; }
+    .btn-add-row{
+        display:block; width:100%; margin-top:12px; padding:10px; text-align:center;
+        border:1.5px dashed rgba(111,36,166,0.35); border-radius:12px; background:transparent;
+        color: var(--pea-purple); font-family:THSarabunBold; font-size:14.5pt; cursor:pointer;
+        transition: all .15s ease;
+    }
+    .btn-add-row:hover{ background: rgba(111,36,166,0.06); border-color: var(--pea-purple); }
+
+    /* ===== ตัวจัดการรูปภาพแนบ (เช่น รูปพื้นที่ตัดหญ้า/ฉีดยา) ===== */
+    .image-manager{ margin-top:6px; }
+    .image-thumbs{ display:flex; flex-wrap:wrap; gap:12px; margin-bottom:10px; }
+    .image-thumb{
+        position:relative; width:130px; height:130px; border-radius:12px; overflow:hidden;
+        border:1px solid rgba(111,36,166,0.16); box-shadow:0 3px 10px rgba(61,26,82,0.08);
+    }
+    .image-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .image-thumb-pdf, .image-thumb-doc{
+        width:auto; height:auto; max-width:260px; border-radius:999px; background:#fff;
+        border:1px solid rgba(0,0,0,0.12); box-shadow:0 2px 6px rgba(61,26,82,0.08);
+        padding:6px 14px 6px 6px;
+    }
+    .pdf-thumb-link{
+        display:flex; flex-direction:row; align-items:center; justify-content:flex-start;
+        text-decoration:none; color:#2c2c2c; gap:8px;
+        font-size:11pt; font-family:THSarabunBold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .pdf-thumb-icon{
+        flex:none; display:flex; align-items:center; justify-content:center;
+        width:34px; height:24px; border-radius:6px; background:#e53935; color:#fff;
+        font-size:9pt; letter-spacing:.3px;
+    }
+    .pdf-thumb-icon.doc-icon{ background:#2b6fd6; }
+    .pdf-thumb-icon.xls-icon{ background:#2e9e5b; }
+    .image-remove{
+        position:absolute; top:5px; right:5px; border:none; width:24px; height:24px; border-radius:50%;
+        background: rgba(20,10,25,0.55); color:#fff; cursor:pointer; font-size:12pt; line-height:1;
+        display:flex; align-items:center; justify-content:center; transition: all .15s ease;
+    }
+    .image-remove:hover{ background:#c0392b; }
+    .btn-add-image{
+        display:inline-flex; align-items:center; gap:8px; padding:10px 20px;
+        border:1.5px dashed rgba(111,36,166,0.35); border-radius:999px; cursor:pointer;
+        color: var(--pea-purple); font-family:THSarabunBold; font-size:14.5pt; transition: all .15s ease;
+    }
+    .btn-add-image:hover{ background: rgba(111,36,166,0.06); border-color: var(--pea-purple); }
+    .image-upload-status{ margin-left:12px; font-size:13pt; color: var(--ink-soft); }
+
+    .edit-note{ color:#9a92a8; font-size:14pt; font-style:italic; }
+    .edit-note a{ color: var(--pea-purple); font-style:normal; font-family:THSarabunBold; }
+
+    /* ===== ฟิลด์/หัวข้อที่ล็อกไว้ (ดึงจาก "ข้อมูลกลาง" แก้ตรงนี้ไม่มีผล) ===== */
+    .lock-badge{
+        font-size:11pt; font-family:THSarabunBold; color:#8a6d1f;
+        background: rgba(201,162,75,0.18); padding:2px 10px; border-radius:999px; margin-left:8px;
+    }
+    details.edit-section-locked{ background: repeating-linear-gradient(135deg, rgba(0,0,0,0.015) 0 10px, transparent 10px 20px); }
+    details.edit-section-locked > summary{ color: var(--ink-soft); cursor:pointer; }
+    .locked-value{
+        padding: 11px 14px; border-radius:11px; font-size:15.5pt;
+        border: 1.5px dashed #e2dbe8; background: #f4f2f6; color: var(--ink-soft);
+        min-height: 1.6em;
+    }
+
+    /* ===== แถบบันทึก: ลอยติดล่างจอเสมอ กดง่ายแม้ฟอร์มยาวมาก ===== */
+    .save-dock{
+        position: sticky; bottom: 0; z-index: 20;
+        margin-top: 22px;
+        background: rgba(255,255,255,0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(111,36,166,0.12);
+        box-shadow: 0 -8px 24px rgba(61,26,82,0.08);
+        padding: 14px 30px; border-radius: 0 0 20px 20px;
+        display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    }
+    .save-dock .btn-save{
+        padding: 13px 32px; border:none; border-radius:999px;
+        background: linear-gradient(135deg, var(--pea-purple) 0%, var(--pea-violet) 100%); color:#fff;
+        font-family: THSarabunBold; font-size:16pt; cursor:pointer;
+        box-shadow: 0 6px 18px rgba(111,36,166,0.32); transition: all .2s ease;
+    }
+    .save-dock .btn-save:hover{ transform: translateY(-2px); box-shadow: 0 10px 22px rgba(111,36,166,0.4); }
+    .save-dock .btn-cancel{
+        padding: 12px 26px; border-radius:999px; text-decoration:none; text-align:center;
+        font-family: THSarabunBold; font-size:15pt; color: var(--pea-purple-dark);
+        border: 1.5px solid rgba(111,36,166,0.25); background:#fff; transition: all .2s ease;
+    }
+    .save-dock .btn-cancel:hover{ background: rgba(111,36,166,0.06); }
+    .save-msg{ font-family:THSarabunBold; font-size:14.5pt; }
+
+    @media (max-width: 980px){
+        .edit-layout{ grid-template-columns: 1fr; }
+        .edit-toc{ position:static; max-height:none; display:flex; flex-wrap:wrap; gap:4px; }
+        .edit-toc-title{ width:100%; }
+        .edit-toc a{ white-space:normal; }
+    }
+    @media (max-width: 640px){
+        .edit-grid{ grid-template-columns: 1fr; }
+        .edit-sheet{ padding: 6px 18px 20px; }
+        .edit-title-row p{ margin-left:0; }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="edit-wrap">
-    <h1 style="font-family:THSarabunBold; color:#40275c;">แก้ไขข้อมูลเอกสาร</h1>
-    <p style="color:#777; margin-bottom:20px;">แก้ไขแล้วกด "บันทึก" ด้านล่าง ระบบจะพาไปหน้าเอกสารที่แก้ไขให้ทันที</p>
+{% set locked_fields = locked_fields|default([]) %}
+<div class="edit-page">
 
-    <form id="editForm">
-        {% macro render_value(key, value, path) %}
-            {% if value is mapping %}
-                <div class="edit-group">
-                    <div class="edit-group-title">{{ key }}</div>
-                    {% for subkey, subval in value.items() %}
-                        {{ render_value(subkey, subval, path ~ '.' ~ subkey) }}
-                    {% endfor %}
-                </div>
-            {% elif value is sequence and value is not string %}
-                {% if value|length > 0 and value[0] is mapping %}
-                    <div class="edit-group">
-                        <div class="edit-group-title">{{ key }}</div>
-                        {% for item in value %}
-                            {% set row_index = loop.index0 %}
-                            <div class="edit-group">
-                                <div class="edit-group-title">{{ key }} #{{ loop.index }}</div>
-                                <div class="edit-row2">
-                                {% for subkey, subval in item.items() %}
-                                    <div class="edit-field">
-                                        <label>{{ subkey }}</label>
-                                        <input type="text" class="form-input" style="width:100%;"
-                                               data-path="{{ path }}.{{ row_index }}.{{ subkey }}"
-                                               value="{{ subval }}">
-                                    </div>
+    <div class="edit-title-row">
+        <div>
+            <h1><span class="badge-icon">✏️</span>แก้ไขข้อมูลเอกสาร</h1>
+            <p>แก้ไขแล้วกด "บันทึก" ด้านล่าง ระบบจะพาไปหน้าเอกสารที่แก้ไขให้ทันที · คลิกหัวข้อเพื่อพับ/ขยายส่วนนั้น</p>
+        </div>
+    </div>
+
+    <div class="edit-layout">
+        <form id="editForm">
+            <div class="edit-sheet">
+                {% macro render_value(key, value, path) %}
+                    {% if value is mapping %}
+                        <details class="edit-section" id="sec-{{ key }}" open>
+                            <summary>{{ key }}</summary>
+                            <div class="section-body edit-grid">
+                                {% for subkey, subval in value.items() %}
+                                    {{ render_value(subkey, subval, path ~ '.' ~ subkey) }}
                                 {% endfor %}
+                            </div>
+                        </details>
+                    {% elif value is sequence and value is not string %}
+                        {% if value|length > 0 and value[0] is mapping %}
+                            <details class="edit-section" id="sec-{{ key }}" open>
+                                <summary>{{ key }}<span class="count-badge js-count">{{ value|length }} รายการ</span></summary>
+                                <div class="section-body">
+                                    <div class="tile-grid js-list-group" data-list-path="{{ path }}">
+                                    {% for item in value %}
+                                        <div class="tile-card js-tile">
+                                            <div class="tile-head">
+                                                <span class="tile-num js-tile-num">#{{ loop.index }}</span>
+                                                <button type="button" class="tile-remove js-remove-tile" title="ลบรายการนี้">✕</button>
+                                            </div>
+                                            {% for subkey, subval in item.items() %}
+                                                {% if subval is sequence and subval is not string %}
+                                                    <div class="edit-field">
+                                                        <label>{{ subkey }}</label>
+                                                        <div class="image-manager js-image-group" data-sub-key="{{ subkey }}">
+                                                            <div class="image-thumbs js-image-thumbs">
+                                                                {% for url in subval %}
+                                                                <div class="image-thumb{% if url.lower().endswith('.pdf') %} image-thumb-pdf{% elif url.lower().endswith(('.doc', '.docx', '.xls', '.xlsx')) %} image-thumb-doc{% endif %} js-image-thumb" data-value="{{ url }}">
+                                                                    {% if url.lower().endswith('.pdf') %}
+                                                                    <a href="{{ url }}" target="_blank" class="pdf-thumb-link"><span class="pdf-thumb-icon">PDF</span><span>{{ url|display_filename }}</span></a>
+                                                                    {% elif url.lower().endswith(('.xls', '.xlsx')) %}
+                                                                    <a href="{{ url }}" target="_blank" class="pdf-thumb-link"><span class="pdf-thumb-icon xls-icon">XLS</span><span>{{ url|display_filename }}</span></a>
+                                                                    {% elif url.lower().endswith(('.doc', '.docx')) %}
+                                                                    <a href="{{ url }}" target="_blank" class="pdf-thumb-link"><span class="pdf-thumb-icon doc-icon">DOC</span><span>{{ url|display_filename }}</span></a>
+                                                                    {% else %}
+                                                                    <img src="{{ url }}" alt="">
+                                                                    {% endif %}
+                                                                    <button type="button" class="image-remove js-remove-image" title="ลบไฟล์นี้">✕</button>
+                                                                </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                            {% if subkey == 'mow_images' %}
+                                                            <label class="btn-add-image">
+                                                                📎 แนบรูปภาพ
+                                                                <input type="file" accept="image/*" class="js-image-input" hidden>
+                                                            </label>
+                                                            {% elif subkey == 'spray_images' %}
+                                                            <label class="btn-add-image">
+                                                                📎 แนบเอกสาร (PDF/Word/Excel)
+                                                                <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="js-image-input" hidden>
+                                                            </label>
+                                                            {% else %}
+                                                            <label class="btn-add-image">
+                                                                📎 แนบรูปภาพ/PDF
+                                                                <input type="file" accept="image/*,application/pdf" class="js-image-input" hidden>
+                                                            </label>
+                                                            {% endif %}
+                                                            <span class="image-upload-status js-image-status"></span>
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="edit-field">
+                                                        <label>{{ subkey }}</label>
+                                                        <input type="text" data-subkey="{{ subkey }}" value="{{ subval }}">
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    {% endfor %}
+                                    </div>
+                                    <button type="button" class="btn-add-row js-add-tile">+ เพิ่มรายการ</button>
+                                </div>
+                            </details>
+                        {% else %}
+                            <div class="edit-field">
+                                <label>{{ key }}</label>
+                                <div class="image-manager js-image-group" data-list-path="{{ path }}">
+                                    <div class="image-thumbs js-image-thumbs">
+                                        {% for url in value %}
+                                        <div class="image-thumb{% if url.lower().endswith('.pdf') %} image-thumb-pdf{% elif url.lower().endswith(('.doc', '.docx', '.xls', '.xlsx')) %} image-thumb-doc{% endif %} js-image-thumb" data-value="{{ url }}">
+                                            {% if url.lower().endswith('.pdf') %}
+                                            <a href="{{ url }}" target="_blank" class="pdf-thumb-link"><span class="pdf-thumb-icon">PDF</span><span>{{ url|display_filename }}</span></a>
+                                            {% elif url.lower().endswith(('.xls', '.xlsx')) %}
+                                            <a href="{{ url }}" target="_blank" class="pdf-thumb-link"><span class="pdf-thumb-icon xls-icon">XLS</span><span>{{ url|display_filename }}</span></a>
+                                            {% elif url.lower().endswith(('.doc', '.docx')) %}
+                                            <a href="{{ url }}" target="_blank" class="pdf-thumb-link"><span class="pdf-thumb-icon doc-icon">DOC</span><span>{{ url|display_filename }}</span></a>
+                                            {% else %}
+                                            <img src="{{ url }}" alt="">
+                                            {% endif %}
+                                            <button type="button" class="image-remove js-remove-image" title="ลบไฟล์นี้">✕</button>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <label class="btn-add-image">
+                                        📎 แนบรูปภาพ/PDF
+                                        <input type="file" accept="image/*,application/pdf" class="js-image-input" hidden>
+                                    </label>
+                                    <span class="image-upload-status js-image-status"></span>
                                 </div>
                             </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="edit-field">
-                        <label>{{ key }}</label>
-                        <p class="edit-note">รายการรูปภาพ/ข้อมูลชนิดนี้ยังไม่รองรับการแก้ไขผ่านฟอร์มนี้ (ค่าเดิมจะยังถูกเก็บไว้ไม่หายไป)</p>
-                    </div>
-                {% endif %}
-            {% else %}
-                <div class="edit-field">
-                    <label>{{ key }}</label>
-                    {% if value|string|length > 60 %}
-                        <textarea class="form-textarea" data-path="{{ path }}">{{ value }}</textarea>
+                        {% endif %}
                     {% else %}
-                        <input type="text" class="form-input" style="width:100%;" data-path="{{ path }}" value="{{ value }}">
+                        <div class="edit-field">
+                            <label>{{ key }}</label>
+                            {% if value|string|length > 60 %}
+                                <textarea class="auto-grow" data-path="{{ path }}">{{ value }}</textarea>
+                            {% else %}
+                                <input type="text" data-path="{{ path }}" value="{{ value }}">
+                            {% endif %}
+                        </div>
                     {% endif %}
+                {% endmacro %}
+
+                {% macro render_locked(key, value) %}
+                    {% if value is mapping or (value is sequence and value is not string and value|length > 0 and value[0] is mapping) %}
+                        <details class="edit-section edit-section-locked" id="sec-{{ key }}">
+                            <summary>{{ key }}<span class="lock-badge">🔒 ใช้ร่วมกันหลายหน้า</span></summary>
+                            <div class="section-body">
+                                <p class="edit-note">ข้อมูลชุดนี้ดึงมาจากหน้า "ข้อมูลกลาง" ใช้ร่วมกับหน้าอื่นด้วย แก้ตรงนี้จะไม่ถูกบันทึก (ค่าจะถูกดึงจากข้อมูลกลางทับใหม่ทุกครั้งที่เปิดหน้า) — <a href="/edit-common-data">ไปแก้ที่หน้าข้อมูลกลาง</a></p>
+                                {% if value is mapping %}
+                                    <div class="edit-grid">
+                                        {% for subkey, subval in value.items() %}
+                                            <div class="edit-field"><label>{{ subkey }}</label><div class="locked-value">{{ subval }}</div></div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="tile-grid">
+                                    {% for item in value %}
+                                        <div class="tile-card">
+                                            <span class="tile-num">#{{ loop.index }}</span>
+                                            {% for subkey, subval in item.items() %}
+                                                <div class="edit-field"><label>{{ subkey }}</label><div class="locked-value">{{ subval }}</div></div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </details>
+                    {% else %}
+                        <div class="edit-field">
+                            <label>{{ key }} <span class="lock-badge">🔒</span></label>
+                            <div class="locked-value">{{ value }}</div>
+                            <p class="edit-note">ใช้ร่วมกันหลายหน้า แก้ไขได้ที่ <a href="/edit-common-data">หน้าข้อมูลกลาง</a></p>
+                        </div>
+                    {% endif %}
+                {% endmacro %}
+
+                <div class="edit-grid">
+                    {% for key, value in data.items() %}
+                        {% if key in locked_fields %}
+                            {{ render_locked(key, value) }}
+                        {% else %}
+                            {{ render_value(key, value, key) }}
+                        {% endif %}
+                    {% endfor %}
                 </div>
-            {% endif %}
-        {% endmacro %}
+            </div>
 
-        <div class="edit-card">
+            <div class="save-dock">
+                <button type="submit" class="btn-save">💾 บันทึก</button>
+                <a href="/spec-page-1" class="btn-cancel">ยกเลิก</a>
+                <span id="saveMsg" class="save-msg"></span>
+            </div>
+        </form>
+
+        <nav class="edit-toc">
+            <div class="edit-toc-title">หัวข้อในหน้านี้</div>
             {% for key, value in data.items() %}
-                {{ render_value(key, value, key) }}
+                {% if value is mapping or (value is sequence and value is not string and value|length > 0 and value[0] is mapping) %}
+                    <a href="#sec-{{ key }}">{{ key }}{% if key in locked_fields %} 🔒{% endif %}</a>
+                {% endif %}
             {% endfor %}
-        </div>
+        </nav>
+    </div>
 
-        <div class="form-actions">
-            <button type="submit" class="btn-save">บันทึก</button>
-            <a href="/spec-page-1" class="btn-reset" style="text-decoration:none; display:inline-flex; align-items:center;">ยกเลิก</a>
-        </div>
-        <p id="saveMsg" style="text-align:center; margin-top:12px;"></p>
-    </form>
 </div>
 
 <script id="original-data" type="application/json">{{ data | tojson }}</script>
@@ -111,12 +446,168 @@
         cur[last] = value;
     }
 
+    // ขยายกล่องข้อความยาวให้สูงพอดีเนื้อหาอัตโนมัติ ไม่ต้องลากขอบเอง
+    function autoGrow(el){
+        el.style.height = 'auto';
+        el.style.height = (el.scrollHeight + 2) + 'px';
+    }
+    document.querySelectorAll('textarea.auto-grow').forEach(function(el){
+        autoGrow(el);
+        el.addEventListener('input', function(){ autoGrow(el); });
+    });
+
+    function renumberTiles(group){
+        group.querySelectorAll(':scope > .js-tile').forEach(function(tile, i){
+            const numEl = tile.querySelector('.js-tile-num');
+            if (numEl) numEl.textContent = '#' + (i + 1);
+        });
+        const section = group.closest('details.edit-section');
+        const countEl = section ? section.querySelector('.js-count') : null;
+        if (countEl) countEl.textContent = group.querySelectorAll(':scope > .js-tile').length + ' รายการ';
+    }
+
+    function escapeHtml(s){
+        return s.replace(/[&<>"']/g, function(c){
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+        });
+    }
+
+    function displayFilenameFromUrl(url){
+        let name = url.split('/').pop();
+        try { name = decodeURIComponent(name); } catch(e){}
+        const m = name.match(/^[0-9a-f]{32}_(.+)$/);
+        return m ? m[1] : name;
+    }
+
+    function addImageThumb(group, url){
+        const thumbs = group.querySelector('.js-image-thumbs');
+        const div = document.createElement('div');
+        const isPdf = url.toLowerCase().endsWith('.pdf');
+        const isXls = /\.(xls|xlsx)$/i.test(url);
+        const isDoc = /\.(doc|docx)$/i.test(url);
+        const label = escapeHtml(displayFilenameFromUrl(url));
+        div.className = 'image-thumb js-image-thumb' + (isPdf ? ' image-thumb-pdf' : ((isXls || isDoc) ? ' image-thumb-doc' : ''));
+        div.setAttribute('data-value', url);
+        const preview = isPdf
+            ? '<a href="' + url + '" target="_blank" class="pdf-thumb-link"><span class="pdf-thumb-icon">PDF</span><span>' + label + '</span></a>'
+            : isXls
+                ? '<a href="' + url + '" target="_blank" class="pdf-thumb-link"><span class="pdf-thumb-icon xls-icon">XLS</span><span>' + label + '</span></a>'
+                : isDoc
+                    ? '<a href="' + url + '" target="_blank" class="pdf-thumb-link"><span class="pdf-thumb-icon doc-icon">DOC</span><span>' + label + '</span></a>'
+                    : '<img src="' + url + '" alt="">';
+        div.innerHTML = preview + '<button type="button" class="image-remove js-remove-image" title="ลบไฟล์นี้">✕</button>';
+        thumbs.appendChild(div);
+    }
+
+    // เพิ่ม/ลบแถวตาราง, ลบรูปภาพ — ใช้ event delegation รองรับปุ่มที่สร้างใหม่ระหว่างทางด้วย
+    document.addEventListener('click', function(e){
+        const addBtn = e.target.closest('.js-add-tile');
+        if (addBtn){
+            const group = addBtn.closest('.section-body').querySelector('.js-list-group');
+            const lastTile = group.querySelector(':scope > .js-tile:last-child');
+            if (lastTile){
+                const newTile = lastTile.cloneNode(true);
+                newTile.querySelectorAll('input').forEach(function(inp){ inp.value = ''; });
+                // แถวใหม่ไม่ควรมีรูปภาพติดมาจากแถวที่ก็อปมา เริ่มจากคลังรูปว่างเสมอ
+                newTile.querySelectorAll('.js-image-thumb').forEach(function(t){ t.remove(); });
+                group.appendChild(newTile);
+                renumberTiles(group);
+                newTile.scrollIntoView({behavior:'smooth', block:'center'});
+                const firstInput = newTile.querySelector('input');
+                if (firstInput) firstInput.focus();
+            }
+            return;
+        }
+        const removeTileBtn = e.target.closest('.js-remove-tile');
+        if (removeTileBtn){
+            const tile = removeTileBtn.closest('.js-tile');
+            const group = tile.closest('.js-list-group');
+            if (group.querySelectorAll(':scope > .js-tile').length <= 1){
+                alert('ต้องมีอย่างน้อย 1 รายการ');
+                return;
+            }
+            tile.remove();
+            renumberTiles(group);
+            return;
+        }
+        const removeImgBtn = e.target.closest('.js-remove-image');
+        if (removeImgBtn){
+            removeImgBtn.closest('.js-image-thumb').remove();
+            return;
+        }
+    });
+
+    // อัปโหลดรูปทันทีที่เลือกไฟล์ ได้ URL กลับมาก็แปะ thumbnail เพิ่มเข้าไปเลย
+    // (ตัวไฟล์จริงจะถูกบันทึกจริงตอนกด "บันทึก" ของฟอร์มนี้ ไปเก็บ URL รวมกับข้อมูลหน้านั้น)
+    document.addEventListener('change', function(e){
+        if (!e.target.matches('.js-image-input')) return;
+        const input = e.target;
+        const group = input.closest('.js-image-group');
+        const statusEl = group.querySelector('.js-image-status');
+        const file = input.files[0];
+        if (!file) return;
+
+        statusEl.textContent = 'กำลังอัปโหลด...';
+        const fd = new FormData();
+        fd.append('image', file);
+        fd.append('field', group.getAttribute('data-sub-key') || '');
+        fetch('/api/upload-image', { method: 'POST', body: fd })
+            .then(function(r){ return r.json(); })
+            .then(function(res){
+                if (res.status === 'success'){
+                    addImageThumb(group, res.url);
+                    statusEl.textContent = '';
+                } else {
+                    statusEl.textContent = res.message || 'อัปโหลดไม่สำเร็จ';
+                }
+            })
+            .catch(function(){ statusEl.textContent = 'เกิดข้อผิดพลาดในการอัปโหลด'; });
+        input.value = '';
+    });
+
     document.getElementById('editForm').addEventListener('submit', function(e){
         e.preventDefault();
         const merged = JSON.parse(JSON.stringify(baseData));
-        document.querySelectorAll('[data-path]').forEach(function(el){
+
+        // ฟิลด์ธรรมดา (ข้อความ/ย่อหน้า/ค่าที่อยู่ในกลุ่ม dict) — ตรงไปตรงมาตามพาธเดิม
+        document.querySelectorAll('input[data-path], textarea[data-path]').forEach(function(el){
             setPath(merged, el.getAttribute('data-path'), el.value);
         });
+
+        // ตารางที่เพิ่ม/ลบแถวได้ — สร้างอาร์เรย์ใหม่จากการ์ดที่เหลืออยู่จริงใน DOM ตามลำดับ
+        // (ไม่ใช้ข้อมูลเดิมจาก baseData เลย เพื่อให้แถวที่ถูกลบหายไปจริง ๆ ตอนบันทึก)
+        document.querySelectorAll('.js-list-group').forEach(function(group){
+            const listPath = group.getAttribute('data-list-path');
+            const items = [];
+            group.querySelectorAll(':scope > .js-tile').forEach(function(tile){
+                const obj = {};
+                tile.querySelectorAll('[data-subkey]').forEach(function(inp){
+                    obj[inp.getAttribute('data-subkey')] = inp.value;
+                });
+                // ฟิลด์รูปภาพที่ซ้อนอยู่ในแถว (เช่น mow_images/spray_images ของแต่ละสถานี)
+                tile.querySelectorAll('.js-image-group[data-sub-key]').forEach(function(imgGroup){
+                    const subKey = imgGroup.getAttribute('data-sub-key');
+                    const urls = [];
+                    imgGroup.querySelectorAll(':scope > .js-image-thumbs > .js-image-thumb').forEach(function(thumb){
+                        urls.push(thumb.getAttribute('data-value'));
+                    });
+                    obj[subKey] = urls;
+                });
+                items.push(obj);
+            });
+            setPath(merged, listPath, items);
+        });
+
+        // รูปภาพที่แนบ/ลบ (ฟิลด์รูประดับบนสุด ถ้ามี) — สร้างอาร์เรย์ URL ใหม่จาก thumbnail ที่เหลืออยู่จริงใน DOM
+        document.querySelectorAll('.js-image-group[data-list-path]').forEach(function(group){
+            const listPath = group.getAttribute('data-list-path');
+            const urls = [];
+            group.querySelectorAll(':scope > .js-image-thumbs > .js-image-thumb').forEach(function(thumb){
+                urls.push(thumb.getAttribute('data-value'));
+            });
+            setPath(merged, listPath, urls);
+        });
+
         merged._page_key = pageKey;
 
         fetch('/api/save-form', {
@@ -135,16 +626,20 @@
                     'spec_page3': '/spec-page-3', 'report': '/report', 'spec_page4': '/spec-page-4',
                     'spec_page5': '/spec-page-5', 'spec_page6': '/spec-page-6'
                 };
+                sessionStorage.setItem('toastMessage', 'แก้ไขสำเร็จ');
+                sessionStorage.setItem('toastType', 'success');
                 setTimeout(function(){ window.location.href = routeMap[res.page_key] || '/select'; }, 600);
             } else {
                 msg.textContent = 'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง';
                 msg.style.color = '#c53030';
+                showToast('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง', 'error');
             }
         })
         .catch(function(){
             const msg = document.getElementById('saveMsg');
             msg.textContent = 'เกิดข้อผิดพลาดในการบันทึก';
             msg.style.color = '#c53030';
+            showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
         });
     });
 })();

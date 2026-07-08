@@ -193,3 +193,19 @@
     .p3-appendix-page .p3-lead{ margin-top:0.02cm; line-height:1.0 !important; }
     .p3-appendix-page .p3-note-label{ margin-top:0.1cm !important; }
 }
+.p3-table thead th{
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #000000 !important;
+}
+
+.p3-table th{
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #000000 !important;
+}
+
+.p3-table td{
+    background: #ffffff !important;
+    color: #000000 !important;
+}

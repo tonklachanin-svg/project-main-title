@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from functools import wraps
 import os
+import re
+import uuid
+import urllib.parse
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_session import Session
@@ -13,6 +16,43 @@ from document_drafts import get_draft, save_draft
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'pea2569-xK9mQ')
+
+# โฟลเดอร์เก็บไฟล์รูปที่แนบผ่านฟอร์มแก้ไข (เช่น รูปพื้นที่ตัดหญ้า/ฉีดยาในหน้า 4)
+# เก็บตัวไฟล์จริงไว้บนดิสก์ ส่วนพาธของรูป (string) จะถูกเก็บลง MySQL ผ่าน
+# document_drafts.data_json เหมือนข้อมูลฟิลด์อื่น ๆ ของหน้านั้น
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static', 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+ALLOWED_IMAGE_EXT = {'jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf'}
+
+# ข้อจำกัดชนิดไฟล์เฉพาะบางฟิลด์: mow_images รับเฉพาะรูปภาพ, spray_images รับเฉพาะเอกสาร
+# (ฟิลด์อื่นที่ไม่ระบุในนี้ยังใช้ ALLOWED_IMAGE_EXT เดิม คือรูปภาพ + PDF)
+FIELD_ALLOWED_EXT = {
+    'mow_images': {'jpg', 'jpeg', 'png', 'gif', 'webp'},
+    'spray_images': {'pdf', 'doc', 'docx', 'xls', 'xlsx'},
+}
+app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024  # จำกัดไฟล์แนบไม่เกิน 8MB ต่อไฟล์
+
+# ชื่อไฟล์ที่เซฟลงดิสก์จริงคือ "<uuid สุ่ม 32 ตัวอักษร>_<ชื่อไฟล์เดิม>" เพื่อกันชนกัน
+# แต่ยังเก็บชื่อไฟล์เดิม (รวมภาษาไทย) ไว้ด้วย จะได้เอามาโชว์ในฟอร์ม/หน้าเอกสารได้
+_UUID_PREFIX_RE = re.compile(r'^[0-9a-f]{32}_')
+
+
+def sanitize_original_filename(name):
+    """ตัดเฉพาะส่วนที่เป็น path/อักขระที่ใช้ในชื่อไฟล์ไม่ได้ออก ส่วนภาษาไทย/ยูนิโค้ด
+    อื่น ๆ คงไว้เหมือนเดิม (ไม่ใช้ werkzeug.secure_filename เพราะมันตัดอักษรไทยทิ้งหมด)
+    """
+    name = os.path.basename(name)
+    name = re.sub(r'[\\/:*?"<>|\x00-\x1f]', '_', name)
+    return name[-150:] or 'file'
+
+
+def display_filename(url):
+    """ดึงชื่อไฟล์เดิมที่ผู้ใช้อัปโหลดออกมาจาก URL ที่เก็บไว้ (ตัด uuid prefix ทิ้ง)"""
+    name = urllib.parse.unquote(url.rsplit('/', 1)[-1])
+    return _UUID_PREFIX_RE.sub('', name, count=1)
+
+
+app.jinja_env.filters['display_filename'] = display_filename
 
 # เก็บ session ฝั่งเซิร์ฟเวอร์แทน cookie ฝั่งไคลเอนต์ (เดิมติดตั้ง Flask-Session ไว้แล้ว
 # แต่ไม่เคยเปิดใช้งานจริง) เพราะ form_store เก็บฉบับร่างของทั้งเอกสาร ขนาดใหญ่เกินกว่า
@@ -325,14 +365,36 @@ DEFAULT_DATA_PAGE6 = {
 # รายชื่อหน้าเอกสารที่แก้ไขแยกชุดกันได้
 VALID_PAGES = ['main', 'spec_page1', 'spec_page2', 'report', 'spec_page3', 'spec_page4', 'spec_page5', 'spec_page6']
 
+# ฟิลด์ระดับบนสุดที่ apply_common_data() เขียนทับทุกครั้งที่โหลดหน้า (ดึงจาก "ข้อมูลกลาง")
+# แก้ผ่านฟอร์มแก้ไขเนื้อหาของหน้านั้นตรง ๆ ไม่มีผล เพราะโหลดครั้งถัดไปจะถูกเขียนทับกลับ
+# ต้องไปแก้ที่หน้า "ข้อมูลกลาง" แทน — ใช้รายการนี้บอกฟอร์มแก้ไขไม่ให้เปิดแก้ไขฟิลด์เหล่านี้
+# ตรงๆ (กันสับสนว่า "แก้ไปแล้วทำไมไม่เซฟ")
+COMMON_DATA_LOCKED_FIELDS = {
+    'main': ['signature_from', 'from', 'to', 'position_from', 'dept_name', 'dept_tel'],
+    'spec_page1': ['signature_from', 'from', 'to', 'position_from', 'dept_name', 'dept_tel'],
+    'spec_page2': ['signature_from', 'from', 'to', 'position_from', 'dept_name', 'dept_tel'],
+    'spec_page3': ['signature_from', 'from', 'to', 'dept_name', 'dept_phone', 'committee'],
+    'spec_page5': ['dept', 'tel', 'committee'],
+    'spec_page6': ['dept', 'tel'],
+}
+
 
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if 'user_id' not in session:
+            if request.path.startswith('/api/'):
+                return jsonify({'status': 'error', 'message': 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่'}), 401
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return decorated
+
+
+@app.errorhandler(413)
+def handle_file_too_large(e):
+    if request.path.startswith('/api/'):
+        return jsonify({'status': 'error', 'message': 'ไฟล์มีขนาดใหญ่เกินไป (จำกัดไม่เกิน 8MB ต่อไฟล์)'}), 413
+    return e
 
 
 # กำหนดชุดข้อมูล default ของแต่ละหน้าไว้ในที่เดียว เพื่อให้ดูแลง่ายเมื่อมีหน้าเพิ่มในอนาคต
@@ -450,14 +512,14 @@ def spec_print_all():
 @login_required
 def main():
     data = get_form_data('main')
-    return render_template('spec_page1.html', data=data, username=session.get('name'))
+    return render_template('spec_page1.html', data=data, username=session.get('name'), page_key='main')
 
 
 @app.route('/report')
 @login_required
 def report():
     data = get_form_data('report')
-    return render_template('report.html', data=data, username=session.get('name'))
+    return render_template('report.html', data=data, username=session.get('name'), page_key='report')
 
 
 @app.route('/spec-page-1')
@@ -523,7 +585,9 @@ def edit_form():
         page_key = 'main'
 
     data = get_form_data(page_key)
-    return render_template('edit_form.html', data=data, username=session.get('name'), page_key=page_key)
+    locked_fields = COMMON_DATA_LOCKED_FIELDS.get(page_key, [])
+    return render_template('edit_form.html', data=data, username=session.get('name'), page_key=page_key,
+                            locked_fields=locked_fields)
 
 
 @app.route('/api/save-form', methods=['POST'])
@@ -539,6 +603,32 @@ def save_form():
     save_draft(session['user_id'], page_key, payload)
 
     return jsonify({'status': 'success', 'message': 'บันทึกแล้ว', 'page_key': page_key})
+
+
+@app.route('/api/upload-image', methods=['POST'])
+@login_required
+def upload_image():
+    """รับไฟล์รูปแนบ (เช่น รูปพื้นที่ตัดหญ้า/ฉีดยาในหน้า 4) บันทึกลงดิสก์ที่
+    static/uploads/ ด้วยชื่อสุ่มกันชนกัน แล้วคืน URL กลับไปให้ฝั่งฟอร์มเก็บพาธนี้
+    ไว้ในข้อมูลของหน้า (ไปบันทึกจริงตอนกด "บันทึก" ผ่าน /api/save-form ตามปกติ)
+    """
+    file = request.files.get('image')
+    if not file or file.filename == '':
+        return jsonify({'status': 'error', 'message': 'ไม่พบไฟล์รูปภาพ'}), 400
+
+    field = request.form.get('field', '')
+    allowed_ext = FIELD_ALLOWED_EXT.get(field, ALLOWED_IMAGE_EXT)
+
+    ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+    if ext not in allowed_ext:
+        return jsonify({'status': 'error', 'message': f'รองรับเฉพาะไฟล์นามสกุล {", ".join(sorted(allowed_ext))}'}), 400
+
+    original_name = sanitize_original_filename(file.filename)
+    filename = f"{uuid.uuid4().hex}_{original_name}"
+    file.save(os.path.join(UPLOAD_FOLDER, filename))
+    url = url_for('static', filename=f'uploads/{filename}')
+
+    return jsonify({'status': 'success', 'url': url})
 
 
 @app.route('/edit-common-data', methods=['GET', 'POST'])

@@ -22,32 +22,95 @@
 .p4-title{ text-align:center; font-family:THSarabunBold; font-size:18pt; margin-bottom:0.3cm; }
 .p4-signblock{ text-align:center; margin-top:0.6cm; }
 
-/* เดิม placeholder สูงแค่ 4.5cm ทำให้หน้าแนบรูปภาพ (ตอนยังไม่ได้แนบรูปจริง)
-   ดูโล่งว่างเปล่าเกือบทั้งหน้า (เหลือพื้นที่พิมพ์ได้อีกเกือบ 20cm) ขยายให้เต็มหน้ามากขึ้น */
+/* รูป/PDF ที่แนบเข้ามา ไม่ว่าไฟล์ต้นฉบับจะขนาดเท่าไหร่ ครอบตัด (object-fit:cover) ให้เป็น
+   กรอบขนาดคงที่เดียวกันเสมอ 7.17 x 5.29 ซม. และใช้ auto-fill แทน repeat(2,1fr) เดิม
+   เพื่อไม่ให้ตายตัวแค่ 2 ช่องต่อแถว — แนบกี่ไฟล์ก็ได้ ไหลขึ้นแถวใหม่เองอัตโนมัติ */
 .p4-photo-grid{
     display:grid;
-    grid-template-columns:repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fill, 7.17cm);
     gap:10px;
     margin:0.5cm 0 0.6cm 0;
 }
 .p4-photo-grid img{
-    width:100%;
-    height:15cm;
+    width:7.17cm;
+    height:5.29cm;
     border:1px solid #aaa;
     object-fit:cover;
 }
 .p4-photo-placeholder{
+    width:7.17cm;
+    height:5.29cm;
+    box-sizing:border-box;
     border:1px dashed #999;
-    min-height:15cm;
     display:flex;
     align-items:center;
     justify-content:center;
     color:#999;
     font-size:12pt;
     text-align:center;
-    padding:0.5cm;
+    padding:0.3cm;
 }
+.p4-pdf-box{
+    width:7.17cm;
+    height:auto;
+    box-sizing:border-box;
+    border:1px solid #ccc;
+    border-radius:999px;
+    background:#fff;
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    justify-content:flex-start;
+    gap:0.25cm;
+    color:#333;
+    font-size:11pt;
+    text-align:left;
+    padding:0.15cm 0.35cm 0.15cm 0.15cm;
+    text-decoration:none;
+    overflow:hidden;
+}
+.p4-pdf-box span:last-child{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.p4-pdf-box .p4-pdf-icon{
+    flex:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:1.2cm;
+    height:0.6cm;
+    padding:0 0.2cm;
+    border-radius:0.15cm;
+    background:#e53935;
+    color:#fff;
+    font-family:THSarabunBold;
+    font-size:10pt;
+    letter-spacing:.5px;
+}
+.p4-pdf-box .p4-pdf-icon.doc-icon{ background:#2b6fd6; }
+.p4-pdf-box .p4-pdf-icon.xls-icon{ background:#2e9e5b; }
 
 @media print {
     .p4-table{ font-size:12pt; }
+}
+.p4-table,
+.p4-table thead,
+.p4-table tbody,
+.p4-table tfoot,
+.p4-table tr,
+.p4-table th,
+.p4-table td{
+    background: #fff !important;
+    color: #000 !important;
+}
+
+.p4-table th,
+.p4-table td{
+    border: 1px solid #555 !important;
+}
+
+.p4-table tbody tr:hover{
+    background: #fff !important;
 }

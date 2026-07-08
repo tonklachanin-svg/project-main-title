@@ -16,25 +16,41 @@
 <div class="readonly-banner">🔒 กำลังดูงานของ {{ owner_name }}</div>
 {% endif %}
 
+{% set nav_pages = [
+    (1, '/spec-page-1', 'ขอความเห็นชอบ', '1.หนังสือขอความเห็นชอบดำเนินการตัดหญ้า'),
+    (2, '/spec-page-2', 'มอบหมายจัดทำ', '2.มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ'),
+    (3, '/spec-page-3', 'รายงานขอจัดจ้าง', '3.รายงานขอจัดจ้างตัดหญ้าและฉีดยา ททร.1(1)แผนก'),
+    (4, '/spec-page-4', 'ใบสั่งจ้าง', '4.รายงาน ใบสั่งจ้างตัดหญ้า หน่วย พค 68 แบบแผน'),
+    (5, '/spec-page-5', 'จ่ายรายงวด', '5.จ่ายรายงวด ขออนุมัติจ่ายเงินค่าจ้างทำความสะอาด'),
+    (6, '/spec-page-6', 'ใบสำคัญจ่ายเงิน', '6.ใบสำคัญจ่ายเงิน'),
+] %}
 <div class="menu">
-    {% if current_page != 1 %}<a href="/spec-page-1{{ qs }}"><button>1.หนังสือขอความเห็นชอบดำเนินการตัดหญ้า</button></a>{% endif %}
-    {% if current_page != 2 %}<a href="/spec-page-2{{ qs }}"><button>2.มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ</button></a>{% endif %}
-    {% if current_page != 3 %}<a href="/spec-page-3{{ qs }}"><button>3.รายงานขอจัดจ้างตัดหญ้าและฉีดยา ททร.1(1)แผนก</button></a>{% endif %}
-    {% if current_page != 4 %}<a href="/spec-page-4{{ qs }}"><button>4.รายงาน ใบสั่งจ้างตัดหญ้า หน่วย พค 68 แบบแผน</button></a>{% endif %}
-    {% if current_page != 5 %}<a href="/spec-page-5{{ qs }}"><button>5.จ่ายรายงวด ขออนุมัติจ่ายเงินค่าจ้างทำความสะอาด</button></a>{% endif %}
-    {% if current_page != 6 %}<a href="/spec-page-6{{ qs }}"><button>6.ใบสำคัญจ่ายเงิน</button></a>{% endif %}
+    {% for num, url, short, full in nav_pages %}
+        {% if current_page == num %}
+        <span class="menu-item active" title="{{ full }}"><span class="menu-num">{{ num }}</span>{{ short }}</span>
+        {% else %}
+        <a class="menu-item" href="{{ url }}{{ qs }}" title="{{ full }}"><span class="menu-num">{{ num }}</span>{{ short }}</a>
+        {% endif %}
+    {% endfor %}
 </div>
 
 <div class="topbar">
     <a href="/select" class="btn-back">← เลือกประเภทเอกสาร</a>
     <div class="topbar-right">
-        {% if page_key and not readonly %}<a href="/edit-form?page={{ page_key }}"><button type="button">📝 แก้ไขเนื้อหา</button></a>{% endif %}
-        {% if not readonly %}<a href="/edit-common-data"><button type="button">✏️ ข้อมูลกลาง</button></a>{% endif %}
-        <button onclick="window.print()">🖨 พิมพ์ PDF</button>
+        {% if page_key and not readonly %}<a href="/edit-form?page={{ page_key }}"><button type="button" class="btn-primary">📝 แก้ไขเนื้อหา</button></a>{% endif %}
+        <div class="dropdown">
+            <button type="button" class="btn-ghost dropdown-toggle" onclick="toggleDropdown(this)">⋯ อื่นๆ ▾</button>
+            <div class="dropdown-menu">
+                {% if not readonly %}<a href="/edit-common-data">✏️ ข้อมูลกลาง</a>{% endif %}
+                <a href="#" onclick="window.print(); return false;">🖨 พิมพ์ PDF</a>
+            </div>
+        </div>
     </div>
 </div>
 
 {% block content %}{% endblock %}
+
+<div id="toast" class="toast"></div>
 
 </body>
 </html>

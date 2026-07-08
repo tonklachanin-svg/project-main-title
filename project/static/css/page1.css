@@ -43,24 +43,23 @@
 }
 
 .approve{
-    margin-top:0.6cm !important;
+    margin-top:0.9cm !important;
     text-align:left;
-    color:#40275c;
-    font-family:THSarabunBold;
+    color:#1f1b25;
     font-size:14pt !important;
 }
 
 .sign-right{
     width:9cm !important;
     margin-left:auto;
-    margin-top:0.6cm !important;
+    margin-top:1.0cm !important;
     text-align:center;
     color:#1f1b25;
 }
 
 .sign-left{
     width:7cm;
-    margin-top:0.3cm !important;
+    margin-top:0.8cm !important;
     margin-left:0;
     margin-right:auto;
     text-align:left;
@@ -73,8 +72,8 @@
     text-align:left;
     margin-left:1.0cm;
 }
-ref-table{
-    margin-top:0.5cm;
+.ref-table{
+    margin-top:0.8cm;
     overflow:hidden;
 }
 

@@ -4,147 +4,439 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>แก้ไขข้อมูลกลาง</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
 <style>
-    * { box-sizing: border-box; }
-    body {
-        font-family: THSarabun, 'Sarabun', sans-serif;
-        font-size: 18px;
-        background: #f0ecf7;
-        margin: 0;
-        padding: 32px 16px 80px;
-        color: #222;
+    :root{
+        --pea-purple-dark: #3d1a52;
+        --pea-purple: #6f24a6;
+        --pea-purple-light: #9b4fb3;
+        --pea-violet: #8a2be2;
+        --pea-gold: #c9a24b;
+        --pea-gold-light: #e6cd8a;
     }
-    .wrap { max-width: 720px; margin: 0 auto; }
-    .back { display: inline-block; margin-bottom: 16px; color: #40275c; text-decoration: none; font-weight: bold; }
-    h1 { font-size: 26px; color: #40275c; margin-bottom: 4px; }
-    p.hint { color: #777; margin-top: 0; margin-bottom: 28px; font-size: 16px; }
 
-    .card {
-        background: #fff;
-        border-radius: 16px;
-        padding: 24px 28px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-        border: 1px solid rgba(0,0,0,0.05);
+    body{
+        padding: 0 0 90px;
+        background:
+            radial-gradient(circle at 8% 8%, rgba(111,36,166,0.10) 0%, transparent 32%),
+            radial-gradient(circle at 92% 15%, rgba(201,162,75,0.12) 0%, transparent 30%),
+            linear-gradient(180deg, #f6f2fb 0%, #efe7f6 45%, #f3ecf9 100%);
+        position: relative;
+        overflow-x: hidden;
     }
-    .card h2 {
-        font-size: 20px;
-        color: #40275c;
-        margin: 0 0 16px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid rgba(111,36,166,0.13);
+
+    /* ===== พื้นหลังลอยตัวเท่ๆ: บลอบสีม่วง/ทองเบลอ ๆ ลอยเบา ๆ ทั้งหน้า ===== */
+    .bg-blobs{
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
     }
-    label { display: block; margin-top: 14px; font-weight: bold; font-size: 15px; color: #444; }
-    label:first-of-type { margin-top: 0; }
-    input[type=text] {
+    .bg-blobs span{
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.55;
+        will-change: transform;
+    }
+    .bg-blobs .b1{
+        width: 420px; height: 420px;
+        top: -120px; left: -100px;
+        background: radial-gradient(circle, var(--pea-violet) 0%, transparent 70%);
+        animation: floatA 22s ease-in-out infinite;
+    }
+    .bg-blobs .b2{
+        width: 340px; height: 340px;
+        top: 10%; right: -90px;
+        background: radial-gradient(circle, var(--pea-gold-light) 0%, transparent 70%);
+        animation: floatB 26s ease-in-out infinite;
+    }
+    .bg-blobs .b3{
+        width: 380px; height: 380px;
+        bottom: 5%; left: 5%;
+        background: radial-gradient(circle, var(--pea-purple-light) 0%, transparent 70%);
+        animation: floatC 30s ease-in-out infinite;
+    }
+    .bg-blobs .b4{
+        width: 260px; height: 260px;
+        bottom: -80px; right: 12%;
+        background: radial-gradient(circle, var(--pea-gold) 0%, transparent 70%);
+        animation: floatA 18s ease-in-out infinite reverse;
+    }
+    .bg-dots{
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background-image: radial-gradient(rgba(111,36,166,0.14) 1.4px, transparent 1.4px);
+        background-size: 26px 26px;
+        mask-image: radial-gradient(circle at 50% 0%, rgba(0,0,0,0.6) 0%, transparent 70%);
+    }
+    @keyframes floatA{
+        0%, 100%{ transform: translate(0, 0) scale(1); }
+        50%{ transform: translate(40px, 50px) scale(1.08); }
+    }
+    @keyframes floatB{
+        0%, 100%{ transform: translate(0, 0) scale(1); }
+        50%{ transform: translate(-50px, 40px) scale(1.12); }
+    }
+    @keyframes floatC{
+        0%, 100%{ transform: translate(0, 0) scale(1); }
+        50%{ transform: translate(30px, -40px) scale(1.06); }
+    }
+    @media (prefers-reduced-motion: reduce){
+        .bg-blobs span{ animation: none !important; }
+    }
+
+    .pea-hero, .wrap{ position: relative; z-index: 1; }
+
+    /* ===== HERO HEADER (โทนม่วง-ทอง ตามตราสัญลักษณ์ กฟภ.) ===== */
+    .pea-hero{
+        position: relative;
+        background: linear-gradient(120deg, var(--pea-purple-dark) 0%, var(--pea-purple) 45%, var(--pea-violet) 100%);
+        padding: 28px 24px 54px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(61,26,82,0.35);
+    }
+    .pea-hero::before{
+        content:'';
+        position:absolute; inset:0;
+        background:
+            radial-gradient(circle at 15% 20%, rgba(255,255,255,0.10) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(230,205,138,0.18) 0%, transparent 45%);
+        pointer-events:none;
+    }
+    .pea-hero::after{
+        content:'';
+        position:absolute; left:0; right:0; bottom:0; height:5px;
+        background: linear-gradient(90deg, var(--pea-gold) 0%, var(--pea-gold-light) 50%, var(--pea-gold) 100%);
+    }
+    .pea-hero-inner{
+        position: relative;
+        max-width: 760px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    .pea-hero-top{
         width: 100%;
-        padding: 10px 12px;
-        margin-top: 6px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        font-size: 17px;
-        font-family: inherit;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
     }
-    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .committee-member {
-        border: 1px dashed rgba(111,36,166,0.3);
-        border-radius: 10px;
-        padding: 14px 16px;
-        margin-top: 14px;
+    .back{
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #f3e9fb;
+        text-decoration: none;
+        font-family: THSarabunBold;
+        font-size: 15pt;
+        background: rgba(255,255,255,0.12);
+        padding: 7px 16px 7px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.25);
+        transition: all 0.2s ease;
     }
-    .committee-member .row2 { margin-top: 6px; }
+    .back:hover{ background: rgba(255,255,255,0.22); transform: translateX(-2px); color:#fff; }
+    .pea-user{
+        color: rgba(255,255,255,0.85);
+        font-size: 14pt;
+        background: rgba(0,0,0,0.15);
+        padding: 6px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.15);
+    }
+    .pea-logo{
+        width: 76px;
+        height: 76px;
+        object-fit: contain;
+        background: #fff;
+        border-radius: 50%;
+        padding: 6px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.25), 0 0 0 3px rgba(230,205,138,0.6);
+        flex-shrink: 0;
+    }
+    .pea-hero-text h1{
+        color: #fff;
+        font-family: THSarabunBold;
+        font-size: 30pt;
+        margin: 0 0 4px;
+        letter-spacing: 0.5px;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .pea-hero-text .eyebrow{
+        display: inline-block;
+        color: var(--pea-gold-light);
+        font-family: THSarabunBold;
+        font-size: 13pt;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+    }
+    .pea-hero-text p{
+        color: rgba(255,255,255,0.82);
+        font-size: 15pt;
+        margin: 0;
+        max-width: 520px;
+        line-height: 1.5;
+    }
 
-    .save-bar {
+    /* ===== BODY ===== */
+    .wrap{ max-width: 1180px; margin: -30px auto 0; padding: 0 20px; position: relative; z-index: 2; }
+
+    /* ===== แบ่งครึ่ง 2 ฝั่ง แทนการ์ดเรียงยาวลงมาทีละอัน ===== */
+    .split{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+        align-items: start;
+    }
+    .split-col{ display: flex; flex-direction: column; }
+    .card-fill{ flex: 1; }
+
+    .card{
+        background: linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(251,249,253,0.88) 100%);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-radius: 18px;
+        padding: 26px 28px 28px;
+        margin-bottom: 22px;
+        box-shadow: 0 14px 34px rgba(61,26,82,0.10), 0 2px 6px rgba(0,0,0,0.04);
+        border: 1px solid rgba(111,36,166,0.08);
+        border-top: 3px solid var(--pea-purple);
+    }
+    .card-head{
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 18px;
+        padding-bottom: 12px;
+        border-bottom: 1.5px dashed rgba(111,36,166,0.18);
+    }
+    .card-icon{
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--pea-purple) 0%, var(--pea-violet) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 19pt;
+        flex-shrink: 0;
+        box-shadow: 0 4px 10px rgba(111,36,166,0.3);
+    }
+    .card h2{
+        font-family: THSarabunBold;
+        font-size: 19pt;
+        color: var(--pea-purple-dark);
+        margin: 0;
+    }
+
+    label{
+        display: block;
+        margin-top: 15px;
+        font-family: THSarabunBold;
+        font-size: 14pt;
+        color: #55446a;
+    }
+    label:first-of-type{ margin-top: 0; }
+
+    input[type=text]{
+        width: 100%;
+        padding: 11px 14px;
+        margin-top: 6px;
+        border: 1.5px solid #e2d7ee;
+        border-radius: 10px;
+        font-size: 16pt;
+        font-family: inherit;
+        background: linear-gradient(135deg, #fafbfd 0%, #f6f1fa 100%);
+        color: #2d1b3d;
+        transition: all 0.2s ease;
+    }
+    input[type=text]:hover{ border-color: #d3bfe6; }
+    input[type=text]:focus{
+        outline: none;
+        border-color: var(--pea-purple);
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(111,36,166,0.12);
+    }
+
+    .row2{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .committee-member{
+        position: relative;
+        border: 1.5px dashed rgba(111,36,166,0.28);
+        background: rgba(111,36,166,0.03);
+        border-radius: 12px;
+        padding: 16px 18px 14px;
+        margin-top: 16px;
+    }
+    .committee-member:first-of-type{ margin-top: 0; }
+    .committee-badge{
+        position: absolute;
+        top: -12px;
+        left: 14px;
+        background: linear-gradient(135deg, var(--pea-gold) 0%, var(--pea-gold-light) 100%);
+        color: #3d1a52;
+        font-family: THSarabunBold;
+        font-size: 12.5pt;
+        padding: 3px 12px;
+        border-radius: 999px;
+        box-shadow: 0 3px 8px rgba(201,162,75,0.4);
+    }
+    .committee-member .row2{ margin-top: 6px; }
+
+    /* ===== SAVE BAR ===== */
+    .save-bar{
         position: sticky;
         bottom: 0;
-        background: rgba(240,236,247,0.95);
-        backdrop-filter: blur(6px);
-        padding: 14px 0;
-        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: rgba(240,236,247,0.9);
+        backdrop-filter: blur(10px);
+        padding: 16px 4px;
+        margin-top: 6px;
+        border-top: 1px solid rgba(111,36,166,0.12);
     }
-    button.save {
-        padding: 13px 30px;
+    button.save{
+        padding: 14px 34px;
         border: none;
         border-radius: 999px;
-        background: linear-gradient(135deg, #6f24a6 0%, #b360d6 100%);
+        background: linear-gradient(135deg, var(--pea-purple) 0%, var(--pea-violet) 100%);
         color: #fff;
-        font-size: 18px;
-        font-family: THSarabunBold, sans-serif;
-        font-weight: bold;
+        font-size: 17pt;
+        font-family: THSarabunBold;
         cursor: pointer;
-        box-shadow: 0 4px 14px rgba(111,36,166,0.28);
+        box-shadow: 0 6px 18px rgba(111,36,166,0.35);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    button.save:hover { transform: translateY(-1px); }
+    button.save:hover{ transform: translateY(-2px); box-shadow: 0 10px 24px rgba(111,36,166,0.42); }
 
-    .saved-msg {
-        display: inline-block;
-        margin-left: 16px;
-        padding: 8px 18px;
-        background: #e7f7ec;
+    .saved-msg{
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 20px;
+        background: linear-gradient(135deg, #e7f7ec 0%, #d7f0e0 100%);
         color: #157347;
         border-radius: 999px;
-        font-size: 15px;
+        font-size: 14pt;
+        font-family: THSarabunBold;
+        border: 1px solid rgba(21,115,71,0.15);
+    }
+
+    @media (max-width: 900px){
+        .split{ grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px){
+        .pea-hero-inner{ flex-direction: column; align-items: flex-start; }
+        .pea-hero-text h1{ font-size: 24pt; }
+        .row2{ grid-template-columns: 1fr; }
+        .wrap{ margin-top: -22px; padding: 0 14px; }
+        .card{ padding: 20px 18px 22px; }
     }
 </style>
 </head>
 <body>
+
+<div class="bg-blobs">
+    <span class="b1"></span>
+    <span class="b2"></span>
+    <span class="b3"></span>
+    <span class="b4"></span>
+</div>
+<div class="bg-dots"></div>
+
+<div class="pea-hero">
+    <div class="pea-hero-inner">
+        <div class="pea-hero-top">
+            <a class="back" href="/spec-page-1">← ย้อนกลับ</a>
+            {% if username %}<span class="pea-user">👤 {{ username }}</span>{% endif %}
+        </div>
+        <img src="{{ url_for('static', filename='logo.jpg') }}" class="pea-logo" alt="การไฟฟ้าส่วนภูมิภาค">
+        <div class="pea-hero-text">
+            <span class="eyebrow">การไฟฟ้าส่วนภูมิภาค · PEA</span>
+            <h1>แก้ไขข้อมูลกลาง</h1>
+            <p>แก้ตรงนี้ที่เดียว หน้า 1, 2, 3, 5, 6 ที่ใช้ข้อมูลชุดนี้จะเปลี่ยนตามทันที</p>
+        </div>
+    </div>
+</div>
+
 <div class="wrap">
-
-    <a class="back" href="/spec-page-1">← ย้อนกลับ</a>
-    <h1>แก้ไขข้อมูลกลาง</h1>
-    <p class="hint">แก้ตรงนี้ที่เดียว หน้า 1, 2, 3, 5, 6 ที่ใช้ข้อมูลชุดนี้จะเปลี่ยนตามทันที</p>
-
     <form method="POST">
 
-        <div class="card">
-            <h2>ลายเซ็นผู้เสนอ + จาก / ถึง</h2>
-            <div class="row2">
-                <div>
-                    <label>จาก (เช่น ผจฟ.1)</label>
-                    <input type="text" name="org_from" value="{{ common.org_from }}">
+        <div class="split">
+            <div class="split-col">
+                <div class="card">
+                    <div class="card-head">
+                        <span class="card-icon">✍️</span>
+                        <h2>ลายเซ็นผู้เสนอ + จาก / ถึง</h2>
+                    </div>
+                    <div class="row2">
+                        <div>
+                            <label>จาก (เช่น ผจฟ.1)</label>
+                            <input type="text" name="org_from" value="{{ common.org_from }}">
+                        </div>
+                        <div>
+                            <label>ถึง (เช่น กปบ.(ก3))</label>
+                            <input type="text" name="org_to" value="{{ common.org_to }}">
+                        </div>
+                    </div>
+                    <label>ชื่อผู้เสนอ (พร้อมวงเล็บ เช่น (นายภานุพงค์ เจนสุริยะกุล))</label>
+                    <input type="text" name="signature_from" value="{{ common.signature_from }}">
+                    <label>ตำแหน่งผู้เสนอ</label>
+                    <input type="text" name="position_from" value="{{ common.position_from }}">
                 </div>
-                <div>
-                    <label>ถึง (เช่น กปบ.(ก3))</label>
-                    <input type="text" name="org_to" value="{{ common.org_to }}">
+
+                <div class="card">
+                    <div class="card-head">
+                        <span class="card-icon">🏢</span>
+                        <h2>ชื่อแผนก + เบอร์โทร</h2>
+                    </div>
+                    <label>ชื่อแผนก</label>
+                    <input type="text" name="dept_name" value="{{ common.dept_name }}">
+                    <label>เบอร์โทร</label>
+                    <input type="text" name="dept_tel" value="{{ common.dept_tel }}">
                 </div>
             </div>
-            <label>ชื่อผู้เสนอ (พร้อมวงเล็บ เช่น (นายภานุพงค์ เจนสุริยะกุล))</label>
-            <input type="text" name="signature_from" value="{{ common.signature_from }}">
-            <label>ตำแหน่งผู้เสนอ</label>
-            <input type="text" name="position_from" value="{{ common.position_from }}">
-        </div>
 
-        <div class="card">
-            <h2>ชื่อแผนก + เบอร์โทร</h2>
-            <label>ชื่อแผนก</label>
-            <input type="text" name="dept_name" value="{{ common.dept_name }}">
-            <label>เบอร์โทร</label>
-            <input type="text" name="dept_tel" value="{{ common.dept_tel }}">
-        </div>
-
-        <div class="card">
-            <h2>คณะกรรมการตรวจรับพัสดุ (3 คน)</h2>
-            {% for m in common.committee %}
-            <div class="committee-member">
-                <label>ชื่อ - นามสกุล คนที่ {{ loop.index }}</label>
-                <input type="text" name="committee_name_{{ loop.index0 }}" value="{{ m.name }}">
-                <div class="row2">
-                    <div>
-                        <label>ตำแหน่งงาน (เช่น พชง.7 ผจฟ.1 กปบ.(ก3))</label>
-                        <input type="text" name="committee_job_pos_{{ loop.index0 }}" value="{{ m.job_pos }}">
+            <div class="split-col">
+                <div class="card card-fill">
+                    <div class="card-head">
+                        <span class="card-icon">👥</span>
+                        <h2>คณะกรรมการตรวจรับพัสดุ (3 คน)</h2>
                     </div>
-                    <div>
-                        <label>บทบาทในคณะกรรมการ (เช่น ประธานกรรมการ / กรรมการ)</label>
-                        <input type="text" name="committee_role_{{ loop.index0 }}" value="{{ m.role }}">
+                    {% for m in common.committee %}
+                    <div class="committee-member">
+                        <span class="committee-badge">คนที่ {{ loop.index }}</span>
+                        <label>ชื่อ - นามสกุล</label>
+                        <input type="text" name="committee_name_{{ loop.index0 }}" value="{{ m.name }}">
+                        <div class="row2">
+                            <div>
+                                <label>ตำแหน่งงาน (เช่น พชง.7 ผจฟ.1 กปบ.(ก3))</label>
+                                <input type="text" name="committee_job_pos_{{ loop.index0 }}" value="{{ m.job_pos }}">
+                            </div>
+                            <div>
+                                <label>บทบาทในคณะกรรมการ (เช่น ประธานกรรมการ / กรรมการ)</label>
+                                <input type="text" name="committee_role_{{ loop.index0 }}" value="{{ m.role }}">
+                            </div>
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
             </div>
-            {% endfor %}
         </div>
 
         <div class="save-bar">
-            <button type="submit" class="save">บันทึกข้อมูลกลาง</button>
-            {% if saved %}<span class="saved-msg">บันทึกเรียบร้อยแล้ว ✓</span>{% endif %}
+            <button type="submit" class="save">💾 บันทึกข้อมูลกลาง</button>
+            {% if saved %}<span class="saved-msg">✓ บันทึกเรียบร้อยแล้ว</span>{% endif %}
         </div>
 
     </form>

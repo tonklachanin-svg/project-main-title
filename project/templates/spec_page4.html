@@ -175,40 +175,57 @@
 
 </div>
 
-<!-- ===== ส่วนที่ 4: เอกสารแนบ 1 - รูปภาพพื้นที่แต่ละสถานี ===== -->
+<!-- ===== ส่วนที่ 4: เอกสารแนบ 1 - รูปภาพพื้นที่แต่ละสถานี =====
+     รวมพื้นที่ตัดหญ้า+ฉีดยาของแต่ละสถานีไว้ในหน้าเดียวกัน (เดิมแยกคนละหน้าและมีหน้าปกชื่อ
+     "เอกสารแนบ 1" อยู่โดดๆ ทำให้เวลาพิมพ์เกิดหน้าว่างโล่งๆ เยอะเกินจำเป็นเมื่อเนื้อหามีไม่มาก) -->
 <div class="page-break"></div>
-
-<div class="a4">
-    <div class="p4-title">เอกสารแนบ 1</div>
-</div>
 
 {% for station in data.station_areas %}
-<div class="page-break"></div>
 <div class="a4">
+    {% if loop.first %}<div class="p4-title">เอกสารแนบ 1</div>{% endif %}
     <div class="p4-section-num">{{ station.name }}</div>
     <div class="p4-list">พื้นที่ตัดหญ้า</div>
     <div class="p4-photo-grid">
         {% for img in station.mow_images %}
-        <img src="{{ img }}" alt="พื้นที่ตัดหญ้า {{ station.name }}">
+            {% if img.lower().endswith('.pdf') %}
+            <a class="p4-pdf-box" href="{{ img }}" target="_blank">
+                <span class="p4-pdf-icon">PDF</span>
+                <span>{{ img|display_filename }}</span>
+            </a>
+            {% else %}
+            <img src="{{ img }}" alt="พื้นที่ตัดหญ้า {{ station.name }}">
+            {% endif %}
         {% else %}
-        <div class="p4-photo-placeholder">แนบรูปภาพพื้นที่ตัดหญ้า</div>
         <div class="p4-photo-placeholder">แนบรูปภาพพื้นที่ตัดหญ้า</div>
         {% endfor %}
     </div>
-</div>
 
-<div class="page-break"></div>
-<div class="a4">
-    <div class="p4-section-num">{{ station.name }}</div>
     <div class="p4-list">พื้นที่ฉีดยากำจัดวัชพืช</div>
     <div class="p4-photo-grid">
         {% for img in station.spray_images %}
-        <img src="{{ img }}" alt="พื้นที่ฉีดยากำจัดวัชพืช {{ station.name }}">
+            {% if img.lower().endswith('.pdf') %}
+            <a class="p4-pdf-box" href="{{ img }}" target="_blank">
+                <span class="p4-pdf-icon">PDF</span>
+                <span>{{ img|display_filename }}</span>
+            </a>
+            {% elif img.lower().endswith(('.xls', '.xlsx')) %}
+            <a class="p4-pdf-box" href="{{ img }}" target="_blank">
+                <span class="p4-pdf-icon xls-icon">XLS</span>
+                <span>{{ img|display_filename }}</span>
+            </a>
+            {% elif img.lower().endswith(('.doc', '.docx')) %}
+            <a class="p4-pdf-box" href="{{ img }}" target="_blank">
+                <span class="p4-pdf-icon doc-icon">DOC</span>
+                <span>{{ img|display_filename }}</span>
+            </a>
+            {% else %}
+            <img src="{{ img }}" alt="พื้นที่ฉีดยากำจัดวัชพืช {{ station.name }}">
+            {% endif %}
         {% else %}
-        <div class="p4-photo-placeholder">แนบรูปภาพพื้นที่ฉีดยากำจัดวัชพืช</div>
-        <div class="p4-photo-placeholder">แนบรูปภาพพื้นที่ฉีดยากำจัดวัชพืช</div>
+        <div class="p4-photo-placeholder">แนบรูปภาพ/PDF พื้นที่ฉีดยากำจัดวัชพืช</div>
         {% endfor %}
     </div>
 </div>
+{% if not loop.last %}<div class="page-break"></div>{% endif %}
 {% endfor %}
 {% endblock %}
