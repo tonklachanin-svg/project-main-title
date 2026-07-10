@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>งานของฉัน</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+<script src="{{ url_for('static', filename='main.js') }}" defer></script>
+<style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background: #f0ecf7;
+            font-family: THSarabun, 'Sarabun', sans-serif;
+            font-size: 18px;
+        }
+
+        .topnav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            height: 64px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(111,36,166,0.12);
+            box-shadow: 0 1px 12px rgba(0,0,0,0.06);
+        }
+
+        .topnav-brand { display: flex; align-items: center; gap: 12px; }
+        .topnav-brand img { height: 40px; width: auto; }
+        .topnav-brand span {
+            font-family: THSarabunBold, sans-serif;
+            font-size: 20px;
+            color: #40275c;
+            font-weight: bold;
+        }
+
+        .btn-logout {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 22px;
+            border-radius: 999px;
+            border: 1.5px solid rgba(111,36,166,0.2);
+            background: none;
+            font-size: 17px;
+            color: #666;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-family: THSarabun, sans-serif;
+        }
+        .btn-logout:hover {
+            background: rgba(183,28,28,0.07);
+            border-color: rgba(183,28,28,0.35);
+            color: #b71c1c;
+        }
+
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 48px 40px 28px;
+            max-width: 1180px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+        }
+
+        .hero-greeting {
+            display: inline-block;
+            background: rgba(111,36,166,0.09);
+            color: #7b3fa8;
+            font-size: 16px;
+            padding: 5px 18px;
+            border-radius: 999px;
+            margin-bottom: 12px;
+        }
+
+        .hero-title {
+            font-family: THSarabunBold, sans-serif;
+            font-size: 36px;
+            color: #2d1b3d;
+            font-weight: bold;
+        }
+
+        .btn-new-case {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #6f24a6 0%, #8a2be2 100%);
+            color: #fff;
+            font-family: THSarabunBold, sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 13px 28px;
+            border-radius: 999px;
+            text-decoration: none;
+            box-shadow: 0 8px 20px rgba(111,36,166,0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-new-case:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(111,36,166,0.4); }
+
+        .wrap {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 40px 72px;
+        }
+
+        .count-row {
+            font-family: THSarabunBold, sans-serif;
+            color: #40275c;
+            font-size: 17px;
+            margin-bottom: 14px;
+        }
+        .count-row b { color: #6f24a6; }
+
+        .table-card {
+            background: #fff;
+            border-radius: 18px;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .table-scroll { overflow-x: auto; }
+
+        table.case-table { width: 100%; border-collapse: collapse; min-width: 920px; }
+
+        .case-table thead th {
+            background: #f6f1fa;
+            color: #40275c;
+            font-family: THSarabunBold, sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: left;
+            padding: 14px 16px;
+            border-bottom: 2px solid rgba(111,36,166,0.12);
+            white-space: nowrap;
+        }
+        .case-table thead th.center { text-align: center; }
+
+        .case-table tbody td {
+            padding: 14px 16px;
+            font-size: 17px;
+            color: #2d1b3d;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            vertical-align: middle;
+        }
+        .case-table tbody tr:last-child td { border-bottom: none; }
+        .case-table tbody tr:hover { background: rgba(111,36,166,0.03); }
+
+        .seq { font-family: THSarabunBold, sans-serif; color: #8a4fb8; }
+        .subject-cell { max-width: 340px; }
+        .date-cell { white-space: nowrap; }
+        .muted { color: #aaa; }
+
+        .status-pill {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-size: 15px;
+            font-family: THSarabunBold, sans-serif;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .status-open { background: rgba(21,101,192,0.1); color: #1565c0; }
+        .status-in_progress { background: rgba(230,145,0,0.12); color: #b05f00; }
+        .status-closed { background: rgba(46,125,50,0.12); color: #2e7d32; }
+
+        .action-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: #6f24a6;
+            font-family: THSarabunBold, sans-serif;
+            font-weight: bold;
+            text-decoration: none;
+            padding: 7px 16px;
+            border-radius: 999px;
+            border: 1.5px solid rgba(111,36,166,0.25);
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .action-link:hover { background: rgba(111,36,166,0.08); }
+
+        .action-cell { display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .delete-link {
+            display: inline-flex;
+            align-items: center;
+            color: #b71c1c;
+            font-family: THSarabunBold, sans-serif;
+            font-weight: bold;
+            text-decoration: none;
+            padding: 7px 14px;
+            border-radius: 999px;
+            border: 1.5px solid rgba(183,28,28,0.25);
+            background: none;
+            cursor: pointer;
+            font-size: 17px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .delete-link:hover { background: rgba(183,28,28,0.08); }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 24px;
+            color: #8a8a9a;
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-state .msg { font-size: 19px; margin-bottom: 24px; }
+
+        .search-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-bottom: 18px;
+        }
+        .search-form input[type=text], .search-form select {
+            font-family: THSarabun, sans-serif;
+            font-size: 17px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            border: 1.5px solid rgba(111,36,166,0.18);
+            background: #fbfaff;
+            color: #2d1b3d;
+        }
+        .search-form input[type=text] { flex: 1 1 260px; min-width: 200px; }
+        .search-form input[type=text]:focus, .search-form select:focus {
+            outline: none; border-color: #6f24a6; background: #fff;
+        }
+        .btn-search {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, #6f24a6 0%, #8a2be2 100%);
+            color: #fff; border: none;
+            font-family: THSarabunBold, sans-serif; font-size: 17px; font-weight: bold;
+            padding: 10px 24px; border-radius: 999px; cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .btn-search:hover { transform: translateY(-2px); }
+        .btn-clear-search {
+            color: #8a8a9a; font-family: THSarabun, sans-serif; font-size: 16px;
+            text-decoration: none; padding: 10px 8px;
+        }
+        .btn-clear-search:hover { color: #6f24a6; text-decoration: underline; }
+
+        @media (max-width: 720px) {
+            .topnav-brand span { display: none; }
+            .hero { padding: 32px 20px 20px; }
+            .hero-title { font-size: 28px; }
+            .wrap { padding: 0 20px 56px; }
+        }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+    <div class="topnav-brand">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="logo">
+        <span>การไฟฟ้าส่วนภูมิภาค</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+        <a href="/history" class="btn-logout" style="color:#40275c; border-color:rgba(111,36,166,0.2);">🕘 ประวัติการบันทึก</a>
+        <a href="/logout" class="btn-logout">🚪 ออกจากระบบ</a>
+    </div>
+</nav>
+
+<div class="hero">
+    <div>
+        <div class="hero-title">งานของฉัน</div>
+    </div>
+    <a href="/folder/new" class="btn-new-case">＋ สร้างงานใหม่</a>
+</div>
+
+<div class="wrap">
+    <form method="get" action="/folder" class="search-form">
+        <input type="text" name="keyword" value="{{ filters.keyword }}" placeholder="ค้นหาจากเรื่องที่ทำ หรือหมวดหมู่...">
+        <select name="status">
+            <option value="">ทุกสถานะ</option>
+            <option value="open" {% if filters.status == 'open' %}selected{% endif %}>เปิดเอกสาร</option>
+            <option value="in_progress" {% if filters.status == 'in_progress' %}selected{% endif %}>กำลังทำ</option>
+            <option value="closed" {% if filters.status == 'closed' %}selected{% endif %}>ปิดงาน/จบงานแล้ว</option>
+        </select>
+        <button type="submit" class="btn-search">🔍 ค้นหา</button>
+        {% if filters.keyword or filters.status %}
+        <a href="/folder" class="btn-clear-search">ล้างตัวเลือก</a>
+        {% endif %}
+    </form>
+
+    {% if cases %}
+    <div class="count-row">จำนวนงานที่พบ : <b>{{ cases|length }}</b> งาน</div>
+
+    <div class="table-card">
+        <div class="table-scroll">
+        <table class="case-table">
+            <thead>
+                <tr>
+                    <th class="center">ลำดับ</th>
+                    <th>หมวดหมู่</th>
+                    <th>เรื่องที่เราทำ</th>
+                    <th>ผู้บันทึก</th>
+                    <th>วันที่บันทึกเอกสาร</th>
+                    <th>วงเงิน (บาท)</th>
+                    <th class="center">สถานะ</th>
+                    <th class="center">ดูและแก้ไข</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in cases %}
+                <tr>
+                    <td class="center seq">{{ c.seq_display }}</td>
+                    <td>{{ c.category.split(':')[0] if c.category else '-' }}</td>
+                    <td class="subject-cell">{{ c.subject or '(ยังไม่ระบุเรื่อง)' }}</td>
+                    <td>{{ c.user_name or '-' }}</td>
+                    <td class="date-cell">{{ (c.updated_at or c.created_at)|thai_datetime }}</td>
+                    <td>{% if c.budget_amount %}{{ c.budget_amount }}{% else %}<span class="muted">-</span>{% endif %}</td>
+                    <td class="center">
+                        {% if c.status == 'closed' %}
+                        <span class="status-pill status-closed">ปิดงาน/จบงานแล้ว</span>
+                        {% elif c.status == 'in_progress' %}
+                        <span class="status-pill status-in_progress">กำลังทำ</span>
+                        {% else %}
+                        <span class="status-pill status-open">เปิดเอกสาร</span>
+                        {% endif %}
+                    </td>
+                    <td class="center">
+                        <div class="action-cell">
+                            <a class="action-link" href="/folder/open/{{ c.id }}">
+                                {% if c.status == 'closed' %}ดู{% else %}ดู/แก้ไข{% endif %}
+                            </a>
+                            <button type="button" class="delete-link" onclick="deleteCase({{ c.id }}, this)">🗑 ลบ</button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="table-card">
+        <div class="empty-state">
+            {% if filters.keyword or filters.status %}
+            <div class="icon">🔍</div>
+            <div class="msg">ไม่พบงานที่ตรงกับการค้นหา ลองเปลี่ยนคำค้นหรือล้างตัวเลือกดู</div>
+            <a href="/folder" class="btn-clear-search">ล้างตัวเลือก</a>
+            {% else %}
+            <div class="icon">🗂</div>
+            <div class="msg">ยังไม่มีงานที่บันทึกไว้ เริ่มสร้างงานแรกของคุณได้เลย</div>
+            <a href="/folder/new" class="btn-new-case">＋ สร้างงานใหม่</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div id="toast" class="toast"></div>
+
+</body>
+</html>

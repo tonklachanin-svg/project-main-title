@@ -1,13 +1,5 @@
-/* =========================================================
-   PAGE1.CSS — เฉพาะหนังสือขอความเห็นชอบดำเนินการตัดหญ้า
-   ค่าระยะเยื้อง/ระยะขอบด้านล่างวัดจาก .doc ต้นฉบับโดยตรง (แปลงจาก twips):
-   - ขอบกระดาษ: บน 1440, ล่าง 1440, ซ้าย 1440, ขวา 1417 twips (2.54/2.54/2.54/2.5cm)
-   - แท็บหัวข้อ "1./2." อยู่ที่ 1418 twips (2.5cm), แท็บย่อหน้าเนื้อหาอยู่ที่ 1701 twips (3.0cm)
-   - ย่อหน้า "จึงเรียนมาเพื่อ..." ใช้ ind left=1.27cm + firstLine=1.27cm (บรรทัดแรกเยื้องรวม 2.54cm)
-========================================================= */
-
 .a4{
-    padding-top:2.54cm;
+    padding-top:1.2cm;
     padding-left:2.54cm;
     padding-right:2.5cm;
     padding-bottom:2.54cm;
@@ -43,7 +35,7 @@
 }
 
 .approve{
-    margin-top:0.9cm !important;
+    margin-top:0.45cm !important;
     text-align:left;
     color:#1f1b25;
     font-size:14pt !important;
@@ -52,14 +44,14 @@
 .sign-right{
     width:9cm !important;
     margin-left:auto;
-    margin-top:1.0cm !important;
+    margin-top:0.5cm !important;
     text-align:center;
     color:#1f1b25;
 }
 
 .sign-left{
     width:7cm;
-    margin-top:0.8cm !important;
+    margin-top:0.3cm !important;
     margin-left:0;
     margin-right:auto;
     text-align:left;
@@ -73,23 +65,24 @@
     margin-left:1.0cm;
 }
 .ref-table{
-    margin-top:0.8cm;
+    margin-top:0.35cm;
     overflow:hidden;
 }
 
 .ref-table-box{
     float:right;
-    width:9cm;
+    width:6.5cm;
     border-collapse:collapse;
     margin:0;
 }
 
 .ref-table-box td{
     border:1px solid #555;
-    padding:3px 10px;
-    font-size:13pt;
+    padding:2px 8px;
+    font-size:11pt;
     background:none;
     color:#000;
+    text-align:center;
 }
 
 .ref-table-box tr:hover{
@@ -105,12 +98,12 @@
 }
 
 .ref-dept{
-    font-size:14pt;
+    font-size:12pt;
     margin-top:6px;
 }
 
 .ref-tel{
-    font-size:14pt;
+    font-size:12pt;
 }
 
 @media print {

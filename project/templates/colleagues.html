@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เพื่อนร่วมงาน</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+    <script src="{{ url_for('static', filename='main.js') }}" defer></script>
     <style>
         .colleagues-wrap{ max-width:720px; margin:32px auto; padding:0 16px 60px; }
         .colleagues-wrap h1{ font-family:THSarabunBold; color:#40275c; margin-bottom:4px; }
@@ -54,6 +55,9 @@
         <p class="empty-note">ยังไม่มีเพื่อนร่วมงานคนอื่นในระบบ</p>
     {% endif %}
 </div>
+
+<div id="toast" class="toast"></div>
+
 <script>
 function filterColleagues(query) {
     var q = query.trim().toLowerCase();

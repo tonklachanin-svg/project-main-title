@@ -18,7 +18,7 @@
 
     .edit-page{ max-width: 1180px; margin: 0 auto; padding: 22px 20px 40px; }
 
-    /* ===== หัวเรื่อง เรียบ กระชับ ไม่แย่งซีนฟอร์ม ===== */
+
     .edit-title-row{
         display:flex; align-items:center; justify-content:space-between;
         flex-wrap: wrap; gap: 10px;
@@ -35,7 +35,7 @@
     }
     .edit-title-row p{ margin: 2px 0 0 48px; color: var(--ink-soft); font-size: 14.5pt; }
 
-    /* ===== เลย์เอาต์หลัก: เนื้อหาฟอร์ม + เมนูลัดข้ามหัวข้อ (จอกว้าง) ===== */
+
     .edit-layout{ display:grid; grid-template-columns: 1fr 220px; gap: 24px; align-items:start; }
     .edit-toc{
         position: sticky; top: 16px;
@@ -51,14 +51,14 @@
     }
     .edit-toc a:hover{ background: rgba(111,36,166,0.08); border-left-color: var(--pea-purple-light, var(--pea-violet)); color:var(--pea-purple); }
 
-    /* ===== การ์ดฟอร์มหลัก: แผ่นเรียบสบายตา ไม่ทึบไม่หนัก ===== */
+
     .edit-sheet{
         background:#fff; border-radius:20px; padding:8px 30px 26px;
         box-shadow: 0 16px 40px rgba(61,26,82,0.09), 0 2px 8px rgba(0,0,0,0.03);
         border: 1px solid rgba(111,36,166,0.07);
     }
 
-    /* กริดฟิลด์ระดับบนสุด: ช่องสั้นเรียงข้างกัน 2 คอลัมน์ ช่องยาว/กลุ่ม เต็มแถว */
+
     .edit-grid{
         display:grid; grid-template-columns: 1fr 1fr; gap: 4px 22px;
         padding-top: 18px;
@@ -83,7 +83,7 @@
     }
     .edit-field textarea{ resize: vertical; min-height: 52px; overflow:hidden; line-height:1.5; }
 
-    /* ===== หัวข้อกลุ่ม (details/summary แบบพับได้) ===== */
+
     details.edit-section{
         margin: 18px 0 6px;
         border: 1px solid rgba(111,36,166,0.12);
@@ -111,10 +111,10 @@
     details.edit-section > summary:hover{ background: rgba(111,36,166,0.05); }
     details.edit-section .section-body{ padding: 14px 18px 6px; }
     details.edit-section[open]{ }
-    /* กลุ่มย่อยที่ซ้อนอยู่ในกลุ่ม ให้พื้นเข้มขึ้นทีละนิด เพื่อบอกระดับชั้น */
+
     details.edit-section details.edit-section{ background: rgba(111,36,166,0.045); }
 
-    /* รายการที่เป็น list ของอ็อบเจกต์ (เช่น ตารางสถานี) แสดงเป็นการ์ดย่อยเรียงกริด แทนสตริงยาวลงมา */
+
     .tile-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
     .tile-card{
         background:#fff; border:1px solid rgba(111,36,166,0.14); border-radius:12px;
@@ -140,7 +140,7 @@
     }
     .btn-add-row:hover{ background: rgba(111,36,166,0.06); border-color: var(--pea-purple); }
 
-    /* ===== ตัวจัดการรูปภาพแนบ (เช่น รูปพื้นที่ตัดหญ้า/ฉีดยา) ===== */
+
     .image-manager{ margin-top:6px; }
     .image-thumbs{ display:flex; flex-wrap:wrap; gap:12px; margin-bottom:10px; }
     .image-thumb{
@@ -182,7 +182,7 @@
     .edit-note{ color:#9a92a8; font-size:14pt; font-style:italic; }
     .edit-note a{ color: var(--pea-purple); font-style:normal; font-family:THSarabunBold; }
 
-    /* ===== ฟิลด์/หัวข้อที่ล็อกไว้ (ดึงจาก "ข้อมูลกลาง" แก้ตรงนี้ไม่มีผล) ===== */
+
     .lock-badge{
         font-size:11pt; font-family:THSarabunBold; color:#8a6d1f;
         background: rgba(201,162,75,0.18); padding:2px 10px; border-radius:999px; margin-left:8px;
@@ -195,7 +195,41 @@
         min-height: 1.6em;
     }
 
-    /* ===== แถบบันทึก: ลอยติดล่างจอเสมอ กดง่ายแม้ฟอร์มยาวมาก ===== */
+
+    /* ===== EGP-STYLE — เลย์เอาต์แบบระบบ e-GP (นำร่องเฉพาะหน้า 1 ก่อน) =====
+       label ชิดซ้าย + ช่องกรอกอยู่ขวาเป็นแถวเดียวกัน
+       หน้าหัวข้อเป็นแถบทึบเต็มแนวนอนแทนการ์ดโค้งมน */
+    .egp-style .edit-grid{ display:block; }
+    .egp-style .edit-field{
+        display:flex; align-items:flex-start; gap:14px;
+        margin: 0; padding: 10px 4px; border-bottom: 1px solid rgba(111,36,166,0.08);
+    }
+    .egp-style .edit-field label{
+        flex: 0 0 300px; text-align:left; margin-bottom:0; padding-top:10px;
+        display:flex; align-items:center; justify-content:flex-start; gap:0;
+        color: var(--ink); font-size:14pt;
+    }
+    .egp-style .edit-field input[type=text],
+    .egp-style .edit-field textarea,
+    .egp-style .edit-field .locked-value{ flex: 1 1 auto; width:auto; margin:0; }
+    .egp-style details.edit-section{
+        border-radius: 0; border: 1px solid rgba(111,36,166,0.15);
+        background: #fff;
+    }
+    .egp-style details.edit-section > summary{
+        background: linear-gradient(135deg, var(--pea-purple) 0%, var(--pea-violet) 100%);
+        color: #fff; border-bottom: none; border-radius: 0;
+    }
+    .egp-style details.edit-section > summary::before{ color:#fff; }
+    .egp-style details.edit-section > summary .count-badge{
+        background: rgba(255,255,255,0.22); color:#fff;
+    }
+    @media (max-width: 640px){
+        .egp-style .edit-field{ flex-direction:column; gap:4px; }
+        .egp-style .edit-field label{ flex-basis:auto; text-align:left; justify-content:flex-start; padding-top:0; }
+    }
+
+
     .save-dock{
         position: sticky; bottom: 0; z-index: 20;
         margin-top: 22px;
@@ -236,7 +270,7 @@
 
 {% block content %}
 {% set locked_fields = locked_fields|default([]) %}
-<div class="edit-page">
+<div class="edit-page{% if page_key == 'spec_page1' %} egp-style{% endif %}">
 
     <div class="edit-title-row">
         <div>
@@ -251,7 +285,7 @@
                 {% macro render_value(key, value, path) %}
                     {% if value is mapping %}
                         <details class="edit-section" id="sec-{{ key }}" open>
-                            <summary>{{ key }}</summary>
+                            <summary>{{ field_labels.get(key, key) }}</summary>
                             <div class="section-body edit-grid">
                                 {% for subkey, subval in value.items() %}
                                     {{ render_value(subkey, subval, path ~ '.' ~ subkey) }}
@@ -261,7 +295,7 @@
                     {% elif value is sequence and value is not string %}
                         {% if value|length > 0 and value[0] is mapping %}
                             <details class="edit-section" id="sec-{{ key }}" open>
-                                <summary>{{ key }}<span class="count-badge js-count">{{ value|length }} รายการ</span></summary>
+                                <summary>{{ field_labels.get(key, key) }}<span class="count-badge js-count">{{ value|length }} รายการ</span></summary>
                                 <div class="section-body">
                                     <div class="tile-grid js-list-group" data-list-path="{{ path }}">
                                     {% for item in value %}
@@ -273,7 +307,7 @@
                                             {% for subkey, subval in item.items() %}
                                                 {% if subval is sequence and subval is not string %}
                                                     <div class="edit-field">
-                                                        <label>{{ subkey }}</label>
+                                                        <label>{{ field_labels.get(subkey, subkey) }}</label>
                                                         <div class="image-manager js-image-group" data-sub-key="{{ subkey }}">
                                                             <div class="image-thumbs js-image-thumbs">
                                                                 {% for url in subval %}
@@ -312,7 +346,7 @@
                                                     </div>
                                                 {% else %}
                                                     <div class="edit-field">
-                                                        <label>{{ subkey }}</label>
+                                                        <label>{{ field_labels.get(subkey, subkey) }}</label>
                                                         <input type="text" data-subkey="{{ subkey }}" value="{{ subval }}">
                                                     </div>
                                                 {% endif %}
@@ -325,7 +359,7 @@
                             </details>
                         {% else %}
                             <div class="edit-field">
-                                <label>{{ key }}</label>
+                                <label>{{ field_labels.get(key, key) }}</label>
                                 <div class="image-manager js-image-group" data-list-path="{{ path }}">
                                     <div class="image-thumbs js-image-thumbs">
                                         {% for url in value %}
@@ -353,7 +387,7 @@
                         {% endif %}
                     {% else %}
                         <div class="edit-field">
-                            <label>{{ key }}</label>
+                            <label>{{ field_labels.get(key, key) }}</label>
                             {% if value|string|length > 60 %}
                                 <textarea class="auto-grow" data-path="{{ path }}">{{ value }}</textarea>
                             {% else %}
@@ -366,13 +400,13 @@
                 {% macro render_locked(key, value) %}
                     {% if value is mapping or (value is sequence and value is not string and value|length > 0 and value[0] is mapping) %}
                         <details class="edit-section edit-section-locked" id="sec-{{ key }}">
-                            <summary>{{ key }}<span class="lock-badge">🔒 ใช้ร่วมกันหลายหน้า</span></summary>
+                            <summary>{{ field_labels.get(key, key) }}<span class="lock-badge">🔒 ใช้ร่วมกันหลายหน้า</span></summary>
                             <div class="section-body">
                                 <p class="edit-note">ข้อมูลชุดนี้ดึงมาจากหน้า "ข้อมูลกลาง" ใช้ร่วมกับหน้าอื่นด้วย แก้ตรงนี้จะไม่ถูกบันทึก (ค่าจะถูกดึงจากข้อมูลกลางทับใหม่ทุกครั้งที่เปิดหน้า) — <a href="/edit-common-data">ไปแก้ที่หน้าข้อมูลกลาง</a></p>
                                 {% if value is mapping %}
                                     <div class="edit-grid">
                                         {% for subkey, subval in value.items() %}
-                                            <div class="edit-field"><label>{{ subkey }}</label><div class="locked-value">{{ subval }}</div></div>
+                                            <div class="edit-field"><label>{{ field_labels.get(subkey, subkey) }}</label><div class="locked-value">{{ subval }}</div></div>
                                         {% endfor %}
                                     </div>
                                 {% else %}
@@ -381,7 +415,7 @@
                                         <div class="tile-card">
                                             <span class="tile-num">#{{ loop.index }}</span>
                                             {% for subkey, subval in item.items() %}
-                                                <div class="edit-field"><label>{{ subkey }}</label><div class="locked-value">{{ subval }}</div></div>
+                                                <div class="edit-field"><label>{{ field_labels.get(subkey, subkey) }}</label><div class="locked-value">{{ subval }}</div></div>
                                             {% endfor %}
                                         </div>
                                     {% endfor %}
@@ -391,7 +425,7 @@
                         </details>
                     {% else %}
                         <div class="edit-field">
-                            <label>{{ key }} <span class="lock-badge">🔒</span></label>
+                            <label>{{ field_labels.get(key, key) }} <span class="lock-badge">🔒</span></label>
                             <div class="locked-value">{{ value }}</div>
                             <p class="edit-note">ใช้ร่วมกันหลายหน้า แก้ไขได้ที่ <a href="/edit-common-data">หน้าข้อมูลกลาง</a></p>
                         </div>
@@ -446,7 +480,6 @@
         cur[last] = value;
     }
 
-    // ขยายกล่องข้อความยาวให้สูงพอดีเนื้อหาอัตโนมัติ ไม่ต้องลากขอบเอง
     function autoGrow(el){
         el.style.height = 'auto';
         el.style.height = (el.scrollHeight + 2) + 'px';
@@ -499,7 +532,6 @@
         thumbs.appendChild(div);
     }
 
-    // เพิ่ม/ลบแถวตาราง, ลบรูปภาพ — ใช้ event delegation รองรับปุ่มที่สร้างใหม่ระหว่างทางด้วย
     document.addEventListener('click', function(e){
         const addBtn = e.target.closest('.js-add-tile');
         if (addBtn){
@@ -508,7 +540,6 @@
             if (lastTile){
                 const newTile = lastTile.cloneNode(true);
                 newTile.querySelectorAll('input').forEach(function(inp){ inp.value = ''; });
-                // แถวใหม่ไม่ควรมีรูปภาพติดมาจากแถวที่ก็อปมา เริ่มจากคลังรูปว่างเสมอ
                 newTile.querySelectorAll('.js-image-thumb').forEach(function(t){ t.remove(); });
                 group.appendChild(newTile);
                 renumberTiles(group);
@@ -537,8 +568,6 @@
         }
     });
 
-    // อัปโหลดรูปทันทีที่เลือกไฟล์ ได้ URL กลับมาก็แปะ thumbnail เพิ่มเข้าไปเลย
-    // (ตัวไฟล์จริงจะถูกบันทึกจริงตอนกด "บันทึก" ของฟอร์มนี้ ไปเก็บ URL รวมกับข้อมูลหน้านั้น)
     document.addEventListener('change', function(e){
         if (!e.target.matches('.js-image-input')) return;
         const input = e.target;
@@ -569,13 +598,10 @@
         e.preventDefault();
         const merged = JSON.parse(JSON.stringify(baseData));
 
-        // ฟิลด์ธรรมดา (ข้อความ/ย่อหน้า/ค่าที่อยู่ในกลุ่ม dict) — ตรงไปตรงมาตามพาธเดิม
         document.querySelectorAll('input[data-path], textarea[data-path]').forEach(function(el){
             setPath(merged, el.getAttribute('data-path'), el.value);
         });
 
-        // ตารางที่เพิ่ม/ลบแถวได้ — สร้างอาร์เรย์ใหม่จากการ์ดที่เหลืออยู่จริงใน DOM ตามลำดับ
-        // (ไม่ใช้ข้อมูลเดิมจาก baseData เลย เพื่อให้แถวที่ถูกลบหายไปจริง ๆ ตอนบันทึก)
         document.querySelectorAll('.js-list-group').forEach(function(group){
             const listPath = group.getAttribute('data-list-path');
             const items = [];
@@ -584,7 +610,6 @@
                 tile.querySelectorAll('[data-subkey]').forEach(function(inp){
                     obj[inp.getAttribute('data-subkey')] = inp.value;
                 });
-                // ฟิลด์รูปภาพที่ซ้อนอยู่ในแถว (เช่น mow_images/spray_images ของแต่ละสถานี)
                 tile.querySelectorAll('.js-image-group[data-sub-key]').forEach(function(imgGroup){
                     const subKey = imgGroup.getAttribute('data-sub-key');
                     const urls = [];
@@ -598,7 +623,6 @@
             setPath(merged, listPath, items);
         });
 
-        // รูปภาพที่แนบ/ลบ (ฟิลด์รูประดับบนสุด ถ้ามี) — สร้างอาร์เรย์ URL ใหม่จาก thumbnail ที่เหลืออยู่จริงใน DOM
         document.querySelectorAll('.js-image-group[data-list-path]').forEach(function(group){
             const listPath = group.getAttribute('data-list-path');
             const urls = [];

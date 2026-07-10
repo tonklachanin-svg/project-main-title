@@ -19,7 +19,7 @@ def auth_login():
 
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT id, name, password, position, supervisor_id FROM users WHERE username = %s", (username,))
+    cursor.execute("SELECT id, name, password, position, supervisor_id, is_admin FROM users WHERE username = %s", (username,))
     user = cursor.fetchone()
 
     if user and check_password_hash(user['password'], password):
@@ -27,8 +27,8 @@ def auth_login():
         session['username'] = username
         session['name'] = user['name']
         session['position'] = user.get('position') or ''
+        session['is_admin'] = bool(user.get('is_admin'))
 
-        # ดึงชื่อ + ตำแหน่งของหัวหน้า/รองหัวหน้า (ชผ.) มาเก็บไว้ใน session ด้วย
         supervisor_name = ''
         supervisor_position = ''
         if user.get('supervisor_id'):
@@ -46,7 +46,7 @@ def auth_login():
 
         cursor.close()
         conn.close()
-        return redirect(url_for('select_category'))
+        return redirect(url_for('case_folder'))
 
     cursor.close()
     conn.close()
@@ -54,7 +54,6 @@ def auth_login():
 
 
 def get_supervisors():
-    """ดึงรายชื่อผู้ที่มีตำแหน่งหัวหน้า/รองหัวหน้า สำหรับใส่ใน dropdown ตอนสมัครสมาชิก"""
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
     cursor.execute(

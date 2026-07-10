@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block content %}
+<div class="convert-area">
 {% if request.args.get('saved') %}
 <div style="max-width:900px;margin:10px auto 0;padding:10px 16px;background:#e7f7ec;color:#157347;border-radius:8px;font-size:16px;text-align:center;">
     บันทึกข้อมูลกลางเรียบร้อยแล้ว ✓
@@ -14,7 +15,7 @@
 {% endif %}
 <div class="a4">
 
-    <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
 
     <div class="row mt10">
         <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data.from }}</div>
@@ -36,35 +37,34 @@
     </div>
 
     <div class="section-title mt18">1. ข้อมูล</div>
-    <div class="paragraph p1-body-indent">{{ data.section1 }}</div>
+<div class="paragraph p1-body-indent" style="white-space: pre-wrap;">{{ data.section1 }}</div>
 
-    <div class="section-title mt12">2. ข้อพิจารณา</div>
-    <div class="paragraph p1-body-indent">{{ data.section2 }}</div>
+<div class="section-title mt12">2. ข้อพิจารณา</div>
+<div class="paragraph p1-body-indent" style="white-space: pre-wrap;">{{ data.section2 }}</div>
 
-    <div class="paragraph p1-closing-indent mt8">{{ data.closing }}</div>
-
+<div class="paragraph p1-closing-indent mt8" style="white-space: pre-wrap;">{{ data.closing }}</div>
     <div class="sign-right">
         <div>{{ data.signature_from }}</div>
         <div>{{ data.position_from }}</div>
     </div>
 
-    <div class="approve">{{ data.approve }}</div>
+    <div class="approve p1-closing-indent mt8" style="white-space: pre-wrap;">{{ data.approve }}</div>
 
     <div class="sign-left">
         <div>{{ data.signature_approve }}</div>
         <div class="position-under">{{ data.position_approve }}</div>
     </div>
 
-    <div class="ref-table mt18">
+    <div class="ref-table">
     <table class="ref-table-box">
         <tr>
-            <td class="ref-label">ชผ.</td>
+            <td class="ref-label">หผ/ชผ.</td>
             <td class="ref-sign">{{ session.get('supervisor_name', '') }}</td>
             <td class="ref-sign">{{ today_th }}</td>
         </tr>
         <tr>
             <td class="ref-label">พชง.</td>
-            <td class="ref-sign">{{ session.get('name', '') }}</td>
+            <td class="ref-sign">{{ session.get('name', '').split()[0] }}</td>
             <td class="ref-sign">{{ today_th }}</td>
         </tr>
     </table>
@@ -76,4 +76,7 @@
 </div>
 
 </div>
+
+</div>
+
 {% endblock %}

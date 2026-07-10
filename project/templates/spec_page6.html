@@ -9,9 +9,9 @@
 {% block content %}
 <div class="a4 p6-voucher">
 
-    <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
 
-    <!-- ===== หัวแบบฟอร์ม ===== -->
+
     <div class="row mt10">
         <div class="left">เลขที่ กฟฟ.&nbsp;&nbsp;&nbsp;{{ data.receipt_ref }}</div>
         <div class="right">เลขที่&nbsp;&nbsp;&nbsp;{{ data.number }}</div>
@@ -26,7 +26,7 @@
 
     <div class="p6-title mt12">ใบสำคัญจ่ายเงิน</div>
 
-    <!-- ===== แถบข้อมูลบัญชี 3 คอลัมน์ ===== -->
+
     <table class="p6-info-box mt8">
         <tr>
             <td class="p6-info-col">
@@ -50,7 +50,7 @@
         </tr>
     </table>
 
-    <!-- ===== ตารางรายการ ===== -->
+
     <table class="p6-table mt8">
         <thead>
             <tr>
@@ -89,7 +89,7 @@
         <span class="p6-total-amount">{{ data.total_amount }}</span>
     </div>
 
-    <!-- ===== แถวลายเซ็นตรวจสอบ / อนุมัติจ่าย ===== -->
+
     <div class="row mt12">
         <div class="left">ตรวจสอบถูกต้องแล้ว</div>
         <div class="right">จ่ายเงินได้</div>
@@ -110,7 +110,7 @@
         <div class="right">............./............./...........................</div>
     </div>
 
-    <!-- ===== ส่วนใบเสร็จรับเงิน ===== -->
+
     <div class="row mt18">
         <div class="left">ใบเสร็จรับเงินเลขที่&nbsp;&nbsp;&nbsp;{{ data.receipt_no }}&nbsp;&nbsp;&nbsp;ลว.&nbsp;&nbsp;&nbsp;{{ data.receipt_date }}</div>
         <div class="right">เช็คเลขที่&nbsp;&nbsp;&nbsp;{{ data.check_no }}&nbsp;&nbsp;&nbsp;ลว.&nbsp;&nbsp;&nbsp;{{ data.check_date }}</div>
@@ -118,7 +118,7 @@
 
     <div class="paragraph mt8">
         ได้รับเงินไว้ถูกต้องแล้ว&nbsp;&nbsp;เมื่อวันที่&nbsp;...................&nbsp;เดือน&nbsp;.....................................&nbsp;พ.ศ.&nbsp;........................
-        <span class="p6-total-amount">จำนวนเงิน&nbsp;&nbsp;{{ data.total_amount }}</span>
+        <span class="p6-total-amount">จำนวนเงิน <span>{{ data.total_amount }}</span></span>
     </div>
 
     <div class="paragraph mt5">เป็นเงิน&nbsp;&nbsp;&nbsp;( {{ data.total_text }} )</div>
@@ -135,7 +135,7 @@
 
     <div class="p6-form-code mt8">ตบ. 7-ป. 33</div>
 
-    <!-- ตารางผู้เกี่ยวข้อง (ชผ./พชง.) — ฟีเจอร์ติดตามงานของระบบ ไม่ใช่ส่วนของหนังสือราชการต้นฉบับ -->
+
     <div class="ref-table mt12">
         <table class="ref-table-box">
             <tr>
@@ -145,7 +145,7 @@
             </tr>
             <tr>
                 <td class="ref-label">พชง.</td>
-                <td class="ref-sign">{{ session.get('name', '') }}</td>
+                <td class="ref-sign">{{ session.get('name', '').split()[0] }}</td>
                 <td class="ref-sign">{{ today_th }}</td>
             </tr>
         </table>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ประวัติการบันทึก</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+<script src="{{ url_for('static', filename='main.js') }}" defer></script>
+<style>
+        .history-wrap{ max-width:980px; margin:32px auto; padding:0 16px 60px; }
+        .history-wrap h1{ font-family:THSarabunBold; color:#40275c; margin-bottom:4px; }
+        .history-hint{ color:#777; margin-bottom:24px; }
+
+        .history-filters{
+            display:flex; flex-wrap:wrap; gap:12px; align-items:end;
+            background:#fff; border-radius:14px; padding:18px 20px; margin-bottom:24px;
+            border:1px solid rgba(0,0,0,0.06); box-shadow:0 2px 10px rgba(0,0,0,0.05);
+        }
+        .history-field{ display:flex; flex-direction:column; gap:6px; }
+        .history-field label{ font-family:THSarabunBold; font-size:13pt; color:#5a4d6b; }
+        .history-field input, .history-field select{
+            padding:9px 12px; border:1px solid rgba(0,0,0,0.15); border-radius:8px;
+            font-family:THSarabun; font-size:14pt; color:#2d1b3d; outline:none;
+        }
+        .history-field input:focus, .history-field select:focus{ border-color:#6f24a6; }
+        .history-search-btn{
+            padding:10px 24px; border:none; border-radius:999px; cursor:pointer;
+            background:linear-gradient(135deg, #6f24a6 0%, #b360d6 100%); color:#fff;
+            font-family:THSarabunBold; font-size:14.5pt;
+        }
+        .history-clear{
+            color:#8a8a9a; text-decoration:none; font-size:13.5pt; padding:10px 6px;
+        }
+
+        table.history-table{ width:100%; border-collapse:collapse; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
+        .history-table th, .history-table td{ padding:12px 16px; text-align:left; border-bottom:1px solid rgba(0,0,0,0.06); font-size:14pt; }
+        .history-table th{ background:#f5f0fa; font-family:THSarabunBold; color:#40275c; }
+        .history-table tr:last-child td{ border-bottom:none; }
+        .history-table tr:hover td{ background:rgba(111,36,166,0.04); }
+        .history-subject{ color:#2d1b3d; }
+        .history-meta{ color:#8a8a9a; font-size:12.5pt; }
+        .history-view{ text-decoration:none; color:#6f24a6; font-family:THSarabunBold; white-space:nowrap; }
+        .history-actions{ display:flex; align-items:center; gap:14px; }
+        .history-clone-btn{
+            border:1.5px solid rgba(111,36,166,0.3); background:#fff; color:#6f24a6;
+            padding:6px 14px; border-radius:999px; cursor:pointer;
+            font-family:THSarabunBold; font-size:13pt; white-space:nowrap;
+        }
+        .history-clone-btn:hover{ background:rgba(111,36,166,0.06); }
+        .history-delete-btn{
+            border:1.5px solid rgba(197,48,48,0.35); background:#fff; color:#c53030;
+            padding:6px 14px; border-radius:999px; cursor:pointer;
+            font-family:THSarabunBold; font-size:13pt; white-space:nowrap;
+        }
+        .history-delete-btn:hover{ background:rgba(197,48,48,0.08); }
+        .empty-note{ color:#8a8a9a; text-align:center; padding:40px 0; }
+</style>
+</head>
+<body>
+<div class="history-wrap">
+    <a class="back" href="/select" style="color:#40275c; font-family:THSarabunBold; text-decoration:none;">← เลือกประเภทเอกสาร</a>
+    <h1>ประวัติการบันทึก</h1>
+    <p class="history-hint">ทุกครั้งที่มีคนกด "บันทึก" ในฟอร์มแก้ไข ระบบจะเก็บสำเนาไว้ที่นี่ ค้นหาย้อนหลังได้ตามหมวดหมู่/เรื่อง/ผู้บันทึก/ช่วงวันที่</p>
+
+    <form class="history-filters" method="get" action="/history">
+        <div class="history-field">
+            <label>หมวดหมู่</label>
+            <select name="category">
+                <option value="">ทั้งหมด</option>
+                {% for c in categories %}
+                <option value="{{ c }}" {% if filters.category == c %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="history-field">
+            <label>ค้นหา (เรื่อง / ผู้บันทึก)</label>
+            <input type="text" name="keyword" value="{{ filters.keyword }}" placeholder="เช่น ท่าทราย 1 หรือ ชื่อผู้บันทึก">
+        </div>
+        <div class="history-field">
+            <label>ตั้งแต่วันที่</label>
+            <input type="date" name="date_from" value="{{ filters.date_from }}">
+        </div>
+        <div class="history-field">
+            <label>ถึงวันที่</label>
+            <input type="date" name="date_to" value="{{ filters.date_to }}">
+        </div>
+        <button type="submit" class="history-search-btn">🔍 ค้นหา</button>
+        {% if filters.category or filters.keyword or filters.date_from or filters.date_to %}
+        <a class="history-clear" href="/history">ล้างตัวกรอง</a>
+        {% endif %}
+    </form>
+
+    {% if entries %}
+    <table class="history-table">
+        <thead>
+            <tr>
+                <th>วันที่บันทึก</th>
+                <th>หมวดหมู่</th>
+                <th>หน้าเอกสาร</th>
+                <th>เรื่อง</th>
+                <th>ผู้บันทึก</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in entries %}
+            <tr>
+                <td class="history-meta">{{ e.created_at.strftime('%d/%m/%Y %H:%M') if e.created_at else '' }}</td>
+                <td class="history-meta">{{ e.category }}</td>
+                <td>{{ e.page_title }}</td>
+                <td class="history-subject">{{ e.subject or '-' }}</td>
+                <td class="history-meta">{{ e.user_name }}</td>
+                <td>
+                    <div class="history-actions">
+                        <button type="button" class="history-clone-btn" onclick='cloneFromHistory({{ e.id }}, {{ (e.subject or e.page_title)|tojson }})'>📋 โคลนงาน</button>
+                        <a class="history-view" href="/history/{{ e.id }}">ดูเอกสาร</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="empty-note">ไม่พบประวัติการบันทึกที่ตรงกับเงื่อนไข</p>
+    {% endif %}
+</div>
+
+<div id="toast" class="toast"></div>
+</body>
+</html>

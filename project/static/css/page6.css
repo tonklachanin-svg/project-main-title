@@ -1,5 +1,3 @@
-/* page6.css — ใบสำคัญจ่ายเงิน (payment voucher) */
-
 .p6-title {
     text-align: center;
     font-weight: bold;
@@ -98,17 +96,18 @@
 }
 .ref-table-box{
     float:right;
-    width:9cm;
+    width:6.5cm;
     border-collapse:collapse;
     margin:0;
 }
 
 .ref-table-box td{
     border:1px solid #555;
-    padding:3px 10px;
-    font-size:13pt;
+    padding:2px 8px;
+    font-size:11pt;
     background:none;
     color:#000;
+    text-align:center;
 }
 
 .ref-table-box tr:hover{

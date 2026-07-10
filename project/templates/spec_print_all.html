@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>พิมพ์เอกสารจัดซื้อจัดจ้าง (ครบชุด 5 หน้า)</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        /* สไตล์เฉพาะของหน้า 3 */
+<style>
+
         .p3-table { width: 100%; border-collapse: collapse; margin: 0.3cm 0; font-size: 14pt; }
         .p3-table th, .p3-table td { border: 1px solid #555; padding: 4px 8px; text-align: center; }
         .p3-table th { background: #f0e8f7; font-family: THSarabunBold; }
@@ -14,7 +14,7 @@
         .p3-section-num { font-family: THSarabunBold; color: #40275c; margin-top: 0.2cm; }
         .p3-list { margin-left: 0.6cm; margin-top: 0.1cm; }
 
-        /* สไตล์เฉพาะของหน้า 4 */
+
         .p4-table { width: 100%; border-collapse: collapse; margin: 0.3cm 0; font-size: 14pt; }
         .p4-table th, .p4-table td { border: 1px solid #555; padding: 4px 8px; text-align: center; }
         .p4-table th { background: #f0e8f7; font-family: THSarabunBold; }
@@ -33,12 +33,7 @@
             .no-print { display: none; }
             .p3-table, .p4-table { font-size: 12pt; }
 
-            /* หน้า 3 (รายงานขอจัดจ้าง) ในชุดพิมพ์รวม เดิมยาวเกิน 2 หน้าไปนิดเดียว ทำให้บล็อก
-               ลายเซ็นผู้เสนอ (signature_from) + ตาราง ชผ./พชง. ท้ายเอกสาร ซึ่งห้ามตัดกลาง
-               (page-break-inside:avoid) ถูกเขี่ยไปทั้งก้อนเป็นหน้าที่ 3 เกือบว่างเปล่าต่างหาก
-               (ตรวจด้วย Playwright PDF จริงพบหน้าที่เหลือแค่ตาราง ชผ./พชง. ตัวเดียว)
-               บีบระยะ/ระยะขอบของตาราง 2.1-2.2 และหัวข้อ 1-7 ลงเล็กน้อยตลอดทั้งหน้า
-               ให้เนื้อหาที่เหลือพอดีจบใน 2 หน้าเดิม ไม่ต้องเปิดหน้าที่ 3 อีกหน้า */
+
             .p3-table td, .p3-table th { padding: 2px 6px !important; }
             .p3-section-num { margin-top: 0.1cm !important; }
             .p3-list { margin-top: 0.05cm !important; }
@@ -46,28 +41,30 @@
             .ref-table.printall-p3-reftable{ margin-top:0.2cm !important; }
             .p3-signoff-approve{ margin-top:0.4cm !important; }
 
-            /* ภาคผนวกคุณสมบัติผู้เสนอราคาในหน้าพิมพ์รวม เดิมใช้ .paragraph ปกติ (เยื้อง 2.75cm,
-               line-height ปกติ) ทำให้เนื้อหายาวเกิน 1 หน้าไปนิดเดียว (บรรทัด "หมายเหตุ" ท้ายสุด
-               ล้นไปเป็นหน้าเกือบว่างเปล่าต่างหาก) บีบเฉพาะส่วนนี้ให้จบในหน้าเดียวเหมือนที่แก้ไว้
-               ในหน้า 3 เดี่ยว (page3.css) */
+
             .printall-appendix{ padding-top:0.5cm !important; padding-bottom:0.3cm !important; font-size:13.5pt; }
             .printall-appendix h2{ font-size:15pt; margin-bottom:0.1cm; }
             .printall-appendix .p3-section-num{ margin-top:0.06cm; }
             .printall-appendix .paragraph{ text-indent:1.25cm; margin-top:0.02cm; line-height:1.0 !important; }
         }
-    </style>
+</style>
 </head>
 <body>
 
-<!-- แถบนี้จะไม่ถูกพิมพ์ออกมา (ใช้เผื่อกรณีเปิดหน้านี้ตรง ๆ ไม่ได้มาจาก iframe) -->
+
 <div class="no-print">
+    {% if history_id %}
+    <a href="/history" style="margin-right:16px;">← กลับประวัติการบันทึก</a>
+    ดูฉบับ snapshot ตอนที่ส่งข้อมูล — ไม่ใช่ฉบับร่างปัจจุบัน
+    {% else %}
     เอกสารพร้อมพิมพ์ 5 หน้า — ถ้าหน้าต่างพิมพ์ไม่เด้งขึ้นอัตโนมัติ
+    {% endif %}
     <button onclick="window.print()">🖨 กดพิมพ์ที่นี่</button>
 </div>
 
-<!-- ===================== หน้า 1: หนังสือขอความเห็นชอบดำเนินการตัดหญ้า ===================== -->
+
 <div class="a4">
-    <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
 
     <div class="row mt10">
         <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data1.from }}</div>
@@ -104,8 +101,11 @@
     <div class="ref-table mt18">
         <table class="ref-table-box">
             <tr><td class="ref-label">ชผ.</td><td class="ref-sign">{{ session.get('supervisor_name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
-            <tr><td class="ref-label">พชง.</td><td class="ref-sign">{{ session.get('name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
-        </table>
+<tr>
+    <td class="ref-label">พชง.</td>
+    <td class="ref-sign">{{ session.get('name', '').split()[0] if session.get('name') else '' }}</td>
+    <td class="ref-sign">{{ today_th }}</td>
+</tr>        </table>
         <div class="ref-text">
             <div class="ref-dept mt5">{{ data1.dept_name }}</div>
             <div class="ref-tel">เบอร์โทร&nbsp;&nbsp;{{ data1.dept_tel }}</div>
@@ -113,10 +113,10 @@
     </div>
 </div>
 
-<!-- ===================== หน้า 2: มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ ===================== -->
+
 <div class="page-break"></div>
 <div class="a4">
-    <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
 
     <div class="row mt10">
         <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data2.from }}</div>
@@ -149,7 +149,11 @@
     <div class="ref-table mt18">
         <table class="ref-table-box">
             <tr><td class="ref-label">ชผ.</td><td class="ref-sign">{{ session.get('supervisor_name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
-            <tr><td class="ref-label">พชง.</td><td class="ref-sign">{{ session.get('name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
+            <tr>
+                <td class="ref-label">พชง.</td>
+                <td class="ref-sign">{{ session.get('name', '').split()[0] if session.get('name') else '' }}</td>
+                <td class="ref-sign">{{ today_th }}</td>
+            </tr>
         </table>
         <div class="ref-text">
             <div class="ref-dept mt5">{{ data2.dept_name }}</div>
@@ -158,10 +162,10 @@
     </div>
 </div>
 
-<!-- ===================== หน้า 3: รายงานขอจัดจ้างตัดหญ้าและฉีดยา (+ ภาคผนวก) ===================== -->
+
 <div class="page-break"></div>
 <div class="a4">
-    <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
 
     <div class="row mt10">
         <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data3.from }}</div>
@@ -279,7 +283,7 @@
     <div class="ref-table printall-p3-reftable mt18">
         <table class="ref-table-box">
             <tr><td class="ref-label">ชผ.</td><td class="ref-sign">{{ session.get('supervisor_name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
-            <tr><td class="ref-label">พชง.</td><td class="ref-sign">{{ session.get('name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
+            <tr><td class="ref-label">พชง.</td><td class="ref-sign">{{ session.get('name', '').split()[0] if session.get('name') else '' }}</td><td class="ref-sign">{{ today_th }}</td></tr>
         </table>
         <div class="ref-text">
             <div class="ref-dept mt5">{{ data3.dept_name }}</div>
@@ -288,7 +292,7 @@
     </div>
 </div>
 
-<!-- ภาคผนวกของหน้า 3: คุณสมบัติผู้เสนอราคา -->
+
 <div class="page-break"></div>
 <div class="a4 printall-appendix">
     <h2 style="text-align:center; margin-bottom:0.3cm;">
@@ -317,10 +321,10 @@
     </div>
 </div>
 
-<!-- ===================== หน้า 4: รายงาน + ใบสั่งจ้าง + เงื่อนไข + เอกสารแนบ ===================== -->
+
 <div class="page-break"></div>
 <div class="a4">
-    <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
 
     <div class="row mt10">
         <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data4.report_from }}</div>
@@ -496,10 +500,10 @@
 {% if not loop.last %}<div class="page-break"></div>{% endif %}
 {% endfor %}
 
-<!-- ===================== หน้า 5: ขออนุมัติจ่ายเงิน (จ่ายรายงวด) ===================== -->
+
 <div class="page-break"></div>
 <div class="a4">
-    <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
 
     <div class="row mt10">
         <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data5.from }}</div>
@@ -542,7 +546,7 @@
     <div class="ref-table mt18">
         <table class="ref-table-box">
             <tr><td class="ref-label">ชผ.</td><td class="ref-sign">{{ session.get('supervisor_name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
-            <tr><td class="ref-label">พชง.</td><td class="ref-sign">{{ session.get('name', '') }}</td><td class="ref-sign">{{ today_th }}</td></tr>
+            <tr><td class="ref-label">พชง.</td><td class="ref-sign">{{ session.get('name', '').split()[0] if session.get('name') else '' }}</td><td class="ref-sign">{{ today_th }}</td></tr>
         </table>
         <div class="ref-text">
             <div class="ref-dept mt5">{{ data5.dept }}</div>

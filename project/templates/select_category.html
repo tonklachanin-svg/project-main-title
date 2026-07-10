@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เลือกประเภทเอกสาร</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
-    <style>
+<script src="{{ url_for('static', filename='main.js') }}" defer></script>
+<style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
@@ -136,7 +137,7 @@
             flex-shrink: 0;
         }
 
-        /* ===== GRID (หมวดหมู่) ===== */
+
         .doc-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -249,7 +250,7 @@
             transform: translateX(0);
         }
 
-        /* สีแต่ละการ์ด */
+
         .c1 { --accent: #6f24a6; --badge-bg: rgba(111,36,166,0.09); --accent-text: #6f24a6; }
         .c2 { --accent: #1565c0; --badge-bg: rgba(21,101,192,0.09); --accent-text: #1565c0; }
         .c3 { --accent: #2e7d32; --badge-bg: rgba(46,125,50,0.09);  --accent-text: #2e7d32; }
@@ -270,18 +271,18 @@
             .topnav { padding: 0 18px; }
             .topnav-brand span { display: none; }
         }
-    </style>
+</style>
 </head>
 <body>
 
 <!-- TOP NAV -->
 <nav class="topnav">
     <div class="topnav-brand">
-        <img src="{{ url_for('static', filename='logo.jpg') }}" alt="logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="logo">
         <span>การไฟฟ้าส่วนภูมิภาค</span>
     </div>
     <div style="display:flex; align-items:center; gap:12px;">
-        <a href="/colleagues" class="btn-logout" style="color:#40275c; border-color:rgba(111,36,166,0.2);">👥 เพื่อนร่วมงาน</a>
+        <a href="/history" class="btn-logout" style="color:#40275c; border-color:rgba(111,36,166,0.2);">🕘 ประวัติการบันทึก</a>
         <a href="/logout" class="btn-logout">🚪 ออกจากระบบ</a>
     </div>
 </nav>
@@ -293,28 +294,87 @@
     <div class="hero-sub">เลือกประเภทเอกสารที่ต้องการดำเนินการ</div>
 </div>
 
-<!-- หมวดหมู่เอกสาร -->
+
 <div class="section-wrap">
     <div class="section-label">
         <span class="dot"></span>
         หมวดหมู่เอกสาร
     </div>
 
-    <div class="doc-grid">
+  <div class="doc-grid">
 
-        <a href="/select/mowing" class="doc-card c1" style="min-height:220px;">
-            <span class="card-count-badge">6 เอกสาร</span>
-            <div class="card-badge">🌿</div>
-            <div class="card-num">หมวดหมู่</div>
-            <div class="card-title">จัดซื้อจัดจ้าง — ตัดหญ้าและฉีดยากำจัดวัชพืช</div>
-            <div class="card-desc">ตั้งแต่ขอความเห็นชอบ มอบหมายผู้จัดทำ รายงานขอจัดจ้าง ใบสั่งจ้าง จนถึงขออนุมัติจ่ายเงิน รวม 6 เอกสาร</div>
-            <div class="card-arrow">→</div>
-        </a>
 
-        <!-- เตรียมไว้สำหรับหมวดหมู่เอกสารอื่นในอนาคต เพิ่มการ์ดแบบเดียวกันตรงนี้ได้เลย -->
+    <a href="/select/mowing" class="doc-card c1" style="min-height:220px;">
+        <span class="card-count-badge">6 เอกสาร</span>
+        <div class="card-badge">🌿</div>
+        <div class="card-num">หมวดหมู่ที่1</div>
+        <div class="card-title">
+            จัดซื้อจัดจ้าง — ตัดหญ้าและฉีดยากำจัดวัชพืช
+        </div>
+        <div class="card-desc">
+            ตั้งแต่ขอความเห็นชอบ มอบหมายผู้จัดทำ รายงานขอจัดจ้าง ใบสั่งจ้าง จนถึงขออนุมัติจ่ายเงิน รวม 6 เอกสาร
+        </div>
+        <div class="card-arrow">→</div>
+    </a>
 
-    </div>
+
+    <a href="/select/mowing2" class="doc-card c2" style="min-height:220px;">
+        <span class="card-count-badge">0 เอกสาร</span>
+        <div class="card-badge">📄</div>
+        <div class="card-num">หมวดหมู่ที่2</div>
+        <div class="card-title">
+            จ้างทำความสะอาด 
+        </div>
+        <div class="card-desc">
+            หนังสือขอความเห็นชอบจ้างทำความสะอาด 
+        </div>
+        <div class="card-arrow">→</div>
+    </a>
+
+
+    <a href="/select/mowing3" class="doc-card c3" style="min-height:220px;">
+        <span class="card-count-badge">0 เอกสาร</span>
+        <div class="card-badge">📄</div>
+        <div class="card-num">หมวดหมู่ที่3</div>
+        <div class="card-title">
+            จ้างปรับพื้นดิน
+        </div>
+        <div class="card-desc">
+            หนังสือขอความเห็นชอบจ้างปรับพื้นดิน
+        </div>
+        <div class="card-arrow">→</div>
+    </a>
+
+
+    <a href="/select/mowing4" class="doc-card c4" style="min-height:220px;">
+        <span class="card-count-badge">0 เอกสาร</span>
+        <div class="card-badge">📄</div>
+        <div class="card-num">หมวดหมู่ที่4</div>
+        <div class="card-title">
+            แบบยืมเงิน
+        </div>
+        <div class="card-desc">
+            แบบฟอร์มยืมเงินสำหรับการดำเนินงาน
+        </div>
+        <div class="card-arrow">→</div>
+    </a>
+
+
+    <a href="/select/mowing5" class="doc-card c5" style="min-height:220px;">
+        <span class="card-count-badge">0 เอกสาร</span>
+        <div class="card-badge">📄</div>
+        <div class="card-num">หมวดหมู่ที่5</div>
+        <div class="card-title">
+            อื่นๆ
+        </div>
+        <div class="card-desc">
+            เพิ่มเติม
+        </div>
+        <div class="card-arrow">→</div>
+    </a>
 </div>
+
+<div id="toast" class="toast"></div>
 
 </body>
 </html>

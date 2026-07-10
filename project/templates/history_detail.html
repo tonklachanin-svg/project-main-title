@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายละเอียดประวัติการบันทึก</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+<style>
+        .detail-wrap{ max-width:860px; margin:32px auto; padding:0 16px 60px; }
+        .detail-wrap h1{ font-family:THSarabunBold; color:#40275c; margin-bottom:4px; }
+        .detail-meta{ color:#777; margin-bottom:24px; }
+        .detail-meta b{ color:#40275c; }
+
+        .detail-card{ background:#fff; border-radius:14px; padding:20px 24px; margin-bottom:14px; border:1px solid rgba(0,0,0,0.06); box-shadow:0 2px 10px rgba(0,0,0,0.05); }
+        .detail-section-title{ font-family:THSarabunBold; color:#6f24a6; font-size:16pt; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid rgba(111,36,166,0.12); }
+        .detail-row{ display:flex; gap:14px; padding:6px 0; font-size:14pt; }
+        .detail-row .k{ min-width:200px; color:#8a8a9a; flex-shrink:0; }
+        .detail-row .v{ color:#2d1b3d; white-space:pre-wrap; word-break:break-word; }
+        .detail-tile{ border:1px solid rgba(0,0,0,0.08); border-radius:10px; padding:12px; margin-bottom:10px; }
+        .detail-tile-num{ font-family:THSarabunBold; color:#6f24a6; margin-bottom:6px; }
+</style>
+</head>
+<body>
+<div class="detail-wrap">
+    <a class="back" href="/history" style="color:#40275c; font-family:THSarabunBold; text-decoration:none;">← ประวัติการบันทึก</a>
+    <h1>{{ entry.page_title }}</h1>
+    <p class="detail-meta">
+        <b>เรื่อง:</b> {{ entry.subject or '-' }} &nbsp;·&nbsp;
+        <b>บันทึกโดย:</b> {{ entry.user_name }} &nbsp;·&nbsp;
+        <b>เมื่อ:</b> {{ entry.created_at.strftime('%d/%m/%Y %H:%M') if entry.created_at else '' }} &nbsp;·&nbsp;
+        <b>หมวดหมู่:</b> {{ entry.category }}
+    </p>
+
+    {% macro render(value) %}
+        {% if value is mapping %}
+            {% for k, v in value.items() %}
+                {% if v is mapping or (v is sequence and v is not string and v|length > 0 and v[0] is mapping) %}
+                    <div class="detail-card">
+                        <div class="detail-section-title">{{ k }}</div>
+                        {{ render(v) }}
+                    </div>
+                {% else %}
+                    <div class="detail-row"><div class="k">{{ k }}</div><div class="v">{{ v if v is not sequence or v is string else (v|join(', ') if v else '-') }}</div></div>
+                {% endif %}
+            {% endfor %}
+        {% elif value is sequence and value is not string %}
+            {% for item in value %}
+            <div class="detail-tile">
+                <div class="detail-tile-num">#{{ loop.index }}</div>
+                {{ render(item) }}
+            </div>
+            {% endfor %}
+        {% else %}
+            {{ value }}
+        {% endif %}
+    {% endmacro %}
+
+    <div class="detail-card">
+        {{ render(entry.data) }}
+    </div>
+</div>
+</body>
+</html>

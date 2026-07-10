@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>จัดซื้อจัดจ้าง — ตัดหญ้าและฉีดยากำจัดวัชพืช</title>
+    <title>จ้างทำความสะอาด - จ้างปรับพื้นดิน - แบบยืมเงิน</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
-<script src="{{ url_for('static', filename='main.js') }}" defer></script>
 <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -81,12 +80,6 @@
         .btn-print-all:disabled {
             opacity: 0.6;
             cursor: wait;
-        }
-
-        .topnav-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
         /* ===== HERO ===== */
@@ -242,78 +235,71 @@
 <nav class="topnav">
     <div class="topnav-left">
         <a href="/select" class="btn-back">← กลับหมวดหมู่</a>
-        <span class="topnav-title">จัดซื้อจัดจ้าง — ตัดหญ้าและฉีดยากำจัดวัชพืช</span>
+        <span class="topnav-title">
+        จ้างทำความสะอาด</span>
     </div>
-    <div class="topnav-right">
-        <button class="btn-print-all" id="btnPrintAll" onclick="printAll()">
-            🖨 พิมพ์ทั้งหมด
-        </button>
-    </div>
+    <button class="btn-print-all" id="btnPrintAll" onclick="printAll()">
+        🖨 พิมพ์ทั้งหมด
+    </button>
 </nav>
-
-<div id="toast" class="toast"></div>
 
 <!-- HERO -->
 <div class="hero">
     <div class="hero-title">เอกสารในหมวดนี้</div>
-    <div class="hero-sub">เป็นเอกสารที่เกี่ยวกับการจัดซื้อจัดจ้างการตัดหญ้าและฉีดยากำจัดวัชพืช</div>
+    <div class="hero-sub">เอกสารที่เกี่ยวกับการจ้างทำความสะอาด </div>
 </div>
 
 <!-- DOCUMENTS -->
 <div class="section-wrap">
     <div class="doc-grid">
 
-        <a href="/spec-page-1" class="doc-card c1">
-            <div class="card-badge">📋</div>
-            <div class="card-num">หน้า 1</div>
-            <div class="card-title">ขอความเห็นชอบ</div>
-            <div class="card-desc">หนังสือขอความเห็นชอบดำเนินการจัดจ้าง</div>
-            <div class="card-arrow">→</div>
-        </a>
+    <a href="/clean-page-1" class="doc-card c1">
+    <div class="card-badge">🧹</div>
+    <div class="card-num">หน้า 1</div>
+    <div class="card-title">ขอความเห็นชอบจ้างทำความสะอาด</div>
+    <div class="card-desc">หนังสือขอความเห็นชอบดำเนินการจ้างทำความสะอาด</div>
+    <div class="card-arrow">→</div>
+    </a>
 
-        <a href="/spec-page-2" class="doc-card c2">
-            <div class="card-badge">📊</div>
-            <div class="card-num">หน้า 2</div>
-            <div class="card-title">มอบหมายผู้จัดทำ</div>
-            <div class="card-desc">คุณลักษณะเฉพาะและราคากลาง</div>
-            <div class="card-arrow">→</div>
-        </a>
+    <a href="/clean-page-2" class="doc-card c2">
+    <div class="card-badge">⛩</div>
+    <div class="card-num">หน้า 2</div>
+    <div class="card-title">มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ</div>
+    <div class="card-desc">มอบหมายรายละเอียด</div>
+    <div class="card-arrow">→</div>
+    </a>
 
-        <a href="/spec-page-3" class="doc-card c3">
-            <div class="card-badge">📄</div>
-            <div class="card-num">หน้า 3</div>
-            <div class="card-title">รายงานขอจัดจ้าง</div>
-            <div class="card-desc">รายละเอียดพัสดุและเงื่อนไขการจ้าง</div>
-            <div class="card-arrow">→</div>
-        </a>
+    <a href="/clean-page-3" class="doc-card c3">
+    <div class="card-badge">⚓️</div>
+    <div class="card-num">หน้า 3</div>
+    <div class="card-title">TOR หน่วย</div>
+    <div class="card-desc"></div>
+    <div class="card-arrow">→</div>
+    </a>
 
-        <a href="/spec-page-4" class="doc-card c4">
-            <div class="card-badge">📑</div>
-            <div class="card-num">หน้า 4</div>
-            <div class="card-title">ใบสั่งจ้าง</div>
-            <div class="card-desc">สรุปผลการพิจารณาและใบสั่งจ้าง</div>
-            <div class="card-arrow">→</div>
-        </a>
+    <a href="/clean-page-4" class="doc-card c4">
+    <div class="card-badge">🗿</div>
+    <div class="card-num">หน้า 4</div>
+    <div class="card-title">งานจ้างทำความสะอาดหน่วย1</div>
+    <div class="card-desc"></div>
+    <div class="card-arrow">→</div>
+    </a>
 
-        <a href="/spec-page-5" class="doc-card c5">
-            <div class="card-badge">🧾</div>
-            <div class="card-num">หน้า 5</div>
-            <div class="card-title">ขออนุมัติจ่ายเงิน</div>
-            <div class="card-desc">จ่ายรายงวด ตรวจรับและอนุมัติจ่ายค่าจ้าง</div>
-            <div class="card-arrow">→</div>
-        </a>
+    <a href="/clean-page-5" class="doc-card c5">
+    <div class="card-badge">🥶</div>
+    <div class="card-num">หน้า 5</div>
+    <div class="card-title">รายงานผลการพิจารณา</div>
+    <div class="card-desc"></div>
+    <div class="card-arrow">→</div>
+    </a>
 
-        <a href="/spec-page-6" class="doc-card c6">
-            <div class="card-badge">✍</div>
-            <div class="card-num">หน้า 6</div>
-            <div class="card-title">ใบสำคัญจ่ายเงิน</div>
-            <div class="card-desc">แบบฟอร์มใบสำคัญจ่ายเงิน (ตบ. 7-ป. 33)</div>
-            <div class="card-arrow">→</div>
-        </a>
-
-    </div>
-</div>
-
+    <a href="/clean-page-6" class="doc-card c6">
+    <div class="card-badge">🤥</div>
+    <div class="card-num">หน้า 6</div>
+    <div class="card-title">ใบสั่งจ้างหน่วย ปี2569</div>
+    <div class="card-desc"></div>
+    <div class="card-arrow">→</div>
+    </a>
 <script>
 function printAll() {
     const btn = document.getElementById('btnPrintAll');

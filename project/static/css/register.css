@@ -1,9 +1,4 @@
-/* ==========================================================
-   register.css — หน้าสมัครสมาชิก
-   แนวทาง: เดียวกับ login.css (ทางการ / ราชการ)
-            แต่ layout เป็น single-column card กลางหน้า
-   Fonts:  Chakra Petch (หัวเรื่อง) + Sarabun (เนื้อหา)
-   ========================================================== */
+
 
 :root {
     --navy-deep:  #0A2647;
@@ -231,7 +226,7 @@ body {
     box-shadow: 0 0 0 3px rgba(18,58,102,0.12);
 }
 
-/* toggle สำหรับ password */
+
 .reg-toggle-pw {
     position: absolute;
     right: 0.7rem;

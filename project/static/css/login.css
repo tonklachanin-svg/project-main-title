@@ -1,9 +1,4 @@
-/* ==========================================================
-   login.css — หน้าเข้าสู่ระบบ
-   แนวทาง: ทางการ / หน่วยงานราชการ — กระดาษขาว + น้ำเงินเข้ม
-   Type: Chakra Petch (หัวเรื่อง, สื่อถึงงานวิศวกรรม/สาธารณูปโภค)
-         Sarabun (เนื้อหา, ฟอนต์ราชการไทยมาตรฐาน)
-   ========================================================== */
+
 
 :root{
     --navy-deep:   #0A2647;
@@ -40,7 +35,7 @@ body.login-body{
     min-height:100vh;
 }
 
-/* ---------- ฝั่งซ้าย: แผงองค์กร ---------- */
+
 .login-brand{
     position:relative;
     flex:0 0 42%;
@@ -53,7 +48,7 @@ body.login-body{
     overflow:hidden;
 }
 
-/* ลายเส้นโครงข่ายไฟฟ้า — ลายเซ็นของดีไซน์นี้ */
+
 .login-brand::before{
     content:"";
     position:absolute;
@@ -109,7 +104,7 @@ body.login-body{
     color:rgba(255,255,255,0.6);
 }
 
-/* เส้นวงจร — คั่นแบบ signature */
+
 .circuit-rule{
     display:flex;
     align-items:center;
@@ -154,7 +149,7 @@ body.login-body{
     padding-top:1rem;
 }
 
-/* ---------- ฝั่งขวา: ฟอร์ม ---------- */
+
 .login-form-side{
     flex:1;
     display:flex;

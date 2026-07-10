@@ -1,7 +1,3 @@
-/* =========================================================
-   PAGE4.CSS — เฉพาะรายงาน/ใบสั่งจ้างตัดหญ้า หน่วย พค 68 แบบแผน
-========================================================= */
-
 .p4-table{
     width:100%;
     border-collapse:collapse;
@@ -22,9 +18,7 @@
 .p4-title{ text-align:center; font-family:THSarabunBold; font-size:18pt; margin-bottom:0.3cm; }
 .p4-signblock{ text-align:center; margin-top:0.6cm; }
 
-/* รูป/PDF ที่แนบเข้ามา ไม่ว่าไฟล์ต้นฉบับจะขนาดเท่าไหร่ ครอบตัด (object-fit:cover) ให้เป็น
-   กรอบขนาดคงที่เดียวกันเสมอ 7.17 x 5.29 ซม. และใช้ auto-fill แทน repeat(2,1fr) เดิม
-   เพื่อไม่ให้ตายตัวแค่ 2 ช่องต่อแถว — แนบกี่ไฟล์ก็ได้ ไหลขึ้นแถวใหม่เองอัตโนมัติ */
+
 .p4-photo-grid{
     display:grid;
     grid-template-columns: repeat(auto-fill, 7.17cm);

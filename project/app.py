@@ -10,54 +10,179 @@ from flask_session import Session
 from database import get_db
 from auth import auth
 from common_data import get_common_data, save_common_data, apply_common_data
-from document_drafts import get_draft, save_draft
-
+from document_drafts import get_draft, save_draft, ensure_case_column
+from document_history import ensure_table as ensure_history_table, log_submission, search_history, get_history_entry, delete_entry as delete_history_entry, seconds_since_last_submission
+import document_cases
 
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'pea2569-xK9mQ')
 
-# โฟลเดอร์เก็บไฟล์รูปที่แนบผ่านฟอร์มแก้ไข (เช่น รูปพื้นที่ตัดหญ้า/ฉีดยาในหน้า 4)
-# เก็บตัวไฟล์จริงไว้บนดิสก์ ส่วนพาธของรูป (string) จะถูกเก็บลง MySQL ผ่าน
-# document_drafts.data_json เหมือนข้อมูลฟิลด์อื่น ๆ ของหน้านั้น
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_IMAGE_EXT = {'jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf'}
 
-# ข้อจำกัดชนิดไฟล์เฉพาะบางฟิลด์: mow_images รับเฉพาะรูปภาพ, spray_images รับเฉพาะเอกสาร
-# (ฟิลด์อื่นที่ไม่ระบุในนี้ยังใช้ ALLOWED_IMAGE_EXT เดิม คือรูปภาพ + PDF)
 FIELD_ALLOWED_EXT = {
     'mow_images': {'jpg', 'jpeg', 'png', 'gif', 'webp'},
     'spray_images': {'pdf', 'doc', 'docx', 'xls', 'xlsx'},
 }
-app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024  # จำกัดไฟล์แนบไม่เกิน 8MB ต่อไฟล์
+app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024
 
-# ชื่อไฟล์ที่เซฟลงดิสก์จริงคือ "<uuid สุ่ม 32 ตัวอักษร>_<ชื่อไฟล์เดิม>" เพื่อกันชนกัน
-# แต่ยังเก็บชื่อไฟล์เดิม (รวมภาษาไทย) ไว้ด้วย จะได้เอามาโชว์ในฟอร์ม/หน้าเอกสารได้
 _UUID_PREFIX_RE = re.compile(r'^[0-9a-f]{32}_')
 
 
 def sanitize_original_filename(name):
-    """ตัดเฉพาะส่วนที่เป็น path/อักขระที่ใช้ในชื่อไฟล์ไม่ได้ออก ส่วนภาษาไทย/ยูนิโค้ด
-    อื่น ๆ คงไว้เหมือนเดิม (ไม่ใช้ werkzeug.secure_filename เพราะมันตัดอักษรไทยทิ้งหมด)
-    """
     name = os.path.basename(name)
     name = re.sub(r'[\\/:*?"<>|\x00-\x1f]', '_', name)
     return name[-150:] or 'file'
 
 
 def display_filename(url):
-    """ดึงชื่อไฟล์เดิมที่ผู้ใช้อัปโหลดออกมาจาก URL ที่เก็บไว้ (ตัด uuid prefix ทิ้ง)"""
     name = urllib.parse.unquote(url.rsplit('/', 1)[-1])
     return _UUID_PREFIX_RE.sub('', name, count=1)
 
 
 app.jinja_env.filters['display_filename'] = display_filename
 
-# เก็บ session ฝั่งเซิร์ฟเวอร์แทน cookie ฝั่งไคลเอนต์ (เดิมติดตั้ง Flask-Session ไว้แล้ว
-# แต่ไม่เคยเปิดใช้งานจริง) เพราะ form_store เก็บฉบับร่างของทั้งเอกสาร ขนาดใหญ่เกินกว่า
-# ที่ cookie ปกติ (จำกัดราว 4KB ต่อโดเมนในเบราว์เซอร์) จะรับไหว พอเนื้อหายาว (เช่นหน้า 3/4)
-# เบราว์เซอร์จะปฏิเสธ Set-Cookie แบบเงียบ ๆ ทำให้ข้อมูลที่บันทึกหายไปโดยไม่มี error ใด ๆ
+
+def first_name(full_name):
+    if not full_name:
+        return full_name
+    parts = full_name.split()
+    return parts[0] if parts else full_name
+
+
+app.jinja_env.filters['first_name'] = first_name
+
+FIELD_LABELS = {
+    'from': 'จาก',
+    'to': 'ถึง',
+    'number': 'เลขที่',
+    'date': 'วันที่',
+    'subject': 'เรื่อง',
+    'receiver': 'เรียน',
+    'section1': 'ข้อมูล (ข้อ 1)',
+    'section2': 'ข้อพิจารณา (ข้อ 2)',
+    'closing': 'ข้อความปิดท้าย',
+    'signature_from': 'ลายเซ็นผู้เสนอ',
+    'position_from': 'ตำแหน่งผู้เสนอ',
+    'approve': 'ข้อความอนุมัติ',
+    'approve_text': 'ข้อความอนุมัติ',
+    'signature_approve': 'ลายเซ็นผู้อนุมัติ',
+    'position_approve': 'ตำแหน่งผู้อนุมัติ',
+    'intro': 'คำนำ',
+    'reason': 'เหตุผลและความจำเป็น',
+    'detail_intro': 'รายละเอียดพัสดุ',
+    'mow_table': 'ตารางพื้นที่ตัดหญ้า',
+    'mow_total': 'ยอดรวมตัดหญ้า',
+    'spray_table': 'ตารางพื้นที่ฉีดยา',
+    'spray_total': 'ยอดรวมฉีดยา',
+    'last_hired': 'จ้างครั้งล่าสุด',
+    'price_basis': 'ที่มาราคากลาง',
+    'budget_detail': 'รายละเอียดงบประมาณ',
+    'deadline': 'กำหนดส่งมอบ',
+    'method': 'วิธีจัดซื้อจัดจ้าง',
+    'officer_name': 'ชื่อเจ้าหน้าที่',
+    'officer_pos': 'ตำแหน่งเจ้าหน้าที่',
+    'committee': 'คณะกรรมการ',
+    'committee_order': 'คำสั่งแต่งตั้งคณะกรรมการ',
+    'dept_phone': 'เบอร์โทรแผนก',
+    'qualification_intro': 'คุณสมบัติผู้เสนอราคา',
+    'condition_offer': 'เงื่อนไขการเสนอราคา',
+    'delivery_days': 'จำนวนวันส่งมอบ',
+    'delivery_place': 'สถานที่ส่งมอบ',
+    'delivery_doc_count': 'จำนวนฉบับเอกสารส่งมอบ',
+    'delivery_due_date': 'วันครบกำหนดส่งมอบ',
+    'warranty_period': 'ระยะเวลารับประกัน',
+    'penalty_clause': 'เงื่อนไขค่าปรับ',
+    'rejection_clause': 'เงื่อนไขการไม่รับมอบ',
+    'penalty_rate_daily': 'อัตราค่าปรับรายวัน (%)',
+    'penalty_lump_sum': 'ค่าปรับเหมาจ่ายต่อวัน',
+    'penalty_rate_lump': 'อัตราค่าปรับเหมาจ่าย (%)',
+    'penalty_min_daily': 'ค่าปรับขั้นต่ำต่อวัน',
+    'report_from': 'จาก',
+    'report_to': 'ถึง',
+    'report_number': 'เลขที่',
+    'report_date': 'วันที่',
+    'report_subject': 'เรื่อง',
+    'report_receiver': 'เรียน',
+    'report_intro': 'คำนำรายงาน',
+    'order_table': 'ตารางสรุปผลการพิจารณา',
+    'order_total': 'ยอดรวม',
+    'report_consideration': 'ผลการพิจารณา',
+    'report_budget_source': 'แหล่งงบประมาณ',
+    'report_closing': 'ข้อความปิดท้าย',
+    'vendor_name': 'ชื่อผู้ขาย/ผู้รับจ้าง',
+    'vendor_address': 'ที่อยู่ผู้ขาย/ผู้รับจ้าง',
+    'vendor_phone': 'เบอร์โทรผู้ขาย/ผู้รับจ้าง',
+    'bank_account_no': 'เลขบัญชีธนาคาร',
+    'bank_account_name': 'ชื่อบัญชีธนาคาร',
+    'bank_name': 'ชื่อธนาคาร',
+    'po_intro': 'คำนำใบสั่งจ้าง',
+    'po_table': 'ตารางใบสั่งจ้าง',
+    'po_total': 'ยอดรวมใบสั่งจ้าง',
+    'po_note': 'หมายเหตุใบสั่งจ้าง',
+    'approver_name': 'ชื่อผู้อนุมัติ',
+    'approver_pos': 'ตำแหน่งผู้อนุมัติ',
+    'station_areas': 'พื้นที่แต่ละสถานี',
+    'mow_images': 'รูปพื้นที่ตัดหญ้า',
+    'spray_images': 'เอกสาร/รูปพื้นที่ฉีดยา',
+    'name': 'ชื่อ',
+    'month': 'เดือน',
+    'year': 'ปี',
+    'period': 'งวดที่',
+    'amount': 'จำนวนเงิน',
+    'amount_text': 'จำนวนเงิน (ตัวอักษร)',
+    'vat_note': 'หมายเหตุภาษี',
+    'dept': 'แผนก',
+    'tel': 'เบอร์โทร',
+    'receipt_ref': 'เลขที่ กฟฟ.',
+    'date_day': 'วันที่ (วัน)',
+    'date_month': 'วันที่ (เดือน)',
+    'date_year': 'วันที่ (ปี)',
+    'payee': 'ผู้เบิก',
+    'payee_address': 'ที่อยู่ผู้เบิก',
+    'branch': 'กฟฟ.',
+    'budget_type': 'ประเภทงบ',
+    'job_number': 'หมายเลขงาน',
+    'account_code': 'รหัสบัญชี',
+    'cashbook_page': 'สมุดเงินสดหน้า',
+    'debit_account': 'เดบิทบัญชี',
+    'posted_date': 'ลงบัญชีเมื่อ',
+    'voucher_items': 'รายการเบิกจ่าย',
+    'description': 'รายละเอียด',
+    'satang': 'สตางค์',
+    'subtotal': 'ยอดรวมย่อย',
+    'subtotal_satang': 'สตางค์ยอดรวมย่อย',
+    'vat': 'ภาษีมูลค่าเพิ่ม',
+    'vat_satang': 'สตางค์ภาษี',
+    'total_text': 'ยอดรวม (ตัวอักษร)',
+    'total_amount': 'ยอดรวมทั้งสิ้น',
+    'receipt_no': 'ใบเสร็จเลขที่',
+    'receipt_date': 'วันที่ใบเสร็จ',
+    'check_no': 'เช็คเลขที่',
+    'check_date': 'วันที่เช็ค',
+    'total': 'พื้นที่รวม',
+    'area': 'พื้นที่ดำเนินการ',
+    'price': 'ราคา',
+    'item': 'รายการ',
+    'offer_price': 'ราคาที่เสนอ',
+    'agreed_price': 'ราคาที่ตกลง',
+    'qty': 'จำนวน',
+    'unit': 'หน่วย',
+    'unit_price': 'ราคาต่อหน่วย',
+    'pos': 'ตำแหน่ง',
+    'role': 'บทบาท',
+    'position': 'ตำแหน่ง',
+    'text': 'ตัวอักษร',
+    'grand_total': 'ยอดรวมสุทธิ',
+    'dept_name': 'ชื่อแผนก',
+    'dept_tel': 'เบอร์โทรแผนก',
+    'org_from': 'จาก',
+    'org_to': 'ถึง',
+}
+app.jinja_env.globals['field_labels'] = FIELD_LABELS
+
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = os.path.join(os.path.dirname(__file__), 'flask_session')
 app.config['SESSION_PERMANENT'] = False
@@ -65,23 +190,66 @@ Session(app)
 
 app.register_blueprint(auth)
 
+
+def ensure_admin_support():
+    conn = get_db()
+    try:
+        cur = conn.cursor()
+        try:
+            cur.execute("ALTER TABLE users ADD COLUMN is_admin TINYINT(1) NOT NULL DEFAULT 0")
+            conn.commit()
+        except mysql.connector.Error as e:
+            if e.errno != 1060:
+                raise
+
+        cur.execute("SELECT COUNT(*) FROM users WHERE is_admin = 1")
+        (admin_count,) = cur.fetchone()
+        if admin_count == 0:
+            cur.execute(
+                "UPDATE users SET is_admin = 1 "
+                "WHERE id = (SELECT id FROM (SELECT MIN(id) AS id FROM users) AS t)"
+            )
+            conn.commit()
+        cur.close()
+    finally:
+        conn.close()
+
+
+ensure_history_table()
+ensure_admin_support()
+ensure_case_column()
+document_cases.ensure_table()
+document_cases.backfill_legacy_drafts()
+
 from datetime import datetime
 
 THAI_MONTHS = [
-    '', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    '', 'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+    'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
 ]
  
 @app.context_processor
 def inject_today_th():
-    """ทำให้ทุก template เรียกใช้ตัวแปร today_th ได้เลย
-    โดยไม่ต้อง pass มาจากทุก route -- จะได้วันที่ปัจจุบันแบบไทย
-    เช่น '2 กรกฎาคม 2569' อัตโนมัติทุกครั้งที่เปิดหน้า
-    """
     now = datetime.now()
     thai_year = now.year + 543
     today_th = f"{now.day} {THAI_MONTHS[now.month]} {thai_year}"
     return {'today_th': today_th}
+
+
+def thai_date(dt):
+    if not dt:
+        return '-'
+    return f"{dt.day} {THAI_MONTHS[dt.month]} {dt.year + 543}"
+
+
+def thai_datetime(dt):
+    if not dt:
+        return '-'
+    return f"{dt.day} {THAI_MONTHS[dt.month]} {dt.year + 543} {dt.strftime('%H:%M')} น."
+
+
+app.jinja_env.filters['thai_date'] = thai_date
+app.jinja_env.filters['thai_datetime'] = thai_datetime
 
 
 DEFAULT_DATA = {
@@ -101,9 +269,6 @@ DEFAULT_DATA = {
     'position_approve': 'อก.ปบ.(ก3)'
 }
 
-# ===== ข้อมูลเริ่มต้นสำหรับหน้า 2: มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ =====
-# (เดิมหน้านี้ไม่มีชุดข้อมูลของตัวเอง เลยไปใช้ DEFAULT_DATA ของหน้า 1 แทนโดยไม่ได้ตั้งใจ
-#  ข้อความด้านล่างนำมาจากเอกสารจริง 2_มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ.docx)
 DEFAULT_DATA_PAGE2 = {
     'from': 'ผจฟ.1',
     'to': 'กปบ.(ก3)',
@@ -121,7 +286,6 @@ DEFAULT_DATA_PAGE2 = {
     'position_approve': 'อก.ปบ.(ก3)'
 }
 
-# ===== ข้อมูลเริ่มต้นสำหรับหน้า 3: รายงานขอจัดจ้าง =====
 DEFAULT_DATA_PAGE3 = {
     'from': 'ผจฟ.1',
     'to': 'กปบ.(ก3)',
@@ -194,9 +358,7 @@ DEFAULT_DATA_PAGE3 = {
     'rejection_clause': 'การไฟฟ้าส่วนภูมิภาค สงวนสิทธิ์ที่จะไม่รับมอบพัสดุ/งานนั้น ถ้าปรากฏว่า พัสดุ/งานนั้นมีลักษณะไม่ตรงตามรายการที่ระบุไว้ในใบสั่งซื้อ/สั่งจ้าง กรณีผู้ขาย/ผู้รับจ้าง ต้องดำเนินการแก้ไขให้ถูกต้องตามใบสั่งซื้อ/สั่งจ้างทุกประการ ด้วยค่าใช้จ่ายของผู้ขาย/ผู้รับจ้างเอง และระยะเวลาที่เสียไปเพราะเหตุดังกล่าว ผู้ขาย/ผู้รับจ้างจะนำมาอ้างเป็นเหตุขอขยายเวลาทำการตามใบสั่งซื้อ/สั่งจ้าง หรือของด หรือลดค่าปรับไม่ได้',
 }
 
-# ===== ข้อมูลเริ่มต้นสำหรับหน้า 4: รายงานสรุปผลการพิจารณา + ใบสั่งจ้าง + เอกสารแนบ =====
 DEFAULT_DATA_PAGE4 = {
-    # --- ส่วนที่ 1: รายงานสรุปผลการพิจารณา, ตรวจรับ และอนุมัติจ่ายเงิน ---
     'report_from': 'ผจฟ.1',
     'report_to': 'กปบ.(ก3)',
     'report_number': 'ก.3 กปบ.(จฟ.1)',
@@ -225,7 +387,6 @@ DEFAULT_DATA_PAGE4 = {
     'report_budget_source': 'โดยเบิกจากงบทำการค่าจ้างบำรุงรักษาสวน รหัสบัญชี 53034030 ศูนย์ต้นทุน I301031040',
     'report_closing': 'จึงเรียนมาเพื่อโปรดพิจารณา หากเห็นชอบ ขอได้โปรดอนุมัติให้สั่งซื้อ/จ้าง จากผู้เสนอราคาดังกล่าว พร้อมทั้งแจ้งคณะกรรมการตรวจรับ ดำเนินการต่อไป',
 
-    # --- ส่วนที่ 2: ใบสั่งจ้าง ---
     'vendor_name': 'นายสมพร คำกลั่น',
     'vendor_address': 'เลขที่ 136 หมู่ที่ 6 ตำบลยกกระบัตร อำเภอบ้านแพ้ว จังหวัดสมุทรสาคร 74120',
     'vendor_phone': '',
@@ -256,7 +417,6 @@ DEFAULT_DATA_PAGE4 = {
     'approver_name': 'นายพัทธนันท์ พชิราสุวรรณ์ชล',
     'approver_pos': 'อก.ปบ.(ก3)',
 
-    # --- ส่วนที่ 3: เงื่อนไขประกอบการสั่งจ้าง ---
     'delivery_doc_count': '',
     'delivery_days': '30',
     'delivery_due_date': '',
@@ -267,7 +427,6 @@ DEFAULT_DATA_PAGE4 = {
     'penalty_rate_lump': '0.10',
     'penalty_min_daily': '100',
 
-    # --- ส่วนที่ 4: เอกสารแนบ 1 - รูปภาพแยกตามสถานี (ใส่ path รูปใน static/uploads/ เพิ่มเองได้ภายหลัง) ---
     'station_areas': [
         {
             'name': 'สถานีไฟฟ้าท่าทราย 1',
@@ -292,7 +451,6 @@ DEFAULT_DATA_PAGE4 = {
     ],
 }
 
-# ===== ข้อมูลเริ่มต้นสำหรับหน้า 5: รายงานผลการจ้าง / ขออนุมัติจ่ายเงินค่าจ้างทำความสะอาด =====
 DEFAULT_DATA_PAGE5 = {
     'from': 'คณะกรรมการตรวจรับพัสดุ',
     'to': 'กปบ.(ก3)',
@@ -325,7 +483,6 @@ DEFAULT_DATA_PAGE5 = {
     'tel': '10520 - 21',
 }
 
-# ===== ข้อมูลเริ่มต้นสำหรับหน้า 6: ใบสำคัญจ่ายเงิน =====
 DEFAULT_DATA_PAGE6 = {
     'receipt_ref': '',
     'number': '',
@@ -362,13 +519,21 @@ DEFAULT_DATA_PAGE6 = {
 }
 
 
-# รายชื่อหน้าเอกสารที่แก้ไขแยกชุดกันได้
 VALID_PAGES = ['main', 'spec_page1', 'spec_page2', 'report', 'spec_page3', 'spec_page4', 'spec_page5', 'spec_page6']
 
-# ฟิลด์ระดับบนสุดที่ apply_common_data() เขียนทับทุกครั้งที่โหลดหน้า (ดึงจาก "ข้อมูลกลาง")
-# แก้ผ่านฟอร์มแก้ไขเนื้อหาของหน้านั้นตรง ๆ ไม่มีผล เพราะโหลดครั้งถัดไปจะถูกเขียนทับกลับ
-# ต้องไปแก้ที่หน้า "ข้อมูลกลาง" แทน — ใช้รายการนี้บอกฟอร์มแก้ไขไม่ให้เปิดแก้ไขฟิลด์เหล่านี้
-# ตรงๆ (กันสับสนว่า "แก้ไปแล้วทำไมไม่เซฟ")
+CATEGORY_MOWING = 'หมวดหมู่ที่1: จัดซื้อจัดจ้าง — ตัดหญ้าและฉีดยากำจัดวัชพืช'
+PAGE_TITLES = {
+    'main': 'หนังสือขอความเห็นชอบดำเนินการตัดหญ้า',
+    'report': 'รายงานสรุปผลการพิจารณา',
+    'spec_page1': '1.หนังสือขอความเห็นชอบดำเนินการตัดหญ้า',
+    'spec_page2': '2.มอบหมายผู้จัดทำรายละเอียดคุณลักษณะเฉพาะ',
+    'spec_page3': '3.รายงานขอจัดจ้างตัดหญ้าและฉีดยา ททร.1(1)แผนก',
+    'spec_page4': '4.รายงาน ใบสั่งจ้างตัดหญ้า หน่วย พค 68 แบบแผน',
+    'spec_page5': '5.จ่ายรายงวด ขออนุมัติจ่ายเงินค่าจ้างทำความสะอาด',
+    'spec_page6': '6.ใบสำคัญจ่ายเงิน',
+}
+PAGE_CATEGORY = {page: CATEGORY_MOWING for page in VALID_PAGES}
+
 COMMON_DATA_LOCKED_FIELDS = {
     'main': ['signature_from', 'from', 'to', 'position_from', 'dept_name', 'dept_tel'],
     'spec_page1': ['signature_from', 'from', 'to', 'position_from', 'dept_name', 'dept_tel'],
@@ -390,6 +555,15 @@ def login_required(f):
     return decorated
 
 
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('is_admin'):
+            return jsonify({'status': 'error', 'message': 'เฉพาะแอดมินเท่านั้นที่ทำรายการนี้ได้'}), 403
+        return f(*args, **kwargs)
+    return decorated
+
+
 @app.errorhandler(413)
 def handle_file_too_large(e):
     if request.path.startswith('/api/'):
@@ -397,7 +571,6 @@ def handle_file_too_large(e):
     return e
 
 
-# กำหนดชุดข้อมูล default ของแต่ละหน้าไว้ในที่เดียว เพื่อให้ดูแลง่ายเมื่อมีหน้าเพิ่มในอนาคต
 PAGE_DEFAULTS = {
     'spec_page2': DEFAULT_DATA_PAGE2,
     'spec_page3': DEFAULT_DATA_PAGE3,
@@ -406,25 +579,32 @@ PAGE_DEFAULTS = {
     'spec_page6': DEFAULT_DATA_PAGE6,
 }
 
-def get_form_data(page_key, owner_id=None):
-    """อ่านข้อมูลเอกสารของหน้าที่ระบุ สำหรับเจ้าของ (owner_id) ที่ระบุ
-    ถ้าไม่ระบุ owner_id จะใช้ผู้ใช้ที่ login อยู่ปัจจุบัน (ดู/แก้ของตัวเอง)
-    ถ้า owner_id เป็นคนอื่น จะอ่านฉบับร่างของคนนั้นแบบ read-only
+def get_active_case_id():
+    case_id = session.get('case_id')
+    if case_id:
+        return case_id
+    case_id = document_cases.create_case(session['user_id'], session.get('name') or '', CATEGORY_MOWING)
+    session['case_id'] = case_id
+    return case_id
 
-    ฉบับร่างเก็บถาวรใน MySQL (document_drafts) แยกตามผู้ใช้แต่ละคน
-    ถ้าเจ้าของยังไม่เคยบันทึกฉบับร่างของหน้านี้เลย จะคืนค่าเริ่มต้น (DEFAULT_DATA)
-    ไปก่อน โดยยังไม่บันทึกลงฐานข้อมูลจนกว่าจะมีการแก้ไขจริงผ่าน /api/save-form
-    """
+
+def latest_case_id_for_user(user_id):
+    cases = document_cases.list_cases(user_id)
+    return cases[0]['id'] if cases else None
+
+
+def get_form_data(page_key, owner_id=None):
     if owner_id is None:
-        owner_id = session.get('user_id')
+        case_id = get_active_case_id()
+    else:
+        case_id = latest_case_id_for_user(owner_id)
 
     default = PAGE_DEFAULTS.get(page_key, DEFAULT_DATA)
-    draft = get_draft(owner_id, page_key)
+    draft = get_draft(case_id, page_key)
 
     if draft is None:
         page_data = dict(default)
     else:
-        # เติม key ใหม่ที่เพิ่งเพิ่มเข้า DEFAULT_DATA แต่ฉบับร่างเดิมยังไม่มี
         page_data = dict(default)
         page_data.update(draft)
 
@@ -433,9 +613,6 @@ def get_form_data(page_key, owner_id=None):
 
 
 def resolve_viewer():
-    """อ่าน ?user=<id> จาก query string เพื่อรองรับการดูงานของเพื่อนร่วมงานแบบ read-only
-    คืนค่า (owner_id, readonly, owner_name) — ถ้าไม่ระบุ หรือระบุเป็นตัวเอง จะถือว่า
-    กำลังดู/แก้ไขข้อมูลของตัวเอง (readonly=False)"""
     my_id = session.get('user_id')
     requested = request.args.get('user', type=int)
     if not requested or requested == my_id:
@@ -456,6 +633,61 @@ def resolve_viewer():
     return requested, True, row['name']
 
 
+@app.route('/folder')
+@login_required
+def case_folder():
+    keyword = request.args.get('keyword', '').strip()
+    status = request.args.get('status', '').strip()
+    cases = document_cases.list_cases(session['user_id'], keyword=keyword or None, status=status or None)
+    return render_template(
+        'folder.html', username=session.get('name'), cases=cases,
+        filters={'keyword': keyword, 'status': status},
+    )
+
+
+@app.route('/api/case/mark-in-progress', methods=['POST'])
+@login_required
+def api_mark_in_progress():
+    case_id = get_active_case_id()
+    document_cases.mark_in_progress(case_id)
+    return jsonify({'status': 'success'})
+
+
+@app.route('/folder/new')
+@login_required
+def case_new():
+    case_id = document_cases.create_case(session['user_id'], session.get('name') or '', CATEGORY_MOWING)
+    session['case_id'] = case_id
+    return redirect(url_for('select_category'))
+
+
+@app.route('/folder/open/<int:case_id>')
+@login_required
+def case_open(case_id):
+    case = document_cases.get_case(case_id, session['user_id'])
+    if not case:
+        return redirect(url_for('case_folder'))
+
+    if case['status'] == 'closed' and case['history_entry_id']:
+        return redirect(url_for('history_detail', entry_id=case['history_entry_id']))
+
+    session['case_id'] = case_id
+    return redirect('/spec-page-1')
+
+
+@app.route('/api/folder/<int:case_id>/delete', methods=['POST'])
+@login_required
+def case_delete(case_id):
+    deleted = document_cases.delete_case(case_id, session['user_id'])
+    if not deleted:
+        return jsonify({'status': 'error', 'message': 'ไม่พบงานนี้ หรือไม่ใช่งานของคุณ'}), 404
+
+    if session.get('case_id') == case_id:
+        session.pop('case_id', None)
+
+    return jsonify({'status': 'success', 'message': 'ลบงานแล้ว'})
+
+
 @app.route('/select')
 @login_required
 def select_category():
@@ -465,32 +697,70 @@ def select_category():
 @app.route('/select/mowing')
 @login_required
 def select_mowing():
-    """หน้าการ์ดย่อย 5 ใบของหมวด 'จัดซื้อจัดจ้าง-ตัดหญ้า' + ปุ่มพิมพ์ทั้งชุด"""
     return render_template('select_group_mowing.html', username=session.get('name'))
 
 
-@app.route('/colleagues')
+@app.route('/history')
 @login_required
-def colleagues():
-    """รายชื่อเพื่อนร่วมงานทั้งหมด กดเข้าไปดูงาน (เอกสาร) ของคนนั้นแบบ read-only ได้"""
-    conn = get_db()
-    try:
-        cur = conn.cursor(dictionary=True)
-        cur.execute(
-            "SELECT id, name, position FROM users WHERE id != %s ORDER BY name",
-            (session['user_id'],),
+def history():
+    category = request.args.get('category', '').strip()
+    keyword = request.args.get('keyword', '').strip()
+    date_from = request.args.get('date_from', '').strip()
+    date_to = request.args.get('date_to', '').strip()
+
+    entries = search_history(
+        category=category or None,
+        keyword=keyword or None,
+        date_from=date_from or None,
+        date_to=date_to or None,
+    )
+
+    return render_template(
+        'history.html',
+        username=session.get('name'),
+        entries=entries,
+        categories=[CATEGORY_MOWING],
+        filters={'category': category, 'keyword': keyword, 'date_from': date_from, 'date_to': date_to},
+        is_admin=session.get('is_admin', False),
+    )
+
+
+@app.route('/api/history/<int:entry_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_history(entry_id):
+    deleted = delete_history_entry(entry_id)
+    if not deleted:
+        return jsonify({'status': 'error', 'message': 'ไม่พบประวัตินี้ อาจถูกลบไปแล้ว'}), 404
+    return jsonify({'status': 'success', 'message': 'ลบประวัติแล้ว'})
+
+
+@app.route('/history/<int:entry_id>')
+@login_required
+def history_detail(entry_id):
+    entry = get_history_entry(entry_id)
+    if not entry:
+        return redirect(url_for('history'))
+
+    if entry['page_key'] == 'mowing_all' and entry['data']:
+        d = entry['data']
+        return render_template(
+            'spec_print_all.html',
+            data1=d.get('spec_page1', {}),
+            data2=d.get('spec_page2', {}),
+            data3=d.get('spec_page3', {}),
+            data4=d.get('spec_page4', {}),
+            data5=d.get('spec_page5', {}),
+            username=session.get('name'),
+            history_id=entry_id,
         )
-        people = cur.fetchall()
-        cur.close()
-    finally:
-        conn.close()
-    return render_template('colleagues.html', people=people, username=session.get('name'))
+
+    return render_template('history_detail.html', username=session.get('name'), entry=entry)
 
 
 @app.route('/spec-print-all')
 @login_required
 def spec_print_all():
-    """รวมข้อมูลเอกสารหน้า 1-5 มาไว้หน้าเดียว สำหรับพิมพ์เป็น PDF ไฟล์เดียว"""
     owner_id, readonly, owner_name = resolve_viewer()
     data1 = get_form_data('spec_page1', owner_id)
     data2 = get_form_data('spec_page2', owner_id)
@@ -505,6 +775,37 @@ def spec_print_all():
         data4=data4,
         data5=data5,
         username=session.get('name'),
+    )
+
+@app.route("/select/mowing2")
+@login_required
+def select_mowing2():
+    return render_template(
+        "select_mowing2.html",
+        username=session["username"]
+    )
+@app.route("/select/mowing3")
+@login_required
+def select_mowing3():
+    return render_template(
+        "select_mowing3.html",
+        username=session["username"]
+    )
+
+@app.route("/select/mowing4")
+@login_required
+def select_mowing4():
+    return render_template(
+        "select_mowing4.html",
+        username=session["username"]
+    )
+
+@app.route("/select/mowing5")
+@login_required
+def select_mowing5():
+    return render_template(
+        "select_mowing5.html",
+        username=session["username"]
     )
 
 
@@ -577,6 +878,12 @@ def spec_page_6():
                             page_key='spec_page6', readonly=readonly, owner_name=owner_name, owner_id=owner_id)
 
 
+EDIT_PAGE_NUMBERS = {
+    'spec_page1': 1, 'spec_page2': 2, 'spec_page3': 3,
+    'spec_page4': 4, 'spec_page5': 5, 'spec_page6': 6,
+}
+
+
 @app.route('/edit-form')
 @login_required
 def edit_form():
@@ -587,7 +894,8 @@ def edit_form():
     data = get_form_data(page_key)
     locked_fields = COMMON_DATA_LOCKED_FIELDS.get(page_key, [])
     return render_template('edit_form.html', data=data, username=session.get('name'), page_key=page_key,
-                            locked_fields=locked_fields)
+                            locked_fields=locked_fields, is_editing=True,
+                            current_page=EDIT_PAGE_NUMBERS.get(page_key))
 
 
 @app.route('/api/save-form', methods=['POST'])
@@ -598,20 +906,106 @@ def save_form():
     if page_key not in VALID_PAGES:
         page_key = 'main'
 
-    # บันทึกลงฉบับร่างของ "ผู้ใช้ที่ login อยู่" เท่านั้นเสมอ (ไม่อ่านจาก payload/query
-    # string เด็ดขาด) เพื่อไม่ให้ใครแก้ไขทับฉบับร่างของคนอื่นได้
-    save_draft(session['user_id'], page_key, payload)
+    case_id = get_active_case_id()
+    save_draft(session['user_id'], case_id, page_key, payload)
+    document_cases.mark_in_progress(case_id)
+
+    subject = payload.get('subject') or payload.get('report_subject')
+    if subject:
+        document_cases.update_subject(case_id, subject)
 
     return jsonify({'status': 'success', 'message': 'บันทึกแล้ว', 'page_key': page_key})
+
+
+SUBMIT_COOLDOWN_SECONDS = 10
+
+
+@app.route('/api/submit-history', methods=['POST'])
+@login_required
+def submit_history():
+    # กันกด "ส่งข้อมูล" ซ้ำในเวลาไล่เลี่ยกัน (เน็ตช้าแล้ว fetch ยิงซ้อน หรือเปิดสองแท็บ
+    # กดพร้อมกัน) — ถ้าเพิ่ง log ไปเมื่อไม่กี่วินาทีก่อน ให้ตอบ success เดิมกลับไปเฉย ๆ
+    # โดยไม่สร้างแถวประวัติซ้ำ
+    since = seconds_since_last_submission(session['user_id'], 'mowing_all')
+    if since is not None and since < SUBMIT_COOLDOWN_SECONDS:
+        return jsonify({'status': 'success', 'message': 'ส่งข้อมูลสำเร็จ'})
+
+    case_id = get_active_case_id()
+    pages_data = {page_key: get_form_data(page_key) for page_key in VALID_PAGES if page_key in PAGE_TITLES}
+
+    subject = (
+        pages_data.get('spec_page1', {}).get('subject')
+        or pages_data.get('spec_page4', {}).get('report_subject')
+        or ''
+    )
+    budget_amount = pages_data.get('spec_page6', {}).get('total_amount') or ''
+
+    history_id = log_submission(
+        user_id=session['user_id'],
+        user_name=session.get('name') or '',
+        category=CATEGORY_MOWING,
+        page_key='mowing_all',
+        page_title='จัดซื้อจัดจ้าง — ตัดหญ้าและฉีดยากำจัดวัชพืช (ทั้งชุด 6 หน้า)',
+        subject=subject,
+        data=pages_data,
+    )
+
+    document_cases.close_case(case_id, subject, budget_amount, history_id)
+    session.pop('case_id', None)
+
+    return jsonify({'status': 'success', 'message': 'ส่งข้อมูลสำเร็จ'})
+
+
+@app.route('/api/clone-draft', methods=['POST'])
+@login_required
+def clone_draft():
+    source_user_id = request.json.get('source_user_id') if request.json else None
+    if not source_user_id or source_user_id == session['user_id']:
+        return jsonify({'status': 'error', 'message': 'ไม่พบเจ้าของงานที่จะโคลน'}), 400
+
+    source_case_id = latest_case_id_for_user(source_user_id)
+    if not source_case_id:
+        return jsonify({'status': 'error', 'message': 'เพื่อนร่วมงานคนนี้ยังไม่เคยบันทึกงานเลย ไม่มีอะไรให้โคลน'}), 400
+
+    case_id = get_active_case_id()
+    cloned_pages = []
+    for page_key in VALID_PAGES:
+        draft = get_draft(source_case_id, page_key)
+        if draft is not None:
+            save_draft(session['user_id'], case_id, page_key, draft)
+            cloned_pages.append(page_key)
+
+    if not cloned_pages:
+        return jsonify({'status': 'error', 'message': 'เพื่อนร่วมงานคนนี้ยังไม่เคยบันทึกงานเลย ไม่มีอะไรให้โคลน'}), 400
+
+    document_cases.mark_in_progress(case_id)
+    return jsonify({'status': 'success', 'message': f'โคลนงานสำเร็จ ({len(cloned_pages)} หน้า)'})
+
+
+@app.route('/api/clone-history/<int:entry_id>', methods=['POST'])
+@login_required
+def clone_history(entry_id):
+    entry = get_history_entry(entry_id)
+    if not entry or not entry.get('data'):
+        return jsonify({'status': 'error', 'message': 'ไม่พบข้อมูลประวัตินี้'}), 404
+
+    case_id = get_active_case_id()
+    cloned_pages = []
+    for page_key, page_data in entry['data'].items():
+        if page_key in VALID_PAGES and isinstance(page_data, dict):
+            save_draft(session['user_id'], case_id, page_key, page_data)
+            cloned_pages.append(page_key)
+
+    if not cloned_pages:
+        return jsonify({'status': 'error', 'message': 'ไม่มีข้อมูลหน้าเอกสารให้โคลนในประวัตินี้'}), 400
+
+    document_cases.mark_in_progress(case_id)
+    return jsonify({'status': 'success', 'message': f'โคลนงานสำเร็จ ({len(cloned_pages)} หน้า)'})
 
 
 @app.route('/api/upload-image', methods=['POST'])
 @login_required
 def upload_image():
-    """รับไฟล์รูปแนบ (เช่น รูปพื้นที่ตัดหญ้า/ฉีดยาในหน้า 4) บันทึกลงดิสก์ที่
-    static/uploads/ ด้วยชื่อสุ่มกันชนกัน แล้วคืน URL กลับไปให้ฝั่งฟอร์มเก็บพาธนี้
-    ไว้ในข้อมูลของหน้า (ไปบันทึกจริงตอนกด "บันทึก" ผ่าน /api/save-form ตามปกติ)
-    """
     file = request.files.get('image')
     if not file or file.filename == '':
         return jsonify({'status': 'error', 'message': 'ไม่พบไฟล์รูปภาพ'}), 400
@@ -634,10 +1028,6 @@ def upload_image():
 @app.route('/edit-common-data', methods=['GET', 'POST'])
 @login_required
 def edit_common_data():
-    """หน้าแก้ไข 'ข้อมูลกลาง' ที่เดียว — บันทึกแล้วหน้า 1,2,3,5,6 ที่ใช้
-    ข้อมูลชุดนี้ (ลายเซ็นผู้เสนอ/จาก-ถึง, ชื่อแผนก+เบอร์โทร, คณะกรรมการ)
-    จะเปลี่ยนตามทันทีในครั้งถัดไปที่เปิดหน้านั้น เพราะดึงจาก MySQL สดทุกครั้ง
-    """
     if request.method == 'POST':
         committee = []
         for i in range(3):

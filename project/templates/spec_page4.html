@@ -7,10 +7,10 @@
 {% endblock %}
 
 {% block content %}
-<!-- ===== ส่วนที่ 1: รายงานสรุปผลการพิจารณา, ตรวจรับ และอนุมัติจ่ายเงิน ===== -->
+
 <div class="a4">
 
-    <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
 
     <div class="row mt10">
         <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data.report_from }}</div>
@@ -33,7 +33,7 @@
 
     <div class="paragraph mt12">{{ data.report_intro }}</div>
 
-    <!-- ตารางสรุปผลการพิจารณา -->
+
     <table class="p4-table">
         <thead>
             <tr>
@@ -77,7 +77,7 @@
 
 </div>
 
-<!-- ===== ส่วนที่ 2: ใบสั่งจ้าง ===== -->
+
 <div class="page-break"></div>
 
 <div class="a4">
@@ -151,7 +151,7 @@
 
 </div>
 
-<!-- ===== ส่วนที่ 3: เงื่อนไขประกอบการสั่งจ้าง ===== -->
+
 <div class="page-break"></div>
 
 <div class="a4">
@@ -175,9 +175,7 @@
 
 </div>
 
-<!-- ===== ส่วนที่ 4: เอกสารแนบ 1 - รูปภาพพื้นที่แต่ละสถานี =====
-     รวมพื้นที่ตัดหญ้า+ฉีดยาของแต่ละสถานีไว้ในหน้าเดียวกัน (เดิมแยกคนละหน้าและมีหน้าปกชื่อ
-     "เอกสารแนบ 1" อยู่โดดๆ ทำให้เวลาพิมพ์เกิดหน้าว่างโล่งๆ เยอะเกินจำเป็นเมื่อเนื้อหามีไม่มาก) -->
+
 <div class="page-break"></div>
 
 {% for station in data.station_areas %}

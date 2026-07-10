@@ -1,9 +1,4 @@
-/* =========================
-   PAGE SETUP (สำคัญมากสำหรับการพิมพ์)
-   ถ้าไม่ประกาศ @page เบราว์เซอร์จะเผลอใส่ margin ขอบกระดาษ
-   ของตัวเองซ้อนเข้ามาอีกชั้น ทำให้เนื้อหาที่ตั้งใจให้พอดี 1 หน้า
-   A4 (29.7cm) ล้นไปหน้าถัดไปโดยไม่มีเหตุผล
-========================= */
+
 @page {
     size: A4;
     margin: 0;
@@ -11,14 +6,14 @@
 
 @font-face {
     font-family: THSarabun;
-    src: url("/static/fonts/THSarabunNew.ttf");
+    src: local("TH SarabunIT๙"), local("TH SarabunIT9"), url("/static/fonts/THSarabunNew.ttf");
     font-weight: normal;
     font-style: normal;
 }
 
 @font-face {
     font-family: THSarabunBold;
-    src: url("/static/fonts/THSarabunNew Bold.ttf");
+    src: local("TH SarabunIT๙ Bold"), local("TH SarabunIT9 Bold"), local("TH SarabunIT๙"), local("TH SarabunIT9"), url("/static/fonts/THSarabunNew Bold.ttf");
     font-weight: bold;
     font-style: normal;
 }
@@ -137,12 +132,7 @@ body{
     box-shadow:0 10px 26px rgba(199, 56, 43, 0.3);
 }
 
-/* =========================
-   PAGE BREAK (คั่นระหว่างเอกสาร/หน้า)
-   ก่อนหน้านี้คลาสนี้ไม่มี CSS เลย ทำให้ <div class="page-break">
-   ที่ใช้คั่นระหว่าง .a4 แต่ละก้อน ไม่ได้ตัดหน้าจริง เนื้อหาจาก
-   เอกสารคนละหน้าจึงไหลไปอยู่ในหน้าพิมพ์เดียวกันได้
-========================= */
+
 .page-break{
     page-break-after: always;
     break-after: page;
@@ -299,7 +289,7 @@ body{
 .topic-text{
     display:inline;
     margin-top:0;
-    
+
 }
 /* =========================
    CONTENT
@@ -323,14 +313,14 @@ body{
 
 .paragraph{
     text-indent:2.75cm;
-    text-align:justify;
+    text-align:justify; text-justify:inter-character;
     margin-top:0.05cm;
     color:#1e1a24;
 }
 
 .indent{
     text-indent:2.75cm;
-    text-align:justify;
+    text-align:justify; text-justify:inter-character;
     margin-top:0.12cm;
 }
 
@@ -427,7 +417,7 @@ body{
         padding: 1.4cm 2.2cm 1.8cm;
     }
 
-    /* สำคัญ: บังคับ row ให้เป็น flex ตอนพิมพ์ */
+
     .row {
         display: flex !important;
         flex-direction: row !important;
@@ -450,7 +440,7 @@ body{
         display: none !important;
     }
 
-    /* ลดระยะห่างท้ายเอกสารให้พอดีหน้าเดียว */
+
     .sign-right {
         margin-top: 1.2cm !important;
     }
@@ -474,7 +464,7 @@ body{
         page-break-inside: avoid;
     }
 
-    /* กันตารางถูกตัดกลางแถว และกันหัวข้อลอยห่างจากเนื้อหาถัดไป */
+
     table,
     tr {
         page-break-inside: avoid;
@@ -734,17 +724,17 @@ a:hover {
         justify-content:center;
         gap:6px;
     }
-    
+
     .menu button {
         font-size:13pt;
         padding:8px 14px;
     }
-    
+
     .a4, .paper {
         margin:16px auto;
         border-radius:12px;
     }
-    
+
 }
 
 @media (max-width:480px) {
@@ -752,23 +742,21 @@ a:hover {
         font-size:12pt;
         padding:8px 12px;
     }
-    
+
     .topbar {
         padding:10px 16px;
     }
-    
-    
+
+
     .form-actions {
         gap:8px;
     }
 }
-/* =========================
-   REF TABLE (ชผ./พชง.)
-========================= */
+
 
 .ref-table {
     margin-top: 1.8cm;
-    overflow: hidden; /* clearfix สำหรับ float ลูก */
+    overflow: hidden; 
 }
 
 .ref-table-box {

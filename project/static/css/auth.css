@@ -1,14 +1,4 @@
-/* ==========================================================
-   auth.css — สไตล์หน้า login/register (ธีมม่วง)
-   แยกออกมาจาก style.css เพื่อไม่ให้ปนกับสไตล์ของหน้าเอกสาร (A4/report)
 
-   วิธีใช้: หน้าไหนใช้คลาส .auth-page / .auth-card ฯลฯ ให้ลิงก์ไฟล์นี้
-   ต่อจาก style.css เสมอ เพราะ style.css เป็นคนดูแล @font-face (THSarabun)
-   และ reset พื้นฐาน (*, body) ที่ auth.css เองไม่ได้ประกาศซ้ำ:
-
-   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-   <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
-   ========================================================== */
 
 .auth-page{
     min-height:100vh;

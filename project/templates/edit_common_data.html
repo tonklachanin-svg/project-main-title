@@ -25,7 +25,7 @@
         overflow-x: hidden;
     }
 
-    /* ===== พื้นหลังลอยตัวเท่ๆ: บลอบสีม่วง/ทองเบลอ ๆ ลอยเบา ๆ ทั้งหน้า ===== */
+
     .bg-blobs{
         position: fixed;
         inset: 0;
@@ -91,7 +91,7 @@
 
     .pea-hero, .wrap{ position: relative; z-index: 1; }
 
-    /* ===== HERO HEADER (โทนม่วง-ทอง ตามตราสัญลักษณ์ กฟภ.) ===== */
+
     .pea-hero{
         position: relative;
         background: linear-gradient(120deg, var(--pea-purple-dark) 0%, var(--pea-purple) 45%, var(--pea-violet) 100%);
@@ -189,7 +189,7 @@
     /* ===== BODY ===== */
     .wrap{ max-width: 1180px; margin: -30px auto 0; padding: 0 20px; position: relative; z-index: 2; }
 
-    /* ===== แบ่งครึ่ง 2 ฝั่ง แทนการ์ดเรียงยาวลงมาทีละอัน ===== */
+
     .split{
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -360,7 +360,7 @@
             <a class="back" href="/spec-page-1">← ย้อนกลับ</a>
             {% if username %}<span class="pea-user">👤 {{ username }}</span>{% endif %}
         </div>
-        <img src="{{ url_for('static', filename='logo.jpg') }}" class="pea-logo" alt="การไฟฟ้าส่วนภูมิภาค">
+        <img src="{{ url_for('static', filename='logo.png') }}" class="pea-logo" alt="การไฟฟ้าส่วนภูมิภาค">
         <div class="pea-hero-text">
             <span class="eyebrow">การไฟฟ้าส่วนภูมิภาค · PEA</span>
             <h1>แก้ไขข้อมูลกลาง</h1>

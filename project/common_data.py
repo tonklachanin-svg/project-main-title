@@ -1,23 +1,6 @@
-"""
-common_data.py
----------------------------------------------------------
-จุดเก็บ "ข้อมูลกลาง" ที่ใช้ร่วมกันในหลายหน้าเอกสาร (สเปคหญ้า/ฉีดยา)
-เก็บใน MySQL ตาราง common_data (แถวเดียว id=1) แทนการพิมพ์ซ้ำ
-ในแต่ละหน้าเหมือนที่ผ่านมา
-
-วิธีใช้:
-    from common_data import get_common_data, save_common_data
-    common = get_common_data()          # อ่านค่าปัจจุบัน
-    save_common_data({...})             # บันทึกค่าใหม่ทั้งหมด
-
-ก่อนใช้งานครั้งแรก ต้องรัน sql/add_common_data_table.sql กับฐานข้อมูล pea_db ก่อน
----------------------------------------------------------
-"""
-
 import json
 from database import get_db
 
-# ใช้เป็นค่าตั้งต้น เผื่อกรณีตารางยังไม่มีข้อมูล (กันไม่ให้หน้าเว็บพังถ้ายังไม่ได้รัน SQL)
 DEFAULT_COMMON_DATA = {
     "signature_from": "(นายภานุพงค์  เจนสุริยะกุล)",
     "position_from": "หผ.จฟ.1 กปบ.(ก3)",
@@ -34,7 +17,6 @@ DEFAULT_COMMON_DATA = {
 
 
 def get_common_data():
-    """อ่านข้อมูลกลางปัจจุบันจาก MySQL คืนค่าเป็น dict เสมอ"""
     conn = get_db()
     try:
         cur = conn.cursor(dictionary=True)
@@ -52,7 +34,6 @@ def get_common_data():
         conn.close()
 
     if not row:
-        # ยังไม่เคยรัน SQL migration หรือแถวถูกลบไป ใช้ค่าตั้งต้นแทนไปก่อน
         return dict(DEFAULT_COMMON_DATA)
 
     try:
@@ -72,11 +53,6 @@ def get_common_data():
 
 
 def save_common_data(data):
-    """บันทึกข้อมูลกลางใหม่ทั้งชุดลง MySQL (แถว id=1 แถวเดียว)
-
-    data ต้องมี key: signature_from, position_from, org_from, org_to,
-    dept_name, dept_tel, committee (list ของ {name, job_pos, role})
-    """
     conn = get_db()
     try:
         cur = conn.cursor()
@@ -115,19 +91,14 @@ def apply_common_data(page_key, data):
    
     common = get_common_data()
 
-    # หน้าที่ใช้ ลายเซ็นผู้เสนอ + จาก/ถึง
     if page_key in ("main", "spec_page1", "spec_page2", "spec_page3"):
         data["signature_from"] = common["signature_from"]
         data["from"] = common["org_from"]
         data["to"] = common["org_to"]
 
-    # ตำแหน่งผู้เสนอ: จากเอกสารจริงพบว่าหน้า 3 ใช้คำที่สั้นกว่าหน้า 1/2
-    # (หน้า 1/2 = "หผ.จฟ.1 กปบ.(ก3)", หน้า 3 = "หผ.จฟ.1" เฉยๆ)
-    # จึงไม่รวม position_from ของหน้า 3 เข้าไปในข้อมูลกลางชุดนี้ ปล่อยให้เป็นค่าเฉพาะของหน้า 3 เอง
     if page_key in ("main", "spec_page1", "spec_page2"):
         data["position_from"] = common["position_from"]
 
-    # หน้าที่ใช้ ชื่อแผนก + เบอร์โทร (ชื่อ field ต่างกันไปตามแต่ละ template เดิม)
     if page_key in ("main", "spec_page1", "spec_page2"):
         data["dept_name"] = common["dept_name"]
         data["dept_tel"] = common["dept_tel"]
@@ -138,7 +109,6 @@ def apply_common_data(page_key, data):
         data["dept"] = common["dept_name"]
         data["tel"] = common["dept_tel"]
 
-    # หน้าที่ใช้ คณะกรรมการตรวจรับ 3 คน (รูปแบบ field ต่างกันไปตาม template เดิม)
     if page_key == "spec_page3":
         data["committee"] = [
             {"name": m["name"], "pos": m["job_pos"], "role": m["role"]}

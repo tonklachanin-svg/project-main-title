@@ -1,41 +1,34 @@
-/* =========================================================
-   PAGE3.CSS — รายงานขอจัดจ้างตัดหญ้าและฉีดยา ททร.1(1)แผนก
-   อิงระยะเยื้อง/ตัวหนา/ขีดเส้นใต้ตรงตาม .docx ต้นฉบับ (หน่วย: ซม.)
-========================================================= */
-
-/* ระยะเยื้อง "ย่อหน้าใหม่" มาตรฐานของหน้านี้คือ 2.5cm ไม่ใช่ 2.75cm แบบ default ของ .paragraph */
 .a4 .paragraph{ text-indent:2.5cm; }
 
-/* ===== หัวกระดาษ: จาก/ถึง/เลขที่/วันที่/เรียน ตัวหนาเฉพาะป้ายชื่อ ===== */
+
 .p3-label{ font-family:THSarabunBold; font-weight:normal; }
 
-/* ===== หัวข้อระดับ 1 (1. / 2. / ... / 7.) หนา เยื้อง 2.5cm เหมือนย่อหน้าใหม่ ===== */
+
 .p3-heading{
     font-family:THSarabunBold;
     text-indent:2.5cm;
-    text-align:justify;
+    text-align:justify; text-justify:inter-character;
     margin-top:0.2cm;
     color:#1f1b25;
 }
 
-/* ===== ข้อความระดับ 2.5cm แต่ไม่ตัวหนา (ทั้งนี้เป็นอำนาจ.../จึงเรียนมาเพื่อ...) ===== */
+
 .p3-body25{
     text-indent:2.5cm;
-    text-align:justify;
+    text-align:justify; text-justify:inter-character;
     margin-top:0.2cm;
     color:#1f1b25;
 }
 
-/* ===== ข้อความอธิบายใต้หัวข้อ / 2.1 / 2.2 / (1) / (2) เยื้อง 3.0cm ===== */
+
 .p3-body30{
     text-indent:3.0cm;
-    text-align:justify;
+    text-align:justify; text-justify:inter-character;
     margin-top:0.1cm;
     color:#1f1b25;
 }
 
-/* ===== รายชื่อคณะกรรมการ เยื้อง 3.75cm ใช้ตารางให้คอลัมน์ตำแหน่ง/บทบาทหดตามเนื้อหา
-   ไม่กินพื้นที่คอลัมน์ชื่อจนชื่อตกบรรทัด ===== */
+
 .p3-committee-wrap{
     padding-left:3.75cm;
     margin-top:0.05cm;
@@ -72,7 +65,7 @@
 .p3-table tfoot td{ font-family:THSarabunBold; }
 .p3-table .name-col{ text-align:left; }
 
-/* ===== แถวลายเซ็น: อนุมัติ (ซ้าย, กล่องลอย) + ผู้เสนอ (ขวา, เยื้อง 8-9cm) ===== */
+
 .p3-sign-row{
     display:flex;
     justify-content:space-between;
@@ -99,11 +92,7 @@
 .from-box .from-name{ font-family:THSarabun; font-weight:normal; }
 .from-box .from-pos{ margin-top:0.1cm; }
 
-/* ===== REF TABLE (ชผ./พชง.) — ฟีเจอร์ติดตามงานภายในระบบ ไม่ใช่ส่วนของหนังสือราชการ =====
-   หมายเหตุสำคัญ: style.css มี .ref-table/.ref-text/.ref-table-box เวอร์ชันเก่าที่ใช้
-   float:left/float:right (ทำให้สองกล่องนี้ห่างกันไปคนละขอบซ้าย-ขวาสุด) และมีขนาดฟอนต์/
-   ตัวหนาคนละแบบกับที่นี่ ต้องใช้ !important บังคับให้กฎของหน้านี้ชนะเสมอ ไม่ว่าไฟล์ไหน
-   จะถูกโหลดทีหลัง โดยไม่ไปแก้ style.css ที่หน้าอื่นอาจยังใช้ float แบบเดิมอยู่ ===== */
+
 .ref-table{
     display:flex !important;
     float:none !important;
@@ -120,66 +109,60 @@
     float:none !important;
     flex:0 0 auto;
     border-collapse:collapse;
-    width:9cm !important;
+    width:6.5cm !important;
     margin:0;
 }
 .ref-table table td{
     border:1px solid #555;
-    padding:3px 16px;
-    min-width:55px;
-    font-size:16pt !important;
+    padding:2px 10px;
+    min-width:40px;
+    font-size:12pt !important;
     color:#1f1b25;
     background:none;
+    text-align:center;
 }
 .ref-table table tbody tr:hover{ background:none; }
 .ref-label{ font-family:THSarabun !important; font-weight:normal !important; }
-.ref-dept{ font-size:16pt !important; margin-top:6px; color:#1f1b25; }
-.ref-tel{ font-size:16pt !important; color:#1f1b25; }
+.ref-dept{ font-size:12pt !important; margin-top:6px; color:#1f1b25; }
+.ref-tel{ font-size:12pt !important; color:#1f1b25; }
 
-/* =========================================================
-   หน้าภาคผนวก: คุณสมบัติของผู้เสนอราคา
-========================================================= */
+
 .p3-appendix-num{ font-family:THSarabunBold; color:#1f1b25; margin-top:0.2cm; }
 .p3-appendix-num .u{ text-decoration:underline; }
 
-/* หัวข้อย่อย เช่น "ผู้เสนอราคาจะต้องปฏิบัติ ดังนี้" เยื้อง 1.27cm */
-.p3-lead{ text-indent:1.27cm; text-align:justify; margin-top:0.1cm; color:#1f1b25; }
 
-/* รายการเดี่ยว (1.1 / 1.8 / 4.1 / 4.3) เยื้องบรรทัดแรกเล็กน้อย 0.5cm */
-.p3-flush{ text-indent:0.5cm; text-align:justify; margin-top:0.05cm; color:#1f1b25; }
+.p3-lead{ text-indent:1.27cm; text-align:justify; text-justify:inter-character; margin-top:0.1cm; color:#1f1b25; }
 
-/* รายการที่ขึ้นบรรทัดใหม่ยาว (1.2-1.7 / 4.2 / 4.4 / 4.5) แบบ hanging indent:
-   บรรทัดแรกเริ่มที่ 0.5cm บรรทัดต่อ ๆ ไปเยื้องลึกกว่าไปที่ 1.25cm */
+
+.p3-flush{ text-indent:0.5cm; text-align:justify; text-justify:inter-character; margin-top:0.05cm; color:#1f1b25; }
+
+
 .p3-hang{
     padding-left:1.25cm;
     text-indent:-0.75cm;
-    text-align:justify;
+    text-align:justify; text-justify:inter-character;
     margin-top:0.05cm;
     color:#1f1b25;
 }
 
-/* รายการ (1)(2)(3) ใต้ "เงื่อนไขการเสนอราคา" hanging indent เดียวกัน */
+
 .p3-numlist{
     padding-left:1.25cm;
     text-indent:-0.75cm;
-    text-align:justify;
+    text-align:justify; text-justify:inter-character;
     margin-top:0.05cm;
     color:#1f1b25;
 }
 
 .p3-note-label{ text-decoration:underline; color:#1f1b25; }
-.p3-note-text{ color:#1f1b25; text-align:justify; }
+.p3-note-text{ color:#1f1b25; text-align:justify; text-justify:inter-character; }
 
 @media print {
     .p3-table{ font-size:12pt; }
     .p3-sign-row, .ref-table{ page-break-inside: avoid; }
     .p3-appendix-title{ page-break-after: avoid; }
 
-    /* บีบหน้าคุณสมบัติผู้เสนอราคาให้จบใน 1 หน้าพิมพ์ ไม่ล้นไปหน้าที่ 2
-       (เดิมยาวเกิน 1 หน้าไปนิดเดียว) ลดเฉพาะหน้านี้ ไม่กระทบหน้าจอ/หน้าอื่น
-       ตรวจด้วย Playwright PDF จริงพบว่าย่อหน้า "หมายเหตุ" ท้ายสุดยังล้นไปโผล่เป็น
-       หน้าที่ 4 เกือบว่างเปล่าอยู่ดี จึงบีบเพิ่มอีกนิด (padding-bottom, line-height,
-       margin ของ note) ให้ดึงกลับมาจบในหน้าเดียวกันจริง ๆ */
+
     .p3-appendix-page{
         padding-top:0.5cm !important;
         padding-bottom:0.3cm !important;
@@ -190,7 +173,8 @@
     .p3-appendix-page .p3-flush,
     .p3-appendix-page .p3-hang,
     .p3-appendix-page .p3-numlist,
-    .p3-appendix-page .p3-lead{ margin-top:0.02cm; line-height:1.0 !important; }
+    .p3-appendix-page .p3-lead{
+        margin-top:0.02cm; line-height:1.0 !important; }
     .p3-appendix-page .p3-note-label{ margin-top:0.1cm !important; }
 }
 .p3-table thead th{

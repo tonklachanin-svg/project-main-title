@@ -9,7 +9,7 @@
 {% block content %}
 <div class="a4">
 
-    <img src="{{ url_for('static', filename='logo.jpg') }}" class="logo">
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
 
     <div class="row mt10">
         <div class="left"><span class="p3-label">จาก</span>&nbsp;&nbsp;&nbsp;{{ data.from }}</div>
@@ -34,18 +34,18 @@
     <div class="paragraph mt8">{{ data.section2 }}</div>
     <div class="paragraph mt8">{{ data.closing }}</div>
 
-    <!-- ลายเซ็นผู้เสนอ -->
+
     <div class="sign-right">
         <div>{{ data.signature_from }}</div>
         <div>{{ data.position_from }}</div>
     </div>
 
-    <!-- เห็นชอบ -->
+
     <div class="approve">
         {{ data.approve }}
     </div>
 
-    <!-- ลายเซ็นผู้อนุมัติ -->
+
     <div class="sign-left">
         <div>{{ data.signature_approve }}</div>
         <div class="position-under">{{ data.position_approve }}</div>
@@ -60,7 +60,7 @@
             </tr>
             <tr>
                 <td class="ref-label">พชง.</td>
-                <td class="ref-sign">{{ session.get('name', '') }}</td>
+                <td class="ref-sign">{{ session.get('name', '').split()[0] }}</td>
                 <td class="ref-sign">{{ today_th }}</td>
             </tr>
         </table>
